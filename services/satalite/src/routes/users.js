@@ -1,12 +1,15 @@
 import axios from 'axios';
+import dotenv from 'dotenv';
 import { Router } from 'express';
 import { authenticateRequest } from '../middleware/authenticateRequest.js';
+dotenv.config();
+
 
 const router = Router();
 const ASTRAL_URL = process.env.ASTRAL_URL;
 
 // POST /api/users/login
-router.post('/login', authenticateRequest, async (req, res) => {
+router.post('/login', async (req, res) => {
     try {
         const response = await axios.post(`${ASTRAL_URL}/users/login`, req.body, {
             headers: {

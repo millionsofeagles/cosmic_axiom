@@ -2,7 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
 import { Router } from 'express';
 import { authenticateRequest } from '../middleware/authenticateRequest.js';
-import { decodeToken, generateToken } from '../utils/tokenUtils.js';
+import { generateToken } from '../utils/tokenUtils.js';
 
 const prisma = new PrismaClient();
 const router = Router();
@@ -19,37 +19,39 @@ router.post('/login', async (req, res) => {
         }
 
         const token = generateToken(user);
-        const decoded = decodeToken(token);
-
-        // Optional: store token for tracking
-        await prisma.token.create({
-            data: {
-                token,
-                userId: user.id,
-                expiresAt: new Date(decoded.exp * 1000),
-            },
-        });
 
         res.json({ token, user });
     } catch (err) {
-        console.error(err);
+        console.error('Login failed:', err.message);
         res.status(500).json({ error: 'Login failed' });
     }
 });
+
 
 // POST /users/logout
 router.post('/logout', authenticateRequest, async (req, res) => {
     const token = req.headers.authorization?.replace('Bearer ', '');
 
+    if (!token) {
+        return res.status(400).json({ error: 'Token missing from Authorization header' });
+    }
+
     try {
-        await prisma.token.update({
-            where: { token },
-            data: { revokedAt: new Date() },
+        const { tokenPayload } = req;
+
+        await prisma.token.create({
+            data: {
+                jti: tokenPayload.jti,
+                userId: tokenPayload.sub,
+                revokedAt: new Date(),
+                expiresAt: new Date(tokenPayload.exp * 1000),
+            },
         });
+
         res.json({ message: 'Logged out' });
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Logout failed' });
+        console.error('Logout failed:', err.message);
+        res.status(401).json({ error: 'Invalid or expired token' });
     }
 });
 

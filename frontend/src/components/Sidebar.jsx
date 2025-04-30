@@ -33,7 +33,7 @@ const Sidebar = () => {
 
             {/* Menu Items */}
             <nav className="flex flex-col gap-6">
-                <Link to="/" className="flex items-center gap-4 hover:text-indigo-500">
+                <Link to="/dashboard" className="flex items-center gap-4 hover:text-indigo-500">
                     <LayoutDashboard size={20} />
                     {!collapsed && <span>Dashboard</span>}
                 </Link>

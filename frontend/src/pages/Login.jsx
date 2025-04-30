@@ -66,33 +66,45 @@ function Login() {
         }
     }, [currentWordIndex]);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-
         setError("");
-
+    
         if (!email || !password) {
             setError("Please enter both email and password.");
             return;
         }
-
+    
         setLoading(true);
-
-        setTimeout(() => {
-            if (email === "admin@example.com" && password === "password123") {
-                localStorage.setItem("token", "test-token");
-                navigate("/dashboard");
-            } else {
-                setError("Invalid email or password.");
-                setLoading(false);
+    
+        try {
+            const response = await fetch(`${import.meta.env.VITE_SATALITE_URL}/users/login`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ email, password }),
+            });
+    
+            const data = await response.json();
+    
+            if (!response.ok) {
+                throw new Error(data.error || "Login failed");
             }
-        }, 1500);
+    
+            localStorage.setItem("token", data.token);
+            navigate("/dashboard");
+        } catch (err) {
+            setError(err.message);
+            setLoading(false);
+        }
     };
+    
 
     return (
         <div className="flex h-screen w-screen">
             {/* Left Panel: Terminal Typing */}
-            <div className="w-[75%] h-full bg-black text-green-400 font-mono p-8 overflow-hidden flex flex-col">
+            <div className="w-[60%] h-full bg-black text-green-400 font-mono p-8 overflow-hidden flex flex-col">
                 <div className="flex-1 overflow-y-auto">
                     {lines.map((line, idx) => (
                         <div key={idx} className="text-sm leading-relaxed">
@@ -108,7 +120,7 @@ function Login() {
             </div>
 
             {/* Right Panel: Login Form */}
-            <div className="w-[25%] h-full bg-gray-100 dark:bg-gray-900 flex items-center justify-center">
+            <div className="w-[40%] h-full bg-gray-100 dark:bg-gray-900 flex items-center justify-center">
                 <div className="w-full max-w-xs p-8 bg-white dark:bg-gray-800 rounded-lg shadow-md">
                     {/* Cosmic Axiom Title with Logo */}
                     <div className="flex flex-col items-center mb-6">
@@ -135,7 +147,7 @@ function Login() {
                                 Email
                             </label>
                             <input
-                                type="email"
+                                type="text"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 className="w-full p-3 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"

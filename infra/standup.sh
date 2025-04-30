@@ -57,6 +57,6 @@ echo "Prisma setup complete for all services."
 
 # Seed data into astral from raw SQL
 echo "Seeding astral with test data..."
-mysql -h "$MYSQL_HOST" -P "$MYSQL_PORT" -u "$MYSQL_USER" --password="$MYSQL_PASSWORD" astral < "../services/astral/prisma/test_seed.sql"
+mysql -h "$MYSQL_HOST" -P "$MYSQL_PORT" -u "$MYSQL_USER" --password="$MYSQL_PASSWORD" astral < "seed_files/seed_astral.sql"
 
 echo "Standup Complete!

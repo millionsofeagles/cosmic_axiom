@@ -11,7 +11,7 @@ datasource db {
 
 model Token {
   id         String   @id @default(uuid())
-  token      String   @unique
+  jti        String   @unique // <-- Add this to support lookup/revocation by jti
   user       User     @relation(fields: [userId], references: [id])
   userId     String
   createdAt  DateTime @default(now())
@@ -25,12 +25,7 @@ model User {
   name         String
   role         String
   passwordHash String
+  createdAt    DateTime @default(now())
+  lastLogin    DateTime?
   tokens       Token[]
-}
-
-
-model Role {
-  id          Int      @id @default(autoincrement())
-  name        String   @unique
-  users       User[]
 }
