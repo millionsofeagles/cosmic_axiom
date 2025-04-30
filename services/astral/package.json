@@ -1,0 +1,16 @@
+{
+    "name": "astral",
+    "version": "1.0.0",
+    "type": "module",
+    "scripts": {
+        "prisma:generate": "prisma generate",
+        "prisma:migrate": "prisma migrate deploy"
+    },
+    "dependencies": {
+        "@prisma/client": "^6.7.0",
+        "jsonwebtoken": "^9.0.2"
+    },
+    "devDependencies": {
+        "prisma": "^6.7.0"
+    }
+}

@@ -1,0 +1,44 @@
+# Node modules
+**/node_modules/
+
+# Build outputs
+**/dist/
+**/build/
+
+# Logs
+*.log
+logs/
+**/*.log
+
+# Environment files
+**/.env
+**/.env.local
+**/.env.*.local
+
+# Prisma artifacts
+**/prisma/dev.db
+**/prisma/migrations/
+
+# Key material
+**/keys/*.key
+**/keys/*.key.pub
+
+# Coverage reports
+**/coverage/
+**/.nyc_output/
+
+# VSCode, JetBrains, etc
+.vscode/
+.idea/
+*.sw?
+
+# OS cruft
+.DS_Store
+Thumbs.db
+
+# Optional: Docker volume mounts
+**/tmp/
+**/docker-data/
+
+# Test snapshots
+**/__snapshots__/
