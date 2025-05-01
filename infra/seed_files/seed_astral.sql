@@ -1,5 +1,5 @@
 -- Insert an admin user
-INSERT INTO User (id, email, name, role, passwordHash, createdAt, lastLogin)
+INSERT INTO User (id, username, name, role, passwordHash, createdAt, lastLogin)
 VALUES (
     UUID(),
     'admin',

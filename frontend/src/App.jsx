@@ -7,6 +7,7 @@ import Findings from './pages/Findings';
 import Login from "./pages/Login";
 import Reports from './pages/Reports';
 import ReportWriter from './pages/ReportWriter';
+import SystemAdmin from './pages/SystemAdmin';
 
 function App() {
   return (
@@ -19,7 +20,7 @@ function App() {
         <Route path="/engagements" element={<PrivateRoute><Engagements /></PrivateRoute>} />
         <Route path="/customers" element={<PrivateRoute><Customers /></PrivateRoute>} />
         <Route path="/report-writer/:engagementId" element={<PrivateRoute><ReportWriter /></PrivateRoute>} />
-
+        <Route path="/admin" element={<PrivateRoute><SystemAdmin/></PrivateRoute>} />
       </Routes>
     </Router>
   );

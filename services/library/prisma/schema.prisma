@@ -1,0 +1,29 @@
+// /services/library/prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model FindingTemplate {
+  id             String   @id @default(uuid())
+  title          String
+  description    String
+  recommendation String
+  severity       Severity
+  reference      String?
+  tags           String[] @default([])
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+enum Severity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}

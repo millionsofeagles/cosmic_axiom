@@ -63,7 +63,7 @@ const DashboardLayout = ({ children }) => {
                     <div className="flex items-center gap-6">
                         {user && (
                             <div className="text-sm text-gray-700 dark:text-gray-300">
-                                Welcome, <span className="font-semibold">{user.email}</span>
+                                Welcome, <span className="font-semibold">{user.username}</span>
                             </div>
                         )}
                         <DarkModeToggle />

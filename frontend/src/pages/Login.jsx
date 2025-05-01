@@ -4,7 +4,7 @@ import { Typewriter } from "react-simple-typewriter";
 
 function Login() {
     const navigate = useNavigate();
-    const [email, setEmail] = useState("");
+    const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
@@ -70,8 +70,8 @@ function Login() {
         e.preventDefault();
         setError("");
     
-        if (!email || !password) {
-            setError("Please enter both email and password.");
+        if (!username || !password) {
+            setError("Please enter both username and password.");
             return;
         }
     
@@ -83,7 +83,7 @@ function Login() {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ email, password }),
+                body: JSON.stringify({ username, password }),
             });
     
             const data = await response.json();
@@ -144,12 +144,12 @@ function Login() {
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                Email
+                                Username
                             </label>
                             <input
                                 type="text"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
                                 className="w-full p-3 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                 required
                             />

@@ -3,6 +3,7 @@ import {
     FileText,
     Handshake,
     LayoutDashboard,
+    Settings,
     Users
 } from "lucide-react";
 import { useState } from "react";
@@ -56,6 +57,11 @@ const Sidebar = () => {
                 <Link to="/customers" className="flex items-center gap-4 hover:text-indigo-500">
                     <Handshake size={20} />
                     {!collapsed && <span>Customers</span>}
+                </Link>
+
+                <Link to="/admin" className="flex items-center gap-4 hover:text-indigo-500">
+                    <Settings size={20} />
+                    {!collapsed && <span>System Admin</span>}
                 </Link>
             </nav>
         </aside>
