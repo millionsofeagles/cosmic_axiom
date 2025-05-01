@@ -28,19 +28,17 @@ done
 
 echo "MySQL is ready! Continuing..."
 
-DATABASES=("astral" "celestial")
+MICROSERVICES=("astral" "library")  # Add more as needed
 
-for DB in "${DATABASES[@]}"; do
+for DB in "${MICROSERVICES[@]}"; do
     echo "Creating database: $DB..."
     mysql -h "$MYSQL_HOST" -P "$MYSQL_PORT" -u "$MYSQL_USER" --password="$MYSQL_PASSWORD" -e "CREATE DATABASE IF NOT EXISTS $DB;"
 done
 
 echo "[COSMIC_AXIOM] All databases ready."
 
-# 🔁 Run Prisma setup for each service
+# Run Prisma setup for each service
 echo "Running Prisma setup for each microservice..."
-
-MICROSERVICES=("astral")  # Add more as needed
 
 for SERVICE in "${MICROSERVICES[@]}"; do
   echo "Setting up Prisma for $SERVICE..."
@@ -58,5 +56,9 @@ echo "Prisma setup complete for all services."
 # Seed data into astral from raw SQL
 echo "Seeding astral with test data..."
 mysql -h "$MYSQL_HOST" -P "$MYSQL_PORT" -u "$MYSQL_USER" --password="$MYSQL_PASSWORD" astral < "seed_files/seed_astral.sql"
+
+# Seed data into library from raw SQL
+echo "Seeding library with test data..."
+mysql -h "$MYSQL_HOST" -P "$MYSQL_PORT" -u "$MYSQL_USER" --password="$MYSQL_PASSWORD" library < "seed_files/seed_library.sql"
 
 echo "Standup Complete!

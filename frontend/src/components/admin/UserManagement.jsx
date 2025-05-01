@@ -18,7 +18,7 @@ const UserManagement = () => {
     const fetchUsers = async () => {
         setLoading(true);
         try {
-            const res = await fetch(`${import.meta.env.VITE_SATALITE_URL}/users`, {
+            const res = await fetch(`${import.meta.env.VITE_SATELLITE_URL}/users`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             const data = await res.json();
@@ -53,8 +53,8 @@ const UserManagement = () => {
     const handleSave = async () => {
         const method = editingUser ? "PUT" : "POST";
         const url = editingUser
-            ? `${import.meta.env.VITE_SATALITE_URL}/users/update`
-            : `${import.meta.env.VITE_SATALITE_URL}/users/create`;
+            ? `${import.meta.env.VITE_SATELLITE_URL}/users/update`
+            : `${import.meta.env.VITE_SATELLITE_URL}/users/create`;
 
         const body = {
             id: editingUser.id,
@@ -86,7 +86,7 @@ const UserManagement = () => {
     const handleDelete = async (id) => {
         if (!confirm("Are you sure you want to delete this user?")) return;
         try {
-            await fetch(`${import.meta.env.VITE_SATALITE_URL}/users/${id}`, {
+            await fetch(`${import.meta.env.VITE_SATELLITE_URL}/users/${id}`, {
                 method: "DELETE",
                 headers: { Authorization: `Bearer ${token}` },
             });
@@ -104,7 +104,7 @@ const UserManagement = () => {
 
     const handleResetPassword = async () => {
         try {
-            await fetch(`${import.meta.env.VITE_SATALITE_URL}/users/password-reset`, {
+            await fetch(`${import.meta.env.VITE_SATELLITE_URL}/users/password-reset`, {
                 method: "POST",
                 headers: {
                     Authorization: `Bearer ${token}`,

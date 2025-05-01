@@ -19,7 +19,7 @@ router.get('/', authenticateRequest, async (req, res) => {
 
         res.status(200).json(response.data);
     } catch (err) {
-        console.error('Satalite: Failed to fetch users:', err.message);
+        console.error('satellite: Failed to fetch users:', err.message);
         res.status(err.response?.status || 500).json({
             error: err.response?.data?.error || 'Failed to fetch users',
         });
@@ -34,7 +34,7 @@ router.post('/password-reset', authenticateRequest, async (req, res) => {
 
         res.status(response.status).json(response.data);
     } catch (err) {
-        console.error("Satalite: Password reset failed:", err.message);
+        console.error("satellite: Password reset failed:", err.message);
         res.status(err.response?.status || 500).json({
             error: err.response?.data?.error || 'Password reset failed',
         });

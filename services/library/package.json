@@ -8,6 +8,7 @@
         "start": "node src/index.js"
     },
     "dependencies": {
+        "@prisma/client": "^6.7.0",
         "axios": "^1.9.0",
         "cors": "^2.8.5",
         "dotenv": "^16.0.3",
@@ -15,6 +16,7 @@
         "morgan": "^1.10.0"
     },
     "devDependencies": {
-        "nodemon": "^3.0.1"
+        "nodemon": "^3.0.1",
+        "prisma": "^6.7.0"
     }
 }

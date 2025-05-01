@@ -78,7 +78,7 @@ function Login() {
         setLoading(true);
     
         try {
-            const response = await fetch(`${import.meta.env.VITE_SATALITE_URL}/users/login`, {
+            const response = await fetch(`${import.meta.env.VITE_SATELLITE_URL}/users/login`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

@@ -16,7 +16,7 @@ model FindingTemplate {
   recommendation String
   severity       Severity
   reference      String?
-  tags           String[] @default([])
+  tags           Json     @default("[]") 
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 }

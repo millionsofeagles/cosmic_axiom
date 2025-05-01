@@ -27,7 +27,7 @@ const DashboardLayout = ({ children }) => {
         const token = localStorage.getItem("token");
     
         try {
-            await fetch(`${import.meta.env.VITE_SATALITE_URL}/users/logout`, {
+            await fetch(`${import.meta.env.VITE_SATELLITE_URL}/users/logout`, {
                 method: "POST",
                 headers: {
                     Authorization: `Bearer ${token}`,

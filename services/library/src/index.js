@@ -16,5 +16,5 @@ app.use(express.json());
 app.use('/', routes);
 
 app.listen(port, () => {
-    console.log(`Satalite BFF running on http://localhost:${port}`);
+    console.log(`Library running on http://localhost:${port}`);
 });

@@ -14,7 +14,7 @@ Each service owns a distinct part of the system, making it modular, easy to main
 | Service Name | Purpose |
 |--------------|---------|
 | **singularity** | Create, edit, and manage structured penetration testing reports. |
-| **satalite** | Create, edit, and manage structured penetration testing reports. |
+| **satellite** | Create, edit, and manage structured penetration testing reports. |
 | **library** | Store reusable finding templates (CVE entries, standard text). |
 | **forge** | Manage client details, project scopes, and engagement metadata. |
 | **horizon** | Generate formatted PDFs or Word documents from report data. |
