@@ -28,7 +28,7 @@ done
 
 echo "MySQL is ready! Continuing..."
 
-MICROSERVICES=("astral" "library")  # Add more as needed
+MICROSERVICES=("astral" "library" "forge" "singularity")  # Add more as needed
 
 for DB in "${MICROSERVICES[@]}"; do
     echo "Creating database: $DB..."
@@ -60,5 +60,13 @@ mysql -h "$MYSQL_HOST" -P "$MYSQL_PORT" -u "$MYSQL_USER" --password="$MYSQL_PASS
 # Seed data into library from raw SQL
 echo "Seeding library with test data..."
 mysql -h "$MYSQL_HOST" -P "$MYSQL_PORT" -u "$MYSQL_USER" --password="$MYSQL_PASSWORD" library < "seed_files/seed_library.sql"
+
+# Seed data into forge from raw SQL
+echo "Seeding forge with test data..."
+mysql -h "$MYSQL_HOST" -P "$MYSQL_PORT" -u "$MYSQL_USER" --password="$MYSQL_PASSWORD" forge < "seed_files/seed_forge.sql"
+
+# Seed data into singularity from raw SQL
+echo "Seeding singularity with test data..."
+mysql -h "$MYSQL_HOST" -P "$MYSQL_PORT" -u "$MYSQL_USER" --password="$MYSQL_PASSWORD" singularity < "seed_files/seed_singularity.sql"
 
 echo "Standup Complete!

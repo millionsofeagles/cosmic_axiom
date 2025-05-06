@@ -3,9 +3,11 @@ import { useState } from "react";
 const NewFindingModal = ({ isOpen, onClose, onSave }) => {
     const [formData, setFormData] = useState({
         title: "",
-        severity: "Medium",
+        severity: "MEDIUM",
         reference: "",
-        description: ""
+        description: "",
+        recommendation: "",
+        tags: ""
     });
 
     const handleChange = (e) => {
@@ -15,9 +17,20 @@ const NewFindingModal = ({ isOpen, onClose, onSave }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        onSave(formData);
+        const formattedData = {
+            ...formData,
+            tags: formData.tags.split(",").map((t) => t.trim()).filter(Boolean)
+        };
+        onSave(formattedData);
         onClose();
-        setFormData({ title: "", severity: "Medium", reference: "", description: "" });
+        setFormData({
+            title: "",
+            severity: "Medium",
+            reference: "",
+            description: "",
+            recommendation: "",
+            tags: ""
+        });
     };
 
     if (!isOpen) return null;
@@ -47,10 +60,10 @@ const NewFindingModal = ({ isOpen, onClose, onSave }) => {
                             onChange={handleChange}
                             className="w-full p-2 rounded bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white"
                         >
-                            <option value="Critical">Critical</option>
-                            <option value="High">High</option>
-                            <option value="Medium">Medium</option>
-                            <option value="Low">Low</option>
+                            <option value="CRITICAL">Critical</option>
+                            <option value="HIGH">High</option>
+                            <option value="MEDIUM">Medium</option>
+                            <option value="LOW">Low</option>
                         </select>
                     </div>
 
@@ -73,6 +86,29 @@ const NewFindingModal = ({ isOpen, onClose, onSave }) => {
                             onChange={handleChange}
                             className="w-full p-2 rounded bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white"
                             rows="3"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-gray-700 dark:text-gray-300 mb-2">Recommendation</label>
+                        <textarea
+                            name="recommendation"
+                            value={formData.recommendation}
+                            onChange={handleChange}
+                            className="w-full p-2 rounded bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white"
+                            rows="3"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-gray-700 dark:text-gray-300 mb-2">Tags (comma-separated)</label>
+                        <input
+                            type="text"
+                            name="tags"
+                            value={formData.tags}
+                            onChange={handleChange}
+                            placeholder="e.g., web, input-validation, XSS"
+                            className="w-full p-2 rounded bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white"
                         />
                     </div>
 

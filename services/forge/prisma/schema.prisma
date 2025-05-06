@@ -1,0 +1,70 @@
+// /services/forge/prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Customer {
+  id           String     @id @default(uuid())
+  name         String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  contacts     Contact[]
+  engagements  Engagement[]
+}
+
+model Contact {
+  id          String    @id @default(uuid())
+  name        String
+  email       String?
+  phone       String?
+  isPrimary   Boolean   @default(false)
+
+  customer    Customer  @relation(fields: [customerId], references: [id])
+  customerId  String
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Engagement {
+  id           String     @id @default(uuid())
+  name         String
+  description  String?
+  startDate    DateTime
+  endDate      DateTime?
+  status       EngagementStatus @default(PLANNED)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  customer     Customer  @relation(fields: [customerId], references: [id])
+  customerId   String
+
+  scopes       Scope[]
+}
+
+model Scope {
+  id            String    @id @default(uuid())
+  name          String
+  description   String?
+  inScope       Boolean   @default(true)
+  notes         String?
+  engagement    Engagement @relation(fields: [engagementId], references: [id])
+  engagementId  String
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+enum EngagementStatus {
+  PLANNED
+  ACTIVE
+  COMPLETED
+  CANCELED
+}

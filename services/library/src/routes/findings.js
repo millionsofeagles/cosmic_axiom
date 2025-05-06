@@ -24,7 +24,7 @@ router.get('/', authenticateRequest, async (req, res) => {
 // POST /findings — create new finding
 router.post('/', authenticateRequest, async (req, res) => {
     const { title, description, recommendation, severity, reference, tags } = req.body;
-
+    
     if (!title || !description || !recommendation || !severity) {
         return res.status(400).json({ error: 'Missing required fields' });
     }

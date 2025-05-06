@@ -1,0 +1,45 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum ReportStatus {
+  DRAFT
+  FINALIZED
+  ARCHIVED
+}
+
+enum SectionType {
+  FINDING
+  CONNECTIVITY
+  CUSTOM
+}
+
+model Report {
+  id          String    @id @default(uuid())
+  engagementId String
+  title       String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  sections    Section[]
+  filename    String?
+}
+
+model Section {
+  id        String   @id @default(uuid())
+  report    Report   @relation(fields: [reportId], references: [id])
+  reportId  String
+  type      String
+  data      Json
+  position  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([reportId, position])
+}

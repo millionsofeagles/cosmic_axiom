@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard';
 import Engagements from './pages/Engagements';
 import Findings from './pages/Findings';
 import Login from "./pages/Login";
+import ReportDetails from "./pages/ReportDetails";
 import Reports from './pages/Reports';
 import ReportWriter from './pages/ReportWriter';
 import SystemAdmin from './pages/SystemAdmin';
@@ -16,6 +17,7 @@ function App() {
         <Route path="/" element={<Login />} />
         <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
         <Route path="/reports" element={<PrivateRoute><Reports /></PrivateRoute>} />
+        <Route path="/reports/:reportid" element={<ReportDetails />} />
         <Route path="/findings" element={<PrivateRoute><Findings /></PrivateRoute>} />
         <Route path="/engagements" element={<PrivateRoute><Engagements /></PrivateRoute>} />
         <Route path="/customers" element={<PrivateRoute><Customers /></PrivateRoute>} />

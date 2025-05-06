@@ -3,9 +3,9 @@ import express from 'express';
 import { authenticateRequest } from '../middleware/authenticateRequest.js';
 
 const router = express.Router();
-const LIBRARY_URL = process.env.LIBRARY_URL || 'http://localhost:5003'; // adjust as needed
+const LIBRARY_URL = process.env.LIBRARY_URL;
 
-// GET /api/findings — List all findings
+// GET /findings — List all findings
 router.get('/', authenticateRequest, async (req, res) => {
     try {
         const response = await axios.get(`${LIBRARY_URL}/findings`, {
@@ -18,7 +18,7 @@ router.get('/', authenticateRequest, async (req, res) => {
     }
 });
 
-// GET /api/findings/:id — Get a specific finding
+// GET /findings/:id — Get a specific finding
 router.get('/:id', authenticateRequest, async (req, res) => {
     try {
         const response = await axios.get(`${LIBRARY_URL}/findings/${req.params.id}`, {
@@ -31,7 +31,7 @@ router.get('/:id', authenticateRequest, async (req, res) => {
     }
 });
 
-// POST /api/findings — Create new finding
+// POST /findings — Create new finding
 router.post('/', authenticateRequest, async (req, res) => {
     try {
         const response = await axios.post(`${LIBRARY_URL}/findings`, req.body, {
@@ -47,7 +47,7 @@ router.post('/', authenticateRequest, async (req, res) => {
     }
 });
 
-// POST /api/findings/update — Update a finding
+// POST /findings/update — Update a finding
 router.post('/update', authenticateRequest, async (req, res) => {
     try {
         const response = await axios.post(`${LIBRARY_URL}/findings/update`, req.body, {
@@ -63,7 +63,7 @@ router.post('/update', authenticateRequest, async (req, res) => {
     }
 });
 
-// DELETE /api/findings/:id — Delete finding
+// DELETE /findings/:id — Delete finding
 router.delete('/:id', authenticateRequest, async (req, res) => {
     try {
         const response = await axios.delete(`${LIBRARY_URL}/findings/${req.params.id}`, {
