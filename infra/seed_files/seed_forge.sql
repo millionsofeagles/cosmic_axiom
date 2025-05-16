@@ -25,11 +25,11 @@ VALUES
 SET @orbit_id = (SELECT id FROM Customer WHERE name = 'Orbit Industries');
 
 INSERT INTO Contact (id, customerId, name, email, phone, isPrimary, createdAt, updatedAt)
-VALUES 
+VALUES
 (UUID(), @orbit_id, 'David Lee', 'david@orbit.com', '555-3456', TRUE, NOW(), NOW()),
 (UUID(), @orbit_id, 'Ellen Ray', 'ellen@orbit.com', '555-9988', FALSE, NOW(), NOW());
 
 INSERT INTO Engagement (id, name, description, startDate, endDate, status, createdAt, updatedAt, customerId)
-VALUES 
+VALUES
 ('11111111-1111-1111-1111-111111111111', 'Test Engagement', 'Testing manual seeding', '2025-05-01', '2025-05-31', 'PLANNED', NOW(), NOW(), '21111111-1111-1111-1111-111111111111'),
 (UUID(), 'Test Engagement 2', 'Testing manual seeding 2', '2025-05-02', '2025-05-4', 'PLANNED', NOW(), NOW(), '32222222-2222-2222-2222-222222222222');

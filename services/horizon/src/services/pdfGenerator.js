@@ -11,64 +11,118 @@ const templatePath = path.join(__dirname, "..", "..", "templates/report-template
 
 if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir);
 
+function wrapText(text, maxCharsPerLine) {
+    const words = text.split(' ');
+    const lines = [];
+    let currentLine = '';
+
+    for (const word of words) {
+        if ((currentLine + word).length <= maxCharsPerLine) {
+            currentLine += (currentLine ? ' ' : '') + word;
+        } else {
+            lines.push(currentLine);
+            currentLine = word;
+        }
+    }
+    if (currentLine) lines.push(currentLine);
+    return lines;
+}
+
 export async function generatePdf({ report, engagement }) {
     const templateBytes = fs.readFileSync(templatePath);
     const pdfDoc = await PDFDocument.load(templateBytes);
     const pages = pdfDoc.getPages();
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
-    const drawText = (page, text, x, y, size = 12) => {
-        page.drawText(text, {
-            x, y, size,
-            font,
-            color: rgb(0.2, 0.2, 0.2),
+    const drawWrappedText = (page, text, x, startY, size = 10, lineSpacing = 14, maxWidth = 80) => {
+        const lines = wrapText(text, maxWidth);
+        lines.forEach((line, i) => {
+            page.drawText(line, {
+                x,
+                y: startY - i * lineSpacing,
+                size,
+                font,
+                color: rgb(0.2, 0.2, 0.2),
+            });
+        });
+    };
+
+    const eraseText = (page, x, y, width = 450, height = 20) => {
+        page.drawRectangle({
+            x,
+            y: y - height + 5,
+            width,
+            height,
+            color: rgb(1, 1, 1),
         });
     };
 
     // Page 1: Cover Page
-    drawText(pages[0], engagement.customerName || "N/A", 150, 680);
-    drawText(pages[0], report.title || "N/A", 150, 660);
-    drawText(pages[0], engagement.startDate + " - " + engagement.endDate, 150, 640);
+    eraseText(pages[0], 150, 680);
+    drawWrappedText(pages[0], engagement.customerName || "", 150, 680, 12, 14, 50);
+    eraseText(pages[0], 150, 660);
+    drawWrappedText(pages[0], report.title || "", 150, 660, 12, 14, 50);
+    eraseText(pages[0], 150, 640);
+    drawWrappedText(pages[0], `${engagement.startDate} - ${engagement.endDate}`, 150, 640, 12, 14, 50);
 
     // Page 4: Executive Summary
-    drawText(pages[3], report.summary || "Executive summary not provided.", 50, 700, 10);
+    eraseText(pages[3], 50, 700);
+    drawWrappedText(pages[3], report.executiveSummary || "", 50, 700);
 
     // Page 5: Scope
-    drawText(pages[4], report.scope || "Scope not defined.", 50, 700, 10);
+    eraseText(pages[4], 50, 700);
+    drawWrappedText(pages[4], engagement.description || "", 50, 700);
 
     // Page 6: Methodology
-    drawText(pages[5], report.methodology || "Methodology not provided.", 50, 700, 10);
+    eraseText(pages[5], 50, 700);
+    drawWrappedText(pages[5], report.methodology || "", 50, 700);
 
     // Page 7: Engagement Timeline
-    drawText(pages[6], engagement.timeline || "Timeline not specified.", 50, 700, 10);
+    eraseText(pages[6], 50, 700);
+    const timelineText = `Start Date: ${engagement.startDate}\nEnd Date: ${engagement.endDate || "N/A"}`;
+    drawWrappedText(pages[6], timelineText, 50, 700);
 
     // Page 8: Tools and Techniques
-    drawText(pages[7], report.tools || "Tools not listed.", 50, 700, 10);
+    eraseText(pages[7], 50, 700);
+    drawWrappedText(pages[7], report.toolsAndTechniques || "", 50, 700);
 
     // Page 9: Findings and Analysis
     let findingsY = 700;
-    (report.sections || []).filter(s => s.type === "finding").forEach(finding => {
-        const text = `${finding.data.title} (${finding.data.severity}): ${finding.data.description}`;
-        drawText(pages[8], text.slice(0, 100), 50, findingsY, 10); // truncate to 100 chars
-        findingsY -= 40;
-    });
+    const findings = (report.sections || []).filter(s => s.type === "finding");
+    for (const finding of findings) {
+        const line = `${finding.data.title} (${finding.data.severity}): ${finding.data.description}`;
+        drawWrappedText(pages[8], line, 50, findingsY);
+        findingsY -= (wrapText(line, 80).length + 1) * 14;
+    }
 
     // Page 10: Risk Ratings
-    drawText(pages[9], "Risk ratings auto-calculated.", 50, 700, 10);
+    eraseText(pages[9], 50, 700);
+    drawWrappedText(pages[9], "Risk ratings auto-calculated based on severity and context.", 50, 700);
 
     // Page 11: Recommendations
     let recY = 700;
-    (report.sections || []).filter(s => s.data.recommendation).forEach(finding => {
-        drawText(pages[10], finding.data.recommendation.slice(0, 100), 50, recY, 10);
-        recY -= 40;
-    });
+    for (const finding of findings) {
+        if (finding.data.recommendation) {
+            drawWrappedText(pages[10], finding.data.recommendation, 50, recY);
+            recY -= (wrapText(finding.data.recommendation, 80).length + 1) * 14;
+        }
+    }
+
+    // Page 12: Conclusion
+    eraseText(pages[11], 50, 700);
+    drawWrappedText(pages[11], report.conclusion || "", 50, 700);
 
     // Page 13: Contact Info
-    drawText(pages[12], engagement.organization || "N/A", 150, 680);
-    drawText(pages[12], engagement.contactName || "N/A", 150, 660);
-    drawText(pages[12], engagement.contactEmail || "N/A", 150, 640);
-    drawText(pages[12], engagement.contactPhone || "N/A", 150, 620);
-    drawText(pages[12], engagement.contactAddress || "N/A", 150, 600);
+    eraseText(pages[12], 150, 680);
+    drawWrappedText(pages[12], engagement.organization || "", 150, 680);
+    eraseText(pages[12], 150, 660);
+    drawWrappedText(pages[12], engagement.contactName || "", 150, 660);
+    eraseText(pages[12], 150, 640);
+    drawWrappedText(pages[12], engagement.contactEmail || "", 150, 640);
+    eraseText(pages[12], 150, 620);
+    drawWrappedText(pages[12], engagement.contactPhone || "", 150, 620);
+    eraseText(pages[12], 150, 600);
+    drawWrappedText(pages[12], engagement.contactAddress || "", 150, 600);
 
     const filename = `${uuidv4()}.pdf`;
     const filepath = path.join(outputDir, filename);

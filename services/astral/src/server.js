@@ -2,6 +2,7 @@ import cors from 'cors';
 import dotenv from "dotenv";
 import express from "express";
 import morgan from 'morgan';
+import healthRoutes from "./routes/health.js";
 import tokenRoutes from "./routes/token.js";
 import usersRoutes from "./routes/users.js";
 dotenv.config();
@@ -13,6 +14,7 @@ app.use(express.json());
 
 app.use('/token', tokenRoutes);
 app.use('/users', usersRoutes);
+app.use('/health', healthRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Astral service running on port ${PORT}`));

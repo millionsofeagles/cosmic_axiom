@@ -22,14 +22,20 @@ enum SectionType {
 }
 
 model Report {
-  id          String    @id @default(uuid())
-  engagementId String
-  title       String
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  sections    Section[]
-  filename    String?
+  id                  String    @id @default(uuid())
+  engagementId        String
+  title               String
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  sections            Section[]
+  filename            String?
+
+  executiveSummary    String?   @db.VarChar(1000)
+  methodology         String?   @db.VarChar(1000)
+  toolsAndTechniques  String?   @db.VarChar(1000)
+  conclusion          String?   @db.VarChar(1000)
 }
+
 
 model Section {
   id        String   @id @default(uuid())
@@ -43,3 +49,12 @@ model Section {
 
   @@index([reportId, position])
 }
+
+model DefaultReportTemplate {
+  id                 String   @id @default("singleton") // Force singleton
+  executiveSummary   String   @db.VarChar(1000)
+  methodology        String   @db.VarChar(1000)
+  toolsAndTechniques String   @db.VarChar(1000)
+  conclusion         String   @db.VarChar(1000)
+}
+

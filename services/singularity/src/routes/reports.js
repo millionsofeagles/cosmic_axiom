@@ -5,6 +5,53 @@ import { authenticateRequest } from "../middleware/authenticateRequest.js";
 const router = Router();
 const prisma = new PrismaClient();
 
+// GET /reports/default-template
+router.get("/default-template", authenticateRequest, async (req, res) => {
+    try {
+        const template = await prisma.defaultReportTemplate.findUnique({
+            where: { id: "singleton" }
+        });
+
+        if (!template) {
+            return res.status(404).json({ error: "Default report template not found" });
+        }
+
+        res.json(template);
+    } catch (err) {
+        console.error("Failed to fetch default template:", err.message);
+        res.status(500).json({ error: "Failed to fetch default report template" });
+    }
+});
+
+// PUT /reports/default-template
+router.put("/default-template", authenticateRequest, async (req, res) => {
+    const { executiveSummary, methodology, toolsAndTechniques, conclusion } = req.body;
+
+    try {
+        const updated = await prisma.defaultReportTemplate.upsert({
+            where: { id: "singleton" },
+            update: {
+                executiveSummary,
+                methodology,
+                toolsAndTechniques,
+                conclusion
+            },
+            create: {
+                id: "singleton",
+                executiveSummary,
+                methodology,
+                toolsAndTechniques,
+                conclusion
+            }
+        });
+
+        res.json(updated);
+    } catch (err) {
+        console.error("Failed to update default template:", err.message);
+        res.status(500).json({ error: "Failed to update default report template" });
+    }
+});
+
 // POST /reports - Create a new report
 router.post("/", authenticateRequest, async (req, res) => {
     const { engagementId, title } = req.body;
@@ -47,15 +94,29 @@ router.patch("/:id/filename", authenticateRequest, async (req, res) => {
     }
 });
 
-// PUT /reports/:id - Update title (user-controlled)
+// PUT /reports/:id - Update title and optional narrative fields
 router.put("/:id", authenticateRequest, async (req, res) => {
     const { id } = req.params;
-    const { title } = req.body;
+    const {
+        title,
+        executiveSummary,
+        methodology,
+        toolsAndTechniques,
+        conclusion
+    } = req.body;
+
+    // Build dynamic update payload
+    const data = {};
+    if (title !== undefined) data.title = title;
+    if (executiveSummary !== undefined) data.executiveSummary = executiveSummary;
+    if (methodology !== undefined) data.methodology = methodology;
+    if (toolsAndTechniques !== undefined) data.toolsAndTechniques = toolsAndTechniques;
+    if (conclusion !== undefined) data.conclusion = conclusion;
 
     try {
         const updated = await prisma.report.update({
             where: { id },
-            data: { title },
+            data
         });
 
         res.json(updated);
@@ -78,7 +139,6 @@ router.get("/", authenticateRequest, async (req, res) => {
         res.status(500).json({ error: "Failed to fetch reports" });
     }
 });
-
 
 // GET /reports/:id - fetch a specific report by engagementID
 router.get('/:engagementId', authenticateRequest, async (req, res, next) => {
@@ -103,6 +163,5 @@ router.get('/:engagementId', authenticateRequest, async (req, res, next) => {
         next(error);
     }
 });
-
 
 export default router;

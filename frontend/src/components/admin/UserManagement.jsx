@@ -121,7 +121,7 @@ const UserManagement = () => {
     return (
         <div className="space-y-4">
             <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold text-gray-200">User Management</h3>
+                <h3 className="text-lg font-semibold text-gray-600">User Management</h3>
                 <button
                     onClick={() => openModal()}
                     className="text-sm bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded"
@@ -134,7 +134,7 @@ const UserManagement = () => {
                 <div className="text-gray-400">Loading users...</div>
             ) : (
                 <table className="w-full text-sm text-left text-gray-400">
-                    <thead className="text-xs uppercase text-gray-500 border-b border-gray-700">
+                    <thead className="text-xs uppercase text-gray-600 border-b border-gray-700">
                         <tr>
                             <th className="px-3 py-2">Name</th>
                             <th className="px-3 py-2">Username</th>
@@ -145,7 +145,7 @@ const UserManagement = () => {
                     </thead>
                     <tbody>
                         {users.map((user) => (
-                            <tr key={user.id} className="border-b border-gray-700">
+                            <tr key={user.id} className="border-b text-gray-600 border-gray-700">
                                 <td className="px-3 py-2">{user.name}</td>
                                 <td className="px-3 py-2">{user.username}</td>
                                 <td className="px-3 py-2">{user.role}</td>

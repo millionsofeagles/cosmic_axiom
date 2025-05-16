@@ -7,6 +7,32 @@ const SINGULARITY_URL = process.env.SINGULARITY_URL;
 const FORGE_URL = process.env.FORGE_URL;
 const HORIZON_URL = process.env.HORIZON_URL;
 
+// GET /reports/default-template
+router.get("/default-template", authenticateRequest, async (req, res) => {
+    try {
+        const response = await axios.get(`${SINGULARITY_URL}/reports/default-template`, {
+            headers: { Authorization: req.headers.authorization }
+        });
+        res.json(response.data);
+    } catch (err) {
+        console.error("Satellite BFF failed to fetch default template:", err.message);
+        res.status(500).json({ error: "Failed to fetch default report template" });
+    }
+});
+
+// PUT /reports/default-template
+router.put("/default-template", authenticateRequest, async (req, res) => {
+    try {
+        const response = await axios.put(`${SINGULARITY_URL}/reports/default-template`, req.body, {
+            headers: { Authorization: req.headers.authorization }
+        });
+        res.json(response.data);
+    } catch (err) {
+        console.error("Satellite BFF failed to update default template:", err.message);
+        res.status(500).json({ error: "Failed to update default report template" });
+    }
+});
+
 // GET latest generated PDF for report
 router.get("/pdf/:filename", authenticateRequest, async (req, res) => {
     const { filename } = req.params;

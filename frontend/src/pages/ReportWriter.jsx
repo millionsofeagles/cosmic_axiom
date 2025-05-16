@@ -1,6 +1,8 @@
 import {
     BriefcaseBusiness,
     CalendarCheck,
+    ChevronDown,
+    ChevronRight,
     IdCard,
     Mail,
     Phone,
@@ -29,6 +31,7 @@ function ReportWriter() {
         severity: "",
         tags: []
     });
+    const [showMetaSection, setShowMetaSection] = useState(false);
 
     useEffect(() => {
         const handleBeforeUnload = (e) => {
@@ -120,6 +123,32 @@ function ReportWriter() {
         }
     };
 
+    const toggleMetaSection = () => setShowMetaSection(!showMetaSection);
+
+    const handleSaveNarrative = async () => {
+        try {
+            const res = await fetch(`${import.meta.env.VITE_SATELLITE_URL}/reports/${report.id}`, {
+                method: "PUT",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    executiveSummary: report.executiveSummary,
+                    methodology: report.methodology,
+                    toolsAndTechniques: report.toolsAndTechniques,
+                    conclusion: report.conclusion
+                })
+            });
+
+            if (!res.ok) throw new Error("Failed to save narrative sections");
+            alert("Narrative sections saved.");
+        } catch (err) {
+            console.error("Failed to save narrative:", err);
+            alert("Save failed. Check console for details.");
+        }
+    };
+
     return (
         <DashboardLayout>
             <div className="mb-8">
@@ -164,6 +193,40 @@ function ReportWriter() {
                                         <span className="font-medium">End:</span> {engagement.endDate}</div>
                                 </div>
                             </div>
+                        </div>
+
+                        {/* Collapsible Meta Section */}
+                        <div className="mt-6 border border-gray-300 dark:border-gray-700 rounded-lg overflow-hidden">
+                            <button
+                                className="w-full px-4 py-3 flex justify-between items-center bg-gray-100 dark:bg-gray-700 text-left hover:bg-gray-200 dark:hover:bg-gray-600"
+                                onClick={toggleMetaSection}
+                            >
+                                <span className="font-semibold text-gray-800 dark:text-gray-100">Report Narrative Sections</span>
+                                {showMetaSection ? <ChevronDown /> : <ChevronRight />}
+                            </button>
+                            {showMetaSection && report && (
+                                <div className="p-4 bg-white dark:bg-gray-800 space-y-4">
+                                    {['executiveSummary', 'methodology', 'toolsAndTechniques', 'conclusion'].map((field) => (
+                                        <div key={field}>
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 capitalize mb-1">
+                                                {field.replace(/([A-Z])/g, ' $1')}
+                                            </label>
+                                            <textarea
+                                                rows={4}
+                                                className="w-full p-2 border rounded bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600"
+                                                value={report[field] || ''}
+                                                onChange={(e) => setReport({ ...report, [field]: e.target.value })}
+                                            />
+                                        </div>
+                                    ))}
+                                    <button
+                                        onClick={handleSaveNarrative}
+                                        className="mt-2 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+                                    >
+                                        Save Narrative
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
                 ) : (
