@@ -1,6 +1,9 @@
 import axios from "axios";
+import dotenv from "dotenv";
 import express from "express";
 import { authenticateRequest } from "../middleware/authenticateRequest.js";
+
+dotenv.config();
 
 const router = express.Router();
 const SINGULARITY_URL = process.env.SINGULARITY_URL;
@@ -77,28 +80,49 @@ router.post("/:reportId/generate-pdf", async (req, res) => {
             headers: { Authorization: token },
         });
         const report = reportRes.data;
-
         // Fetch engagement from Forge
         const engagementRes = await axios.get(`${process.env.FORGE_URL}/engagement/${report.engagementId}`, {
             headers: { Authorization: token },
         });
         const engagement = engagementRes.data;
-
-        // Send to Horizon to generate the PDF
+        
+        // Fetch scopes for the engagement from Forge
+        let scopes = [];
+        try {
+            const scopesRes = await axios.get(`${process.env.FORGE_URL}/scope/engagement/${report.engagementId}`, {
+                headers: { Authorization: token },
+            });
+            scopes = scopesRes.data;
+        } catch (err) {
+            console.log("No scopes found for engagement:", err.message);
+        }
+        
+        // Add scopes to engagement object
+        engagement.scopes = scopes;
+        
+        // Send to Horizon to generate the PDF, passing existing filename if available
         const horizonRes = await axios.post(
             `${process.env.HORIZON_URL}/generate`,
-            { report, engagement },
+            { 
+                report, 
+                engagement,
+                existingFilename: report.filename || null 
+            },
             {
                 headers: { Authorization: token },
             }
         );
 
         const filename = horizonRes.data.url.split("/").pop();
-        const store_response = await axios.patch(
-            `${SINGULARITY_URL}/reports/${reportId}/filename`,
-            { filename, reportId: report.id },
-            { headers: { Authorization: token } }
-        );
+        
+        // Only update filename in database if it's a new file
+        if (!report.filename) {
+            const store_response = await axios.patch(
+                `${SINGULARITY_URL}/reports/${reportId}/filename`,
+                { filename, reportId: reportId },
+                { headers: { Authorization: token } }
+            );
+        }
 
         res.status(200).json(horizonRes.data); // should include { url: "/generated/filename.pdf" }
     } catch (err) {
@@ -110,17 +134,35 @@ router.post("/:reportId/generate-pdf", async (req, res) => {
 // GET /reports - Get all reports enriched with engagement data
 router.get("/", authenticateRequest, async (req, res) => {
     try {
+        console.log("GET /reports - URLs:", { SINGULARITY_URL, FORGE_URL });
+        
         // 1. Fetch reports from Singularity
-        const reportsRes = await axios.get(`${SINGULARITY_URL}/reports`, {
-            headers: { Authorization: req.headers.authorization },
-        });
-        const reports = reportsRes.data;
+        console.log("Fetching reports from Singularity...");
+        let reports;
+        try {
+            const reportsRes = await axios.get(`${SINGULARITY_URL}/reports`, {
+                headers: { Authorization: req.headers.authorization },
+            });
+            reports = reportsRes.data;
+            console.log(`Got ${reports.length} reports from Singularity`);
+        } catch (err) {
+            console.error("Failed to fetch from Singularity:", err.message);
+            throw err;
+        }
 
         // 2. Fetch engagements from Forge
-        const engagementsRes = await axios.get(`${FORGE_URL}/engagement`, {
-            headers: { Authorization: req.headers.authorization },
-        });
-        const engagements = engagementsRes.data;
+        console.log("Fetching engagements from Forge...");
+        let engagements;
+        try {
+            const engagementsRes = await axios.get(`${FORGE_URL}/engagement`, {
+                headers: { Authorization: req.headers.authorization },
+            });
+            engagements = engagementsRes.data;
+            console.log(`Got ${engagements.length} engagements from Forge`);
+        } catch (err) {
+            console.error("Failed to fetch from Forge:", err.message);
+            throw err;
+        }
 
         // 3. Map engagementId → engagement details
         const engagementMap = {};
@@ -137,27 +179,29 @@ router.get("/", authenticateRequest, async (req, res) => {
         res.json(enriched);
     } catch (err) {
         console.error("GET /reports failed:", err.message);
+        console.error("Full error:", err.response?.data || err);
         res.status(500).json({ error: "Failed to fetch enriched reports" });
     }
 });
 
-// GET /reports/:engagementId - Fetch report by engagement ID
-router.get("/:engagementId", authenticateRequest, async (req, res) => {
-    const engagementId = req.params.engagementId;
+// GET /reports/:reportId - Fetch report by engagement ID
+router.get("/:reportId", authenticateRequest, async (req, res) => {
+    const reportId = req.params.reportId;
 
-    if (!engagementId) {
+    if (!reportId) {
         res.status(404).json({ error: "Engagement Id Missing" });
     }
     try {
         // 1. Get report from Singularity by engagementId
-        const reportRes = await axios.get(`${SINGULARITY_URL}/reports/${engagementId}`, {
+        const reportRes = await axios.get(`${SINGULARITY_URL}/reports/${reportId}`, {
             headers: { Authorization: req.headers.authorization },
         });
+
 
         const report = reportRes.data;
 
         // 2. Get engagement info from Astral (includes customer, etc.)
-        const engagementRes = await axios.get(`${FORGE_URL}/engagement/${engagementId}`, {
+        const engagementRes = await axios.get(`${FORGE_URL}/engagement/${report.engagementId}`, {
             headers: { Authorization: req.headers.authorization },
         });
 
@@ -175,7 +219,7 @@ router.get("/:engagementId", authenticateRequest, async (req, res) => {
     }
 });
 
-
+// GET /reports/:id/sections - Fetch sections for a specific report
 router.get('/:id/sections', authenticateRequest, async (req, res) => {
     try {
 
@@ -212,6 +256,59 @@ router.put("/:id", authenticateRequest, async (req, res) => {
     } catch (error) {
         console.error("Error updating report:", error.message);
         res.status(500).json({ error: "Failed to update report" });
+    }
+});
+
+// POST /reports/:reportId/generate-briefing
+router.post("/:reportId/generate-briefing", authenticateRequest, async (req, res) => {
+    const { reportId } = req.params;
+    const token = req.headers.authorization;
+    
+    if (!reportId) {
+        return res.status(400).json({ error: "Missing reportId" });
+    }
+
+    try {
+        // Fetch report from Singularity
+        const reportRes = await axios.get(`${SINGULARITY_URL}/reports/${reportId}`, {
+            headers: { Authorization: token },
+        });
+        const report = reportRes.data;
+        
+        // Fetch engagement from Forge
+        const engagementRes = await axios.get(`${FORGE_URL}/engagement/${report.engagementId}`, {
+            headers: { Authorization: token },
+        });
+        const engagement = engagementRes.data;
+        
+        // Send to Horizon to generate the briefing PDF
+        const horizonRes = await axios.post(
+            `${HORIZON_URL}/generate-briefing`,
+            { report, engagement },
+            {
+                headers: { Authorization: token },
+            }
+        );
+
+        res.status(200).json(horizonRes.data);
+    } catch (err) {
+        console.error("Error in BFF /generate-briefing:", err.message);
+        res.status(500).json({ error: "Failed to generate briefing PDF" });
+    }
+});
+
+// DELETE /reports/:id - Delete a report
+router.delete("/:id", authenticateRequest, async (req, res) => {
+    try {
+        const response = await axios.delete(`${SINGULARITY_URL}/reports/${req.params.id}`, {
+            headers: { Authorization: req.headers.authorization },
+        });
+        res.json(response.data);
+    } catch (error) {
+        console.error("Error deleting report:", error.message);
+        res.status(error.response?.status || 500).json({ 
+            error: error.response?.data?.error || "Failed to delete report" 
+        });
     }
 });
 

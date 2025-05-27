@@ -1,6 +1,9 @@
 import axios from "axios";
+import dotenv from "dotenv";
 import express from "express";
 import { authenticateRequest } from "../middleware/authenticateRequest.js";
+
+dotenv.config();
 
 const router = express.Router();
 const FORGE_URL = process.env.FORGE_URL;
@@ -21,14 +24,21 @@ router.get("/", authenticateRequest, async (req, res) => {
         });
         const reports = reportRes.data;
 
-        // 3. Build a Set of engagementIds that have reports
-        const reportMap = new Set(reports.map(r => r.engagementId));
+        // 3. Build a Map of engagementId → report
+        const reportMap = new Map();
+        reports.forEach((report) => {
+            reportMap.set(report.engagementId, report);
+        });
 
-        // 4. Enrich engagements with a report indicator
-        const enriched = engagements.map((engagement) => ({
-            ...engagement,
-            report: reportMap.has(engagement.id) ? { id: true } : null,
-        }));
+        // 4. Enrich engagements with reportId if it exists
+        const enriched = engagements.map((engagement) => {
+            const report = reportMap.get(engagement.id);
+            return {
+                ...engagement,
+                report: report ? { id: report.id } : null,
+            };
+        });
+
 
         res.json(enriched);
     } catch (err) {

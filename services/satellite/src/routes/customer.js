@@ -1,7 +1,10 @@
 // satalite/src/routes/customers.js
 import axios from "axios";
+import dotenv from "dotenv";
 import express from "express";
 import { authenticateRequest } from "../middleware/authenticateRequest.js";
+
+dotenv.config();
 
 const router = express.Router();
 const FORGE_URL = process.env.FORGE_URL; // Adjust port as needed

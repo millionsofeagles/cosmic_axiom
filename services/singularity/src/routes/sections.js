@@ -7,90 +7,213 @@ const prisma = new PrismaClient();
 
 // POST /sections - Create and assign to report
 router.post("/", authenticateRequest, async (req, res) => {
-    const { reportId, type, data, position } = req.body;
+    const { reportId, type, position, title, description, recommendation, impact, reference, severity, tags, content, affectedSystems } = req.body;
 
-    if (!reportId || !type || !data) {
-        return res.status(400).json({ error: "Missing required fields" });
+    console.log("POST /sections request body:", req.body);
+
+    if (!reportId || !type) {
+        console.log("Missing required fields - reportId:", reportId, "type:", type);
+        return res.status(400).json({ error: "Missing required fields: reportId and type are required" });
     }
 
     try {
-        const newSection = await prisma.section.create({
-            data: {
-                reportId,
-                type,
-                data,
-                position
-            },
-        });
+        // Handle different section types
+        if (type === "finding" || type === "FINDING") {
+            // For findings, create a ReportFinding first
+            if (!title || !description || !recommendation || !impact || !severity) {
+                return res.status(400).json({ error: "Missing required finding fields" });
+            }
 
-        res.status(201).json(newSection);
+            // First check if the report exists
+            const reportExists = await prisma.report.findUnique({
+                where: { id: reportId }
+            });
+
+            if (!reportExists) {
+                console.error(`Report with ID ${reportId} not found`);
+                
+                // Log available reports for debugging
+                const allReports = await prisma.report.findMany({
+                    select: { id: true, title: true, engagementId: true }
+                });
+                console.log("Available reports:", allReports);
+                
+                return res.status(400).json({ error: `Report with ID ${reportId} not found` });
+            }
+
+            const newFinding = await prisma.reportFinding.create({
+                data: {
+                    reportId,
+                    title,
+                    description,
+                    recommendation,
+                    impact,
+                    reference,
+                    severity,
+                    tags,
+                    affectedSystems: affectedSystems || [],
+                },
+            });
+
+            const newSection = await prisma.section.create({
+                data: {
+                    reportId,
+                    type: "FINDING",
+                    position: position || 0,
+                    reportFindingId: newFinding.id,
+                },
+                include: {
+                    reportFinding: {
+                        include: {
+                            images: true
+                        }
+                    }
+                }
+            });
+
+            res.status(201).json(newSection);
+        } else {
+            // For connectivity or custom sections, just create the section
+            const newSection = await prisma.section.create({
+                data: {
+                    reportId,
+                    type: type.toUpperCase(),
+                    position: position || 0,
+                    title: title || "Connectivity Section",
+                    content: content || ""
+                },
+            });
+
+            res.status(201).json(newSection);
+        }
     } catch (err) {
         console.error("Failed to create section:", err.message);
         res.status(500).json({ error: "Failed to create section" });
     }
 });
 
-// PUT /sections/:id - Update section data and completion status
+// PUT /sections/:id - Update section fields
 router.put("/:id", authenticateRequest, async (req, res) => {
     const { id } = req.params;
-    const { data, isComplete } = req.body;
+    const updateData = { ...req.body };
 
     try {
+        // Remove fields that shouldn't be updated directly
+        delete updateData.id;
+        delete updateData.reportId;
+        delete updateData.createdAt;
+        delete updateData.updatedAt;
+        delete updateData.reportFinding;
+        delete updateData.report;
+
+        // Only update fields that exist in the Section model
+        const allowedFields = ['type', 'position', 'reportFindingId', 'title', 'content'];
+        const filteredData = {};
+        
+        for (const field of allowedFields) {
+            if (updateData[field] !== undefined) {
+                filteredData[field] = updateData[field];
+            }
+        }
+
         const updated = await prisma.section.update({
             where: { id },
-            data: {
-                data,
-                isComplete,
-            },
+            data: filteredData,
+            include: {
+                reportFinding: {
+                    include: {
+                        images: true
+                    }
+                }
+            }
         });
-
-        // Check if all sections on the same report are complete
-        const section = await prisma.section.findUnique({ where: { id } });
-        const reportId = section.reportId;
-
-        const incompleteCount = await prisma.section.count({
-            where: {
-                reportId,
-                isComplete: false,
-            },
-        });
-
-        if (incompleteCount === 0) {
-            await prisma.report.update({
-                where: { id: reportId },
-                data: { status: "COMPLETED" },
-            });
-        }
 
         res.json(updated);
     } catch (err) {
-        console.error("Failed to update section:", err.message);
+        console.error("Failed to update section:", err);
         res.status(500).json({ error: "Failed to update section" });
     }
 });
 
-// GET /reports/:id/sections - Get all sections for a report
-router.get('/:reportId', authenticateRequest, async (req, res) => {
+// GET /sections/report/:reportId - Get all sections for a report
+router.get("/:reportId", authenticateRequest, async (req, res) => {
     const { reportId } = req.params;
 
     try {
         const sections = await prisma.section.findMany({
-            where: { reportId: reportId },
-            orderBy: { createdAt: 'desc' },
-            select: {
-                id: true,
-                type: true,
-                data: true,
-                createdAt: true,
-                updatedAt: true,
-                position: true,
-            },
+            where: { reportId },
+            orderBy: { createdAt: "desc" },
+            include: {
+                reportFinding: {
+                    include: {
+                        images: true
+                    }
+                },
+            }
         });
 
         res.json(sections);
     } catch (err) {
         console.error(`Failed to get sections for report ${reportId}:`, err.message);
-        res.status(500).json({ error: 'Failed to fetch sections for report' });
+        res.status(500).json({ error: "Failed to fetch sections for report" });
+    }
+});
+
+// PUT /findings/:id - Update report finding
+router.put("/findings/:id", authenticateRequest, async (req, res) => {
+    const { id } = req.params;
+    const updateData = { ...req.body };
+
+    try {
+        // Remove fields that shouldn't be updated
+        delete updateData.id;
+        delete updateData.reportId;
+        delete updateData.createdAt;
+        delete updateData.updatedAt;
+
+        const updated = await prisma.reportFinding.update({
+            where: { id },
+            data: updateData
+        });
+
+        res.json(updated);
+    } catch (err) {
+        console.error("Failed to update finding:", err);
+        res.status(500).json({ error: "Failed to update finding" });
+    }
+});
+
+// DELETE /sections/:id - Delete a section
+router.delete("/:id", authenticateRequest, async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        // First get the section to see if it has a reportFinding
+        const section = await prisma.section.findUnique({
+            where: { id },
+            include: { reportFinding: true }
+        });
+
+        if (!section) {
+            return res.status(404).json({ error: "Section not found" });
+        }
+
+        // If it's a finding section, delete the reportFinding first (cascade will handle the section)
+        if (section.reportFindingId && section.reportFinding) {
+            await prisma.reportFinding.delete({
+                where: { id: section.reportFindingId }
+            });
+        } else {
+            // Otherwise just delete the section
+            await prisma.section.delete({
+                where: { id }
+            });
+        }
+
+        res.json({ message: "Section deleted successfully" });
+    } catch (err) {
+        console.error("Failed to delete section:", err);
+        res.status(500).json({ error: "Failed to delete section" });
     }
 });
 

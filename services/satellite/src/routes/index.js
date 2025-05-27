@@ -6,6 +6,11 @@ import healthRoutes from './health.js';
 import reportsRoutes from './reports.js';
 import sectionsRoutes from './sections.js';
 import userRoutes from './users.js';
+import threatIntelRoutes from "./threatintel.js";
+import cveRoutes from './cve.js';
+import testApiRoutes from './test-api.js';
+import newsRoutes from './news.js';
+import scopeRoutes from './scope.js';
 
 
 const router = Router();
@@ -17,6 +22,12 @@ router.use('/customer', customerRoutes);
 router.use("/engagement", engagementRoutes);
 router.use('/sections', sectionsRoutes);
 router.use('/reports', reportsRoutes);
+router.use("/threatintel", threatIntelRoutes);
+router.use('/cve', cveRoutes);
+router.use('/test-api', testApiRoutes);
+router.use('/news', newsRoutes);
+router.use('/scope', scopeRoutes);
+
 
 
 export default router;

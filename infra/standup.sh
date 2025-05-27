@@ -69,4 +69,4 @@ mysql -h "$MYSQL_HOST" -P "$MYSQL_PORT" -u "$MYSQL_USER" --password="$MYSQL_PASS
 echo "Seeding singularity with test data..."
 mysql -h "$MYSQL_HOST" -P "$MYSQL_PORT" -u "$MYSQL_USER" --password="$MYSQL_PASSWORD" singularity < "seed_files/seed_singularity.sql"
 
-echo "Standup Complete!
+echo "Standup Complete!"

@@ -23,9 +23,9 @@ router.get('/', authenticateRequest, async (req, res) => {
 
 // POST /findings — create new finding
 router.post('/', authenticateRequest, async (req, res) => {
-    const { title, description, recommendation, severity, reference, tags } = req.body;
+    const { title, description, recommendation, impact, severity, reference, tags } = req.body;
     
-    if (!title || !description || !recommendation || !severity) {
+    if (!title || !description || !recommendation || !impact || !severity) {
         return res.status(400).json({ error: 'Missing required fields' });
     }
 
@@ -35,6 +35,7 @@ router.post('/', authenticateRequest, async (req, res) => {
                 title,
                 description,
                 recommendation,
+                impact,
                 severity,
                 reference,
                 tags: tags || [],
@@ -49,9 +50,9 @@ router.post('/', authenticateRequest, async (req, res) => {
 
 // POST /findings/update — update existing finding
 router.post('/update', authenticateRequest, async (req, res) => {
-    const { id, title, description, recommendation, severity, reference, tags } = req.body;
+    const { id, title, description, recommendation, impact, severity, reference, tags } = req.body;
 
-    if (!id || !title || !description || !recommendation || !severity) {
+    if (!id || !title || !description || !recommendation || !impact || !severity) {
         return res.status(400).json({ error: 'Missing required fields' });
     }
 
@@ -62,6 +63,7 @@ router.post('/update', authenticateRequest, async (req, res) => {
                 title,
                 description,
                 recommendation,
+                impact,
                 severity,
                 reference,
                 tags: tags || [],
@@ -83,6 +85,22 @@ router.delete('/:id', authenticateRequest, async (req, res) => {
         res.json({ message: 'Finding deleted' });
     } catch (err) {
         console.error('Failed to delete finding:', err.message);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// GET /findings/:id — get finding by ID
+router.get('/:id', authenticateRequest, async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const finding = await prisma.findingTemplate.findUnique({ where: { id } });
+        if (!finding) {
+            return res.status(404).json({ error: 'Finding not found' });
+        }
+        res.json(finding);
+    } catch (err) {
+        console.error('Failed to fetch finding:', err.message);
         res.status(500).json({ error: 'Internal server error' });
     }
 });

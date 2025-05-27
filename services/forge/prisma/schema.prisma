@@ -51,7 +51,7 @@ model Engagement {
 
 model Scope {
   id            String    @id @default(uuid())
-  name          String
+  address       String
   description   String?
   inScope       Boolean   @default(true)
   notes         String?

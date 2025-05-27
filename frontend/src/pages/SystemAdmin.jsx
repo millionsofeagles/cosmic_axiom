@@ -3,9 +3,10 @@ import { useNavigate } from "react-router-dom";
 import SettingsPanel from "../components/admin/SettingsPanel";
 import SystemHealth from "../components/admin/SystemHealth";
 import UserManagement from "../components/admin/UserManagement";
+import ApiKeyManager from "../components/admin/ApiKeyManager";
 import DashboardLayout from "../layouts/DashboardLayout";
 
-const tabs = ["Users", "Sessions", "System Health", "Audit Log", "Settings"];
+const tabs = ["Users", "API Keys", "Sessions", "System Health", "Audit Log", "Settings"];
 
 const SystemAdmin = () => {
     const navigate = useNavigate();
@@ -22,6 +23,8 @@ const SystemAdmin = () => {
         switch (activeTab) {
             case "Users":
                 return <UserManagement />;
+            case "API Keys":
+                return <ApiKeyManager />;
             case "Sessions":
                 return <div className="text-sm text-gray-700 dark:text-gray-300">Active Sessions overview coming soon...</div>;
             case "System Health":

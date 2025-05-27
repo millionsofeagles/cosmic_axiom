@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{report.title}}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @media print {
+      .page-break { page-break-before: always; }
+      .no-break { page-break-inside: avoid; }
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      line-height: 1.5;
+      color: #1a202c;
+      font-size: 13px;
+    }
+    
+    .gradient-text {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .severity-critical { background-color: #dc2626; color: white; }
+    .severity-high { background-color: #ea580c; color: white; }
+    .severity-medium { background-color: #f59e0b; color: white; }
+    .severity-low { background-color: #3b82f6; color: white; }
+    .severity-info { background-color: #6b7280; color: white; }
+    
+    .section-header {
+      border-bottom: 3px solid #e5e7eb;
+      padding-bottom: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .finding-box {
+      border: 1px solid #e5e7eb;
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      background-color: #f9fafb;
+    }
+    
+    .evidence-box {
+      background-color: #f3f4f6;
+      border: 1px solid #d1d5db;
+      border-radius: 0.375rem;
+      padding: 1rem;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.875rem;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+    }
+    
+    th, td {
+      border: 1px solid #e5e7eb;
+      padding: 0.75rem;
+      text-align: left;
+    }
+    
+    th {
+      background-color: #f3f4f6;
+      font-weight: 600;
+    }
+    
+    .header-logo {
+      width: 60px;
+      height: 60px;
+      display: inline-block;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body class="text-gray-900">
+
+  <!-- Cover Page -->
+  <div class="h-screen flex flex-col justify-center items-center page-break relative">
+    <!-- Watermark -->
+    <div class="absolute top-8 left-8 opacity-10">
+      <img src="https://cdn-icons-png.flaticon.com/512/3212/3212608.png" alt="Cosmic Axiom" class="w-32 h-32" />
+    </div>
+    
+    <div class="absolute top-8 right-8 text-sm text-gray-500">
+      {{#if report.classification}}
+        <span class="px-3 py-1 bg-red-100 text-red-700 rounded-full font-semibold">{{report.classification}}</span>
+      {{else}}
+        <span class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full font-semibold">CONFIDENTIAL</span>
+      {{/if}}
+    </div>
+    
+    <div class="text-center">
+      <div class="mb-6">
+        <svg class="w-20 h-20 mx-auto text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+        </svg>
+      </div>
+      
+      <h1 class="text-4xl font-bold mb-6 gradient-text" style="line-height: 1.3;">Penetration Testing Report</h1>
+      <h2 class="text-xl text-gray-600 mb-8">{{report.title}}</h2>
+    </div>
+    
+    <div class="w-[80%] bg-gray-50 rounded-lg p-6 mt-6">
+      <table class="w-full text-left">
+        <tr>
+          <td class="font-semibold text-gray-700 py-2 w-1/3">Client Organization:</td>
+          <td class="text-gray-900">{{#if engagement.customerName}}{{engagement.customerName}}{{else if engagement.customer}}{{engagement.customer}}{{else}}Not Specified{{/if}}</td>
+        </tr>
+        <tr>
+          <td class="font-semibold text-gray-700 py-2">Engagement Type:</td>
+          <td class="text-gray-900">{{#if engagement.type}}{{engagement.type}}{{else if engagement.engagementType}}{{engagement.engagementType}}{{else}}Penetration Test{{/if}}</td>
+        </tr>
+        <tr>
+          <td class="font-semibold text-gray-700 py-2">Testing Period:</td>
+          <td class="text-gray-900">{{engagement.startDate}} to {{engagement.endDate}}</td>
+        </tr>
+        <tr>
+          <td class="font-semibold text-gray-700 py-2">Report Date:</td>
+          <td class="text-gray-900">{{report.createdAt}}</td>
+        </tr>
+        <tr>
+          <td class="font-semibold text-gray-700 py-2">Report Version:</td>
+          <td class="text-gray-900">{{report.version}}</td>
+        </tr>
+      </table>
+    </div>
+    
+    <div class="absolute bottom-8 text-center text-sm text-gray-500">
+      <p>Prepared by {{engagement.organization}}</p>
+      <p class="mt-1 text-xs">Generated with Cosmic Axiom Security Platform</p>
+    </div>
+  </div>
+
+  <!-- Document Control & Confidentiality -->
+  <div class="px-10 py-8 page-break">
+    <h2 class="text-2xl font-bold mb-6 section-header">Document Control</h2>
+    
+    <div class="mb-8">
+      <h3 class="text-xl font-semibold mb-4 text-gray-800">Distribution</h3>
+      <table class="w-full">
+        <thead>
+          <tr>
+            <th class="text-left">Name</th>
+            <th class="text-left">Title</th>
+            <th class="text-left">Organization</th>
+            <th class="text-left">Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>{{engagement.contactName}}</td>
+            <td>{{engagement.contactTitle}}</td>
+            <td>{{#if engagement.customerName}}{{engagement.customerName}}{{else if engagement.customer}}{{engagement.customer}}{{else}}Not Specified{{/if}}</td>
+            <td>{{report.createdAt}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    
+    <div class="mb-8">
+      <h3 class="text-xl font-semibold mb-4 text-gray-800">Version History</h3>
+      <table class="w-full">
+        <thead>
+          <tr>
+            <th class="text-left">Version</th>
+            <th class="text-left">Date</th>
+            <th class="text-left">Author</th>
+            <th class="text-left">Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1.0</td>
+            <td>{{report.createdAt}}</td>
+            <td>{{report.author}}</td>
+            <td>Initial release</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    
+    <div class="bg-red-50 border-l-4 border-red-500 p-6 rounded">
+      <h3 class="text-xl font-semibold mb-3 text-red-800">Confidentiality Statement</h3>
+      <p class="text-gray-700">
+        This document contains confidential and proprietary information and is intended solely for the use of {{#if engagement.customerName}}{{engagement.customerName}}{{else if engagement.customer}}{{engagement.customer}}{{else}}the client organization{{/if}}. 
+        The information contained herein may not be disclosed, duplicated, or used in whole or in part for any purpose other than the 
+        evaluation of security findings without the express written permission of both {{#if engagement.customerName}}{{engagement.customerName}}{{else if engagement.customer}}{{engagement.customer}}{{else}}the client organization{{/if}} and {{engagement.organization}}.
+      </p>
+    </div>
+  </div>
+
+  <!-- Table of Contents -->
+  <div class="px-10 py-8 page-break">
+    <h2 class="text-2xl font-bold mb-6 section-header">Table of Contents</h2>
+    <div class="space-y-3">
+      <div class="flex justify-between items-baseline">
+        <span class="text-lg">1. Executive Summary</span>
+        <span class="text-gray-500">3</span>
+      </div>
+      <div class="flex justify-between items-baseline">
+        <span class="text-lg">2. Engagement Overview</span>
+        <span class="text-gray-500">4</span>
+      </div>
+      <div class="flex justify-between items-baseline pl-6">
+        <span class="text-base text-gray-700">2.1 Scope</span>
+        <span class="text-gray-500">4</span>
+      </div>
+      <div class="flex justify-between items-baseline pl-6">
+        <span class="text-base text-gray-700">2.2 Methodology</span>
+        <span class="text-gray-500">5</span>
+      </div>
+      <div class="flex justify-between items-baseline pl-6">
+        <span class="text-base text-gray-700">2.3 Risk Rating</span>
+        <span class="text-gray-500">6</span>
+      </div>
+      <div class="flex justify-between items-baseline">
+        <span class="text-lg">3. Findings Summary</span>
+        <span class="text-gray-500">7</span>
+      </div>
+      {{#if report.hasConnectivity}}
+      <div class="flex justify-between items-baseline">
+        <span class="text-lg">4. Network Connectivity Tests</span>
+        <span class="text-gray-500">8</span>
+      </div>
+      {{/if}}
+      <div class="flex justify-between items-baseline">
+        <span class="text-lg">{{#if report.hasConnectivity}}5{{else}}4{{/if}}. Detailed Findings</span>
+        <span class="text-gray-500">{{#if report.hasConnectivity}}9{{else}}8{{/if}}</span>
+      </div>
+      <div class="flex justify-between items-baseline">
+        <span class="text-lg">{{#if report.hasConnectivity}}6{{else}}5{{/if}}. Recommendations</span>
+        <span class="text-gray-500">{{#if report.hasConnectivity}}12{{else}}10{{/if}}</span>
+      </div>
+      <div class="flex justify-between items-baseline">
+        <span class="text-lg">{{#if report.hasConnectivity}}7{{else}}6{{/if}}. Conclusion</span>
+        <span class="text-gray-500">{{#if report.hasConnectivity}}13{{else}}11{{/if}}</span>
+      </div>
+      {{#if report.toolsAndTechniques}}
+      <div class="flex justify-between items-baseline">
+        <span class="text-lg">Appendix A: Tools Used</span>
+        <span class="text-gray-500">{{#if report.hasConnectivity}}14{{else}}12{{/if}}</span>
+      </div>
+      {{/if}}
+    </div>
+  </div>
+
+  <!-- Executive Summary -->
+  {{#if report.executiveSummary}}
+  <div class="px-10 py-8 page-break">
+    <h2 class="text-2xl font-bold mb-6 section-header">1. Executive Summary</h2>
+    <div class="prose max-w-none">
+      <p class="text-gray-800 leading-relaxed text-justify">{{report.executiveSummary}}</p>
+    </div>
+    
+    {{#if report.findings}}
+    <div class="mt-8 bg-gray-50 rounded-lg p-6">
+      <h3 class="text-xl font-semibold mb-4">Key Statistics</h3>
+      <div class="grid grid-cols-2 md:grid-cols-{{#if report.informationalCount}}5{{else}}4{{/if}} gap-4">
+        <div class="text-center">
+          <div class="text-3xl font-bold text-red-600">{{report.criticalCount}}</div>
+          <div class="text-sm text-gray-600">Critical</div>
+        </div>
+        <div class="text-center">
+          <div class="text-3xl font-bold text-orange-600">{{report.highCount}}</div>
+          <div class="text-sm text-gray-600">High</div>
+        </div>
+        <div class="text-center">
+          <div class="text-3xl font-bold text-yellow-600">{{report.mediumCount}}</div>
+          <div class="text-sm text-gray-600">Medium</div>
+        </div>
+        <div class="text-center">
+          <div class="text-3xl font-bold text-blue-600">{{report.lowCount}}</div>
+          <div class="text-sm text-gray-600">Low</div>
+        </div>
+        {{#if report.informationalCount}}
+        <div class="text-center">
+          <div class="text-3xl font-bold text-gray-600">{{report.informationalCount}}</div>
+          <div class="text-sm text-gray-600">Info</div>
+        </div>
+        {{/if}}
+      </div>
+    </div>
+    {{/if}}
+  </div>
+  {{/if}}
+
+  <!-- Engagement Overview -->
+  <div class="px-10 py-8">
+    <h2 class="text-2xl font-bold mb-6 section-header">2. Engagement Overview</h2>
+    
+    <div class="mb-8">
+      <h3 class="text-xl font-semibold mb-4">2.1 Scope</h3>
+      <div class="bg-gray-50 rounded-lg p-4">
+        <p class="text-gray-800 mb-2"><strong>Client:</strong> {{engagement.customerName}}</p>
+        <p class="text-gray-800 mb-2"><strong>Engagement:</strong> {{engagement.name}}</p>
+        <p class="text-gray-800 mb-2"><strong>Type:</strong> {{engagement.type}}</p>
+        <p class="text-gray-800 mb-2"><strong>Duration:</strong> {{engagement.startDate}} - {{engagement.endDate}}</p>
+        {{#if engagement.scopes}}
+        {{#if engagement.scopes.length}}
+        <div class="mt-4">
+          <p class="text-gray-800 font-semibold mb-2">In-Scope Systems:</p>
+          {{#ifCond engagement.scopes.length ">" 20}}
+          <!-- For many entries, use a compact table format -->
+          <div class="overflow-x-auto">
+            <table class="min-w-full text-sm">
+              <thead>
+                <tr class="border-b">
+                  <th class="text-left py-1 pr-4 font-medium text-gray-700">Address/Target</th>
+                  <th class="text-left py-1 font-medium text-gray-700">Description</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-200">
+                {{#each engagement.scopes}}
+                {{#if this.inScope}}
+                <tr>
+                  <td class="py-1 pr-4 text-gray-700 font-mono text-xs">{{this.address}}</td>
+                  <td class="py-1 text-gray-600 text-xs">{{#if this.description}}{{this.description}}{{else}}-{{/if}}</td>
+                </tr>
+                {{/if}}
+                {{/each}}
+              </tbody>
+            </table>
+          </div>
+          {{else}}
+          <!-- For fewer entries, use a more readable format -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+            {{#each engagement.scopes}}
+            {{#if this.inScope}}
+            <div class="flex items-start gap-2 text-sm">
+              <span class="text-gray-400">•</span>
+              <div>
+                <span class="font-mono text-gray-700">{{this.address}}</span>
+                {{#if this.description}}
+                <span class="text-gray-600 text-xs block">{{this.description}}</span>
+                {{/if}}
+              </div>
+            </div>
+            {{/if}}
+            {{/each}}
+          </div>
+          {{/ifCond}}
+        </div>
+        {{/if}}
+        {{/if}}
+      </div>
+    </div>
+  </div>
+
+  <!-- Methodology -->
+  {{#if report.methodology}}
+  <div class="px-10 py-8 page-break">
+    <h3 class="text-xl font-semibold mb-4">2.2 Methodology</h3>
+    <p class="text-gray-800 leading-relaxed mb-6">{{report.methodology}}</p>
+    
+    <div class="bg-blue-50 rounded-lg p-6">
+      <h4 class="font-semibold mb-3">Testing Phases</h4>
+      <ol class="list-decimal list-inside space-y-2">
+        <li>Reconnaissance & Information Gathering</li>
+        <li>Vulnerability Identification</li>
+        <li>Exploitation & Verification</li>
+        <li>Post-Exploitation & Lateral Movement</li>
+        <li>Reporting & Documentation</li>
+      </ol>
+    </div>
+  </div>
+  {{/if}}
+
+  <!-- Risk Rating -->
+  <div class="px-10 py-8 page-break">
+    <h3 class="text-xl font-semibold mb-4">2.3 Risk Rating Methodology</h3>
+    <p class="text-gray-800 mb-6">
+      Risk ratings are determined based on the likelihood of exploitation and the potential impact to the organization.
+    </p>
+    
+    <table class="w-full">
+      <thead>
+        <tr>
+          <th class="text-left">Severity</th>
+          <th class="text-left">CVSS Score</th>
+          <th class="text-left">Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="px-2 py-1 rounded severity-critical">Critical</span></td>
+          <td>9.0 - 10.0</td>
+          <td>Immediate action required. Exploitation is trivial and impact is severe.</td>
+        </tr>
+        <tr>
+          <td><span class="px-2 py-1 rounded severity-high">High</span></td>
+          <td>7.0 - 8.9</td>
+          <td>Prompt action required. Significant risk to operations or data.</td>
+        </tr>
+        <tr>
+          <td><span class="px-2 py-1 rounded severity-medium">Medium</span></td>
+          <td>4.0 - 6.9</td>
+          <td>Should be addressed in regular patching cycle.</td>
+        </tr>
+        <tr>
+          <td><span class="px-2 py-1 rounded severity-low">Low</span></td>
+          <td>0.1 - 3.9</td>
+          <td>Minor issues with minimal impact.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Findings Summary -->
+  <div class="px-10 py-8 page-break">
+    <h2 class="text-2xl font-bold mb-6 section-header">3. Findings Summary</h2>
+    
+    {{#if report.chartImage}}
+    <div class="mb-8 text-center">
+      <img src="{{report.chartImage}}" alt="Findings Distribution" class="inline-block rounded shadow-lg" style="max-width: 600px;" />
+    </div>
+    {{/if}}
+    
+    <table class="w-full">
+      <thead>
+        <tr>
+          <th class="text-left">Finding</th>
+          <th class="text-left">Severity</th>
+          <th class="text-left">Category</th>
+          <th class="text-left">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each report.findings}}
+        <tr>
+          <td>{{this.title}}</td>
+          <td>
+            <span class="px-2 py-1 rounded text-xs font-semibold severity-{{toLowerCase this.severity}}">
+              {{this.severity}}
+            </span>
+          </td>
+          <td>{{this.category}}</td>
+          <td>{{this.status}}</td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Connectivity Sections -->
+  {{#if report.hasConnectivity}}
+  <div class="px-10 py-8 page-break">
+    <h2 class="text-2xl font-bold mb-6 section-header">4. Network Connectivity Tests</h2>
+    {{#each report.sections}}
+      {{#ifCond type "===" "CONNECTIVITY"}}
+      <div class="mb-6">
+        {{#if title}}
+        <h3 class="text-xl font-semibold mb-4 text-gray-800">{{title}}</h3>
+        {{/if}}
+        {{#if content}}
+        <div class="evidence-box">
+          <pre style="white-space: pre-wrap; word-wrap: break-word;">{{content}}</pre>
+        </div>
+        {{/if}}
+      </div>
+      {{/ifCond}}
+    {{/each}}
+  </div>
+  {{/if}}
+
+  <!-- Detailed Findings -->
+  {{#each report.sections}}
+    {{#ifCond type "===" "FINDING"}}
+    {{#if @first}}
+    <!-- First finding includes the section header -->
+    <div class="px-10 py-8 page-break">
+      <h2 class="text-2xl font-bold mb-6 section-header">{{#if ../report.hasConnectivity}}5{{else}}4{{/if}}. Detailed Findings</h2>
+    {{else}}
+    <!-- Subsequent findings start on new pages -->
+    <div class="px-10 py-8 page-break no-break">
+    {{/if}}
+      <div class="finding-box">
+        <div class="flex items-start justify-between mb-4">
+          <h3 class="text-xl font-bold text-gray-900">{{reportFinding.title}}</h3>
+          <span class="px-3 py-1 rounded-full text-sm font-semibold severity-{{toLowerCase reportFinding.severity}}">
+            {{reportFinding.severity}}
+          </span>
+        </div>
+        
+        {{#if reportFinding.cveId}}
+        <div class="mb-4">
+          <span class="text-sm text-gray-600">CVE Reference: </span>
+          <span class="text-sm font-mono">{{reportFinding.cveId}}</span>
+        </div>
+        {{/if}}
+        
+        <div class="mb-6">
+          <h4 class="font-semibold text-base mb-2 text-gray-800">Description</h4>
+          <p class="text-gray-700 leading-relaxed">{{reportFinding.description}}</p>
+        </div>
+        
+        {{#if reportFinding.impact}}
+        <div class="mb-6">
+          <h4 class="font-semibold text-base mb-2 text-gray-800">Impact</h4>
+          <p class="text-gray-700 leading-relaxed">{{reportFinding.impact}}</p>
+        </div>
+        {{/if}}
+        
+        {{#if reportFinding.affectedSystems}}
+        <div class="mb-6">
+          <h4 class="font-semibold text-base mb-2 text-gray-800">Affected Systems</h4>
+          <ul class="list-disc list-inside text-gray-700">
+            {{#each reportFinding.affectedSystems}}
+            <li>{{this}}</li>
+            {{/each}}
+          </ul>
+        </div>
+        {{/if}}
+        
+        {{#if reportFinding.recommendation}}
+        <div class="mb-6">
+          <h4 class="font-semibold text-base mb-2 text-gray-800">Recommendation</h4>
+          <p class="text-gray-700 leading-relaxed">{{reportFinding.recommendation}}</p>
+        </div>
+        {{/if}}
+        
+        {{#if reportFinding.references}}
+        <div class="mb-6">
+          <h4 class="font-semibold text-base mb-2 text-gray-800">References</h4>
+          <ul class="list-disc list-inside text-gray-700">
+            {{#each reportFinding.references}}
+            <li><a href="{{this}}" class="text-blue-600 underline">{{this}}</a></li>
+            {{/each}}
+          </ul>
+        </div>
+        {{/if}}
+        
+        {{#if reportFinding.evidence}}
+        <div>
+          <h4 class="font-semibold text-base mb-2 text-gray-800">Evidence</h4>
+          <div class="evidence-box">{{reportFinding.evidence}}</div>
+        </div>
+        {{/if}}
+        
+        {{#if reportFinding.images}}
+        {{#if reportFinding.images.length}}
+        <div class="mt-6">
+          <h4 class="font-semibold text-base mb-3 text-gray-800">Supporting Evidence</h4>
+          <div class="space-y-4">
+            {{#each reportFinding.images}}
+            <div class="border rounded-lg overflow-hidden shadow-sm">
+              <img src="{{this.imageUrl}}" alt="{{this.title}}" class="w-full max-w-2xl" />
+              <div class="bg-gray-50 px-4 py-2 border-t">
+                <p class="text-sm font-medium text-gray-800">{{this.title}}</p>
+                {{#if this.caption}}
+                <p class="text-sm text-gray-600 italic">{{this.caption}}</p>
+                {{/if}}
+              </div>
+            </div>
+            {{/each}}
+          </div>
+        </div>
+        {{/if}}
+        {{/if}}
+      </div>
+    </div>
+    {{/ifCond}}
+  {{/each}}
+
+  <!-- Recommendations Summary -->
+  <div class="px-10 py-8 page-break">
+    <h2 class="text-2xl font-bold mb-6 section-header">{{#if report.hasConnectivity}}6{{else}}5{{/if}}. Recommendations</h2>
+    
+    <div class="mb-8">
+      <h3 class="text-xl font-semibold mb-4 text-red-700">Immediate Actions (Critical & High)</h3>
+      <ol class="list-decimal list-inside space-y-2 text-gray-700">
+        <li>Address all critical findings within 24-48 hours</li>
+        <li>Implement patches for high-severity vulnerabilities within 7 days</li>
+        <li>Review and update security configurations</li>
+        <li>Conduct validation testing after remediation</li>
+      </ol>
+    </div>
+    
+    <div class="mb-8">
+      <h3 class="text-xl font-semibold mb-4 text-yellow-700">Short-term Actions (Medium)</h3>
+      <ol class="list-decimal list-inside space-y-2 text-gray-700">
+        <li>Schedule remediation within standard maintenance windows</li>
+        <li>Update security policies and procedures</li>
+        <li>Implement additional monitoring for affected systems</li>
+      </ol>
+    </div>
+    
+    <div class="mb-8">
+      <h3 class="text-xl font-semibold mb-4 text-blue-700">Long-term Actions (Low & Process)</h3>
+      <ol class="list-decimal list-inside space-y-2 text-gray-700">
+        <li>Include in next scheduled patching cycle</li>
+        <li>Review and update security awareness training</li>
+        <li>Consider implementing defense-in-depth strategies</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- Conclusion -->
+  <div class="px-10 py-8 page-break">
+    <h2 class="text-2xl font-bold mb-6 section-header">{{#if report.hasConnectivity}}7{{else}}6{{/if}}. Conclusion</h2>
+    {{#if report.conclusion}}
+    <p class="text-gray-800 leading-relaxed">{{report.conclusion}}</p>
+    {{else}}
+    <p class="text-gray-800 leading-relaxed">
+      This penetration test has identified several security vulnerabilities within the tested environment. 
+      The findings range from critical issues requiring immediate attention to lower-risk items that should 
+      be addressed as part of regular security maintenance.
+    </p>
+    <p class="text-gray-800 leading-relaxed mt-4">
+      We recommend implementing the suggested remediations based on the risk ratings provided. After remediation, 
+      a retest should be conducted to verify that the vulnerabilities have been properly addressed.
+    </p>
+    {{/if}}
+    
+    {{#if report.nextSteps}}
+    <div class="mt-8 bg-gray-50 rounded-lg p-6">
+      <h3 class="text-xl font-semibold mb-4">Next Steps</h3>
+      <ol class="list-decimal list-inside space-y-2 text-gray-700">
+        {{#each report.nextSteps}}
+        <li>{{this}}</li>
+        {{/each}}
+      </ol>
+    </div>
+    {{/if}}
+  </div>
+
+  <!-- Tools Appendix -->
+  {{#if report.toolsAndTechniques}}
+  <div class="px-10 py-8 page-break">
+    <h2 class="text-2xl font-bold mb-6 section-header">Appendix A: Tools Used</h2>
+    <p class="text-gray-800 leading-relaxed mb-6">{{report.toolsAndTechniques}}</p>
+    
+    <div class="bg-gray-50 rounded-lg p-6">
+      <h3 class="text-lg font-semibold mb-4">Common Testing Tools</h3>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <h4 class="font-semibold text-gray-700 mb-2">Network Testing</h4>
+          <ul class="list-disc list-inside text-sm text-gray-600">
+            <li>Nmap - Network discovery and security auditing</li>
+            <li>Wireshark - Network protocol analyzer</li>
+            <li>Metasploit - Penetration testing framework</li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="font-semibold text-gray-700 mb-2">Web Application Testing</h4>
+          <ul class="list-disc list-inside text-sm text-gray-600">
+            <li>Burp Suite - Web vulnerability scanner</li>
+            <li>OWASP ZAP - Web application security scanner</li>
+            <li>SQLMap - SQL injection testing tool</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  {{/if}}
+
+
+  <!-- Contact Information -->
+  <div class="px-10 py-8 page-break">
+    <h2 class="text-2xl font-bold mb-6 section-header">Contact Information</h2>
+    
+    <div class="grid grid-cols-2 gap-8">
+      <div>
+        <h3 class="text-xl font-semibold mb-4 text-gray-800">Client Organization</h3>
+        <div class="bg-gray-50 rounded-lg p-6">
+          <p class="font-semibold">{{#if engagement.customerName}}{{engagement.customerName}}{{else if engagement.customer}}{{engagement.customer}}{{else}}Not Specified{{/if}}</p>
+          {{#if engagement.contactName}}
+          <p class="text-gray-700 mt-2">{{engagement.contactName}}</p>
+          {{/if}}
+          {{#if engagement.contactEmail}}
+          <p class="text-gray-700">{{engagement.contactEmail}}</p>
+          {{/if}}
+          {{#if engagement.contactPhone}}
+          <p class="text-gray-700">{{engagement.contactPhone}}</p>
+          {{/if}}
+          {{#if engagement.contactAddress}}
+          <p class="text-gray-700 mt-2">{{engagement.contactAddress}}</p>
+          {{/if}}
+        </div>
+      </div>
+      
+      <div>
+        <h3 class="text-xl font-semibold mb-4 text-gray-800">Testing Organization</h3>
+        <div class="bg-gray-50 rounded-lg p-6">
+          <p class="font-semibold">{{engagement.organization}}</p>
+          {{#if report.leadTester}}
+          <p class="text-gray-700 mt-2">Lead Tester: {{report.leadTester}}</p>
+          {{/if}}
+          {{#if engagement.organizationEmail}}
+          <p class="text-gray-700">{{engagement.organizationEmail}}</p>
+          {{/if}}
+          {{#if engagement.organizationPhone}}
+          <p class="text-gray-700">{{engagement.organizationPhone}}</p>
+          {{/if}}
+        </div>
+      </div>
+    </div>
+    
+    <div class="mt-12 text-center text-sm text-gray-500">
+      <p>Report generated on {{report.generatedDate}} using Cosmic Axiom Security Platform</p>
+      <p class="mt-1">© {{report.year}} {{engagement.organization}}. All rights reserved.</p>
+    </div>
+  </div>
+
+</body>
+</html>

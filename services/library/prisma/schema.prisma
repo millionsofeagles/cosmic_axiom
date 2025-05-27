@@ -12,14 +12,16 @@ datasource db {
 model FindingTemplate {
   id             String   @id @default(uuid())
   title          String
-  description    String
-  recommendation String
+  description    String   @db.Text       // Changed
+  recommendation String   @db.Text       // Changed
+  impact         String   @db.Text       // Add this if not already present
   severity       Severity
   reference      String?
-  tags           Json     @default("[]") 
+  tags           Json     @default("[]")
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 }
+
 
 enum Severity {
   LOW

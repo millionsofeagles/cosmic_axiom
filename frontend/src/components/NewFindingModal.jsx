@@ -1,14 +1,30 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-const NewFindingModal = ({ isOpen, onClose, onSave }) => {
+const NewFindingModal = ({ isOpen, onClose, onSave, initialData = null }) => {
     const [formData, setFormData] = useState({
         title: "",
         severity: "MEDIUM",
         reference: "",
         description: "",
+        impact: "",
         recommendation: "",
         tags: ""
     });
+
+    // Update form data when initialData changes
+    useEffect(() => {
+        if (initialData) {
+            setFormData({
+                title: initialData.title || "",
+                severity: initialData.severity || "MEDIUM",
+                reference: initialData.reference || "",
+                description: initialData.description || "",
+                impact: initialData.impact || "",
+                recommendation: initialData.recommendation || "",
+                tags: initialData.tags || ""
+            });
+        }
+    }, [initialData]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -23,11 +39,13 @@ const NewFindingModal = ({ isOpen, onClose, onSave }) => {
         };
         onSave(formattedData);
         onClose();
+        // Reset form data
         setFormData({
             title: "",
-            severity: "Medium",
+            severity: "MEDIUM",
             reference: "",
             description: "",
+            impact: "",
             recommendation: "",
             tags: ""
         });
@@ -90,6 +108,18 @@ const NewFindingModal = ({ isOpen, onClose, onSave }) => {
                     </div>
 
                     <div>
+                        <label className="block text-gray-700 dark:text-gray-300 mb-2">Impact</label>
+                        <textarea
+                            name="impact"
+                            value={formData.impact}
+                            onChange={handleChange}
+                            className="w-full p-2 rounded bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white"
+                            rows="3"
+                            placeholder="Describe the potential impact if this vulnerability is exploited"
+                        />
+                    </div>
+
+                    <div>
                         <label className="block text-gray-700 dark:text-gray-300 mb-2">Recommendation</label>
                         <textarea
                             name="recommendation"
@@ -113,7 +143,23 @@ const NewFindingModal = ({ isOpen, onClose, onSave }) => {
                     </div>
 
                     <div className="flex justify-end gap-4">
-                        <button type="button" onClick={onClose} className="px-4 py-2 bg-gray-300 dark:bg-gray-600 rounded text-gray-800 dark:text-white">
+                        <button 
+                            type="button" 
+                            onClick={() => {
+                                onClose();
+                                // Reset form when canceling
+                                setFormData({
+                                    title: "",
+                                    severity: "MEDIUM",
+                                    reference: "",
+                                    description: "",
+                                    impact: "",
+                                    recommendation: "",
+                                    tags: ""
+                                });
+                            }} 
+                            className="px-4 py-2 bg-gray-300 dark:bg-gray-600 rounded text-gray-800 dark:text-white"
+                        >
                             Cancel
                         </button>
                         <button type="submit" className="px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold rounded">

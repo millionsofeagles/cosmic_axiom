@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{title}} - Executive Briefing</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        @page {
+            size: landscape;
+            margin: 0.5in;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            font-size: 14px;
+            line-height: 1.4;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .slide {
+            page-break-after: always;
+            height: 7in;
+            padding: 0.75in;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+        }
+        
+        .slide:last-child {
+            page-break-after: avoid;
+        }
+        
+        .slide-header {
+            border-bottom: 3px solid #6366F1;
+            padding-bottom: 0.25in;
+            margin-bottom: 0.5in;
+            background: linear-gradient(135deg, #667EEA 0%, #764BA2 100%);
+            color: white;
+            padding: 16px 24px;
+            margin: -0.75in -0.75in 0.5in -0.75in;
+            border-radius: 0;
+        }
+        
+        .slide-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .title-slide {
+            text-align: center;
+            justify-content: center;
+        }
+        
+        .finding-card {
+            background: linear-gradient(135deg, #F9FAFB 0%, #F3F4F6 100%);
+            border-left: 4px solid;
+            padding: 0.4in;
+            margin: 0.2in 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        
+        .critical { 
+            border-left-color: #DC2626;
+            background: linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%);
+        }
+        .high { 
+            border-left-color: #F59E0B;
+            background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%);
+        }
+        .medium { 
+            border-left-color: #FBBF24;
+            background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%);
+        }
+        .low { 
+            border-left-color: #10B981;
+            background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%);
+        }
+        .informational { 
+            border-left-color: #6B7280;
+            background: linear-gradient(135deg, #F9FAFB 0%, #F3F4F6 100%);
+        }
+        
+        .key-point {
+            background: linear-gradient(135deg, #EBF4FF 0%, #E0E7FF 100%);
+            border-left: 4px solid #6366F1;
+            padding: 0.25in;
+            margin: 0.25in 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        h1 { font-size: 32px; font-weight: bold; margin: 0; }
+        h2 { font-size: 24px; font-weight: bold; margin: 0; }
+        h3 { font-size: 18px; font-weight: bold; margin: 0 0 8px 0; }
+        h4 { font-size: 16px; font-weight: bold; margin: 0 0 8px 0; }
+        
+        ul {
+            list-style-position: inside;
+            margin-left: 0.25in;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.3in;
+            margin: 0.3in 0;
+        }
+        
+        .stat-box {
+            background: linear-gradient(135deg, #FFFFFF 0%, #F9FAFB 100%);
+            border: 1px solid #E5E7EB;
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+        }
+        
+        .stat-box:hover {
+            transform: translateY(-2px);
+        }
+        
+        .stat-number {
+            font-size: 28px;
+            font-weight: bold;
+            color: #6366F1;
+            margin-bottom: 4px;
+        }
+        
+        .page-number {
+            position: absolute;
+            bottom: 0.25in;
+            right: 0.75in;
+            font-size: 12px;
+            color: #6B7280;
+            z-index: 10;
+        }
+        
+        .slide-footer {
+            position: absolute;
+            bottom: 0.25in;
+            left: 0.75in;
+            font-size: 10px;
+            color: #9CA3AF;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+    <!-- Title Slide -->
+    <div class="slide title-slide" style="background: linear-gradient(135deg, #667EEA 0%, #764BA2 100%); color: white;">
+        <div style="position: absolute; top: 0.5in; right: 0.5in; opacity: 0.2;">
+            <img src="https://cdn-icons-png.flaticon.com/512/3212/3212608.png" alt="Cosmic Axiom" style="width: 120px; height: 120px;" />
+        </div>
+        <div class="slide-content">
+            <div style="background: rgba(255,255,255,0.1); padding: 2rem; border-radius: 16px; backdrop-filter: blur(10px);">
+                <h1 style="font-size: 36px; margin-bottom: 1rem;">{{title}}</h1>
+                <p style="font-size: 24px; margin-bottom: 1rem; color: #E0E7FF;">Executive Briefing</p>
+                <p style="font-size: 20px; margin-bottom: 2rem; color: #C7D2FE;">{{engagement.customerName}}</p>
+                <p style="font-size: 16px; color: #A5B4FC;">{{engagement.startDate}} - {{engagement.endDate}}</p>
+            </div>
+            <div style="position: absolute; bottom: 1rem; left: 50%; transform: translateX(-50%); color: #E0E7FF; font-size: 14px;">
+                Powered by Cosmic Axiom
+            </div>
+        </div>
+        <div class="page-number" style="color: white;">1</div>
+    </div>
+
+    <!-- Executive Summary Slide -->
+    <div class="slide">
+        <div class="slide-header">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <img src="https://cdn-icons-png.flaticon.com/512/3212/3212608.png" alt="Cosmic Axiom" style="width: 24px; height: 24px;" />
+                    <h2 style="margin: 0;">Executive Summary</h2>
+                </div>
+                <div style="font-size: 14px; opacity: 0.9;">{{engagement.customerName}} | {{title}}</div>
+            </div>
+        </div>
+        <div class="slide-content">
+            {{#if sections}}
+            {{#each sections}}
+            {{#if @first}}
+            <div class="key-point">
+                <p>{{{this.content}}}</p>
+            </div>
+            {{/if}}
+            {{/each}}
+            {{else}}
+            <div class="key-point">
+                <p>This penetration testing engagement identified {{totalFindings}} security findings across the target environment. Immediate attention is required for critical and high-severity vulnerabilities.</p>
+            </div>
+            {{/if}}
+            
+            <div class="stats-grid mt-8">
+                <div class="stat-box">
+                    <div class="stat-number">{{totalFindings}}</div>
+                    <div class="text-gray-600">Total Findings</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number text-red-600">{{criticalCount}}</div>
+                    <div class="text-gray-600">Critical</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number text-yellow-600">{{highCount}}</div>
+                    <div class="text-gray-600">High</div>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer">Cosmic Axiom - Confidential</div>
+        <div class="page-number">2</div>
+    </div>
+
+    <!-- Key Findings Overview -->
+    <div class="slide">
+        <div class="slide-header">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <img src="https://cdn-icons-png.flaticon.com/512/3212/3212608.png" alt="Cosmic Axiom" style="width: 24px; height: 24px;" />
+                    <h2 style="margin: 0;">Key Findings Overview</h2>
+                </div>
+                <div style="font-size: 14px; opacity: 0.9;">{{engagement.customerName}} | {{title}}</div>
+            </div>
+        </div>
+        <div class="slide-content">
+            {{#if criticalFindings}}
+            {{#each criticalFindings}}
+            <div class="finding-card critical">
+                <h4 style="font-weight: bold; margin-bottom: 8px;">{{this.title}}</h4>
+                <p style="font-size: 12px; margin: 0;">{{#if this.summary}}{{this.summary}}{{else}}{{this.description}}{{/if}}</p>
+            </div>
+            {{/each}}
+            {{/if}}
+            
+            {{#if highFindings}}
+            {{#each highFindings}}
+            <div class="finding-card high">
+                <h4 style="font-weight: bold; margin-bottom: 8px;">{{this.title}}</h4>
+                <p style="font-size: 12px; margin: 0;">{{#if this.summary}}{{this.summary}}{{else}}{{this.description}}{{/if}}</p>
+            </div>
+            {{/each}}
+            {{/if}}
+            
+            {{#unless criticalFindings}}
+            {{#unless highFindings}}
+            <div class="key-point">
+                <p>No critical or high-severity findings identified. Review the detailed report for all findings.</p>
+            </div>
+            {{/unless}}
+            {{/unless}}
+        </div>
+        <div class="slide-footer">Cosmic Axiom - Confidential</div>
+        <div class="page-number">3</div>
+    </div>
+
+    <!-- Risk Distribution -->
+    <div class="slide">
+        <div class="slide-header">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <img src="https://cdn-icons-png.flaticon.com/512/3212/3212608.png" alt="Cosmic Axiom" style="width: 24px; height: 24px;" />
+                    <h2 style="margin: 0;">Risk Distribution</h2>
+                </div>
+                <div style="font-size: 14px; opacity: 0.9;">{{engagement.customerName}} | {{title}}</div>
+            </div>
+        </div>
+        <div class="slide-content">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                <div>
+                    <h3 style="margin-bottom: 1rem;">Findings by Severity</h3>
+                    <div style="margin-bottom: 0.5rem; display: flex; align-items: center;">
+                        <div style="width: 100px; text-align: right; padding-right: 1rem;">Critical:</div>
+                        <div style="flex: 1; background: #e5e7eb; border-radius: 4px; height: 24px; position: relative;">
+                            <div style="background: #dc2626; color: white; padding: 0 8px; border-radius: 4px; width: {{criticalPercent}}%; height: 100%; display: flex; align-items: center; justify-content: center;">{{criticalCount}}</div>
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 0.5rem; display: flex; align-items: center;">
+                        <div style="width: 100px; text-align: right; padding-right: 1rem;">High:</div>
+                        <div style="flex: 1; background: #e5e7eb; border-radius: 4px; height: 24px; position: relative;">
+                            <div style="background: #ea580c; color: white; padding: 0 8px; border-radius: 4px; width: {{highPercent}}%; height: 100%; display: flex; align-items: center; justify-content: center;">{{highCount}}</div>
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 0.5rem; display: flex; align-items: center;">
+                        <div style="width: 100px; text-align: right; padding-right: 1rem;">Medium:</div>
+                        <div style="flex: 1; background: #e5e7eb; border-radius: 4px; height: 24px; position: relative;">
+                            <div style="background: #f59e0b; color: white; padding: 0 8px; border-radius: 4px; width: {{mediumPercent}}%; height: 100%; display: flex; align-items: center; justify-content: center;">{{mediumCount}}</div>
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 0.5rem; display: flex; align-items: center;">
+                        <div style="width: 100px; text-align: right; padding-right: 1rem;">Low:</div>
+                        <div style="flex: 1; background: #e5e7eb; border-radius: 4px; height: 24px; position: relative;">
+                            <div style="background: #10b981; color: white; padding: 0 8px; border-radius: 4px; width: {{lowPercent}}%; height: 100%; display: flex; align-items: center; justify-content: center;">{{lowCount}}</div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h3 style="margin-bottom: 1rem;">Key Risk Areas</h3>
+                    {{#if topCategories}}
+                    {{#each topCategories}}
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span>{{this.category}}</span>
+                        <span style="font-weight: bold;">{{this.count}}</span>
+                    </div>
+                    {{/each}}
+                    {{else}}
+                    <p>No categories available</p>
+                    {{/if}}
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer">Cosmic Axiom - Confidential</div>
+        <div class="page-number">4</div>
+    </div>
+
+    <!-- Critical Findings Detail Slides -->
+    {{#each criticalFindings}}
+    <div class="slide">
+        <div class="slide-header">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <img src="https://cdn-icons-png.flaticon.com/512/3212/3212608.png" alt="Cosmic Axiom" style="width: 24px; height: 24px;" />
+                    <h2 style="margin: 0;">Critical Finding: {{this.title}}</h2>
+                </div>
+                <div style="font-size: 14px; opacity: 0.9;">{{../engagement.customerName}} | {{../title}}</div>
+            </div>
+        </div>
+        <div class="slide-content">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                <div>
+                    <h3 style="margin-bottom: 1rem; color: #dc2626;">Issue</h3>
+                    <p style="margin-bottom: 1rem; font-size: 13px;">{{{this.description}}}</p>
+                    
+                    <h3 style="margin-bottom: 1rem; color: #dc2626;">Impact</h3>
+                    <p style="font-size: 13px;">{{{this.impact}}}</p>
+                </div>
+                <div>
+                    <h3 style="margin-bottom: 1rem; color: #2563eb;">Recommendation</h3>
+                    <p style="margin-bottom: 1rem; font-size: 13px;">{{{this.recommendation}}}</p>
+                    
+                    {{#if this.cves}}
+                    <h3 style="margin-bottom: 0.5rem; color: #6b7280;">Related CVEs</h3>
+                    <p style="font-size: 11px;">{{#each this.cves}}{{this.cve}} {{/each}}</p>
+                    {{/if}}
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer">Cosmic Axiom - Confidential</div>
+        <div class="page-number">{{add @index 5}}</div>
+    </div>
+    {{/each}}
+
+    <!-- Recommendations Summary -->
+    <div class="slide">
+        <div class="slide-header">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <img src="https://cdn-icons-png.flaticon.com/512/3212/3212608.png" alt="Cosmic Axiom" style="width: 24px; height: 24px;" />
+                    <h2 style="margin: 0;">Key Recommendations</h2>
+                </div>
+                <div style="font-size: 14px; opacity: 0.9;">{{engagement.customerName}} | {{title}}</div>
+            </div>
+        </div>
+        <div class="slide-content">
+            <h3 style="margin-bottom: 1rem;">Immediate Actions Required</h3>
+            {{#if immediateActions}}
+            <ul style="margin-bottom: 1.5rem; list-style: none; padding-left: 0;">
+                {{#each immediateActions}}
+                <li style="margin-bottom: 0.75rem; display: flex; align-items: flex-start;">
+                    <span style="color: #dc2626; margin-right: 0.5rem;">▶</span>
+                    <span style="font-size: 13px;">{{this}}</span>
+                </li>
+                {{/each}}
+            </ul>
+            {{else}}
+            <p style="margin-bottom: 1.5rem; font-style: italic;">Review critical and high findings for immediate actions.</p>
+            {{/if}}
+            
+            <h3 style="margin-bottom: 1rem;">Short-term Improvements</h3>
+            {{#if shortTermActions}}
+            <ul style="list-style: none; padding-left: 0;">
+                {{#each shortTermActions}}
+                <li style="margin-bottom: 0.75rem; display: flex; align-items: flex-start;">
+                    <span style="color: #ea580c; margin-right: 0.5rem;">▶</span>
+                    <span style="font-size: 13px;">{{this}}</span>
+                </li>
+                {{/each}}
+            </ul>
+            {{else}}
+            <p style="font-style: italic;">Review medium and low findings for improvement opportunities.</p>
+            {{/if}}
+        </div>
+        <div class="slide-footer">Cosmic Axiom - Confidential</div>
+        <div class="page-number">{{add criticalFindings.length 5}}</div>
+    </div>
+
+    <!-- Next Steps -->
+    <div class="slide">
+        <div class="slide-header">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <img src="https://cdn-icons-png.flaticon.com/512/3212/3212608.png" alt="Cosmic Axiom" style="width: 24px; height: 24px;" />
+                    <h2 style="margin: 0;">Next Steps</h2>
+                </div>
+                <div style="font-size: 14px; opacity: 0.9;">{{engagement.customerName}} | {{title}}</div>
+            </div>
+        </div>
+        <div class="slide-content">
+            <div class="space-y-6">
+                <div>
+                    <h3 class="mb-3">1. Remediation Planning</h3>
+                    <p>Schedule technical deep-dive sessions to plan remediation of critical findings</p>
+                </div>
+                <div>
+                    <h3 class="mb-3">2. Resource Allocation</h3>
+                    <p>Assign dedicated resources to address high-priority vulnerabilities</p>
+                </div>
+                <div>
+                    <h3 class="mb-3">3. Timeline Development</h3>
+                    <p>Establish realistic timelines for fixing identified issues based on risk levels</p>
+                </div>
+                <div>
+                    <h3 class="mb-3">4. Progress Tracking</h3>
+                    <p>Implement tracking mechanisms to monitor remediation progress</p>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer">Cosmic Axiom - Confidential</div>
+        <div class="page-number">{{add criticalFindings.length 6}}</div>
+    </div>
+
+    <!-- Questions Slide -->
+    <div class="slide title-slide" style="background: linear-gradient(135deg, #667EEA 0%, #764BA2 100%); color: white;">
+        <div style="position: absolute; top: 0.5in; right: 0.5in; opacity: 0.2;">
+            <img src="https://cdn-icons-png.flaticon.com/512/3212/3212608.png" alt="Cosmic Axiom" style="width: 120px; height: 120px;" />
+        </div>
+        <div class="slide-content">
+            <div style="background: rgba(255,255,255,0.1); padding: 2rem; border-radius: 16px; backdrop-filter: blur(10px); text-align: center;">
+                <h1 style="font-size: 48px; margin-bottom: 1rem;">Questions?</h1>
+                <p style="font-size: 20px; color: #E0E7FF; margin-bottom: 2rem;">Thank you for your attention</p>
+                <div style="border-top: 1px solid rgba(255,255,255,0.3); padding-top: 1rem; margin-top: 2rem;">
+                    <p style="font-size: 14px; color: #C7D2FE;">Cosmic Axiom Penetration Testing Services</p>
+                    <p style="font-size: 12px; color: #A5B4FC;">Professional Security Assessment & Consulting</p>
+                </div>
+            </div>
+        </div>
+        <div class="page-number" style="color: white;">{{add criticalFindings.length 7}}</div>
+    </div>
+</body>
+</html>

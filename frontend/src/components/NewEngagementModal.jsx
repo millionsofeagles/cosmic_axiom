@@ -2,24 +2,38 @@ import { useEffect, useState } from "react";
 
 const statusOptions = ["Upcoming", "Active", "Completed"];
 
-const NewEngagementModal = ({ isOpen, onClose, onSave, customers = [] }) => {
+const NewEngagementModal = ({ isOpen, onClose, onSave, customers = [], initialData = null }) => {
     const [form, setForm] = useState({
         name: "",
         customerId: "",
         startDate: "",
         endDate: "",
+        status: "Upcoming",
     });
 
     useEffect(() => {
         if (isOpen) {
-            setForm({
-                name: "",
-                customerId: customers[0]?.id || "",
-                startDate: "",
-                endDate: "",
-            });
+            if (initialData) {
+                // Edit mode - populate with existing data
+                setForm({
+                    name: initialData.name || "",
+                    customerId: initialData.customerId || "",
+                    startDate: initialData.startDate ? new Date(initialData.startDate).toISOString().split('T')[0] : "",
+                    endDate: initialData.endDate ? new Date(initialData.endDate).toISOString().split('T')[0] : "",
+                    status: initialData.status || "Upcoming",
+                });
+            } else {
+                // Create mode - reset form
+                setForm({
+                    name: "",
+                    customerId: customers[0]?.id || "",
+                    startDate: "",
+                    endDate: "",
+                    status: "Upcoming",
+                });
+            }
         }
-    }, [isOpen]);
+    }, [isOpen, initialData, customers]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -38,7 +52,9 @@ const NewEngagementModal = ({ isOpen, onClose, onSave, customers = [] }) => {
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-lg p-6">
-                <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">New Engagement</h2>
+                <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">
+                    {initialData ? "Edit Engagement" : "New Engagement"}
+                </h2>
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
                         <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Engagement Name</label>
@@ -93,12 +109,28 @@ const NewEngagementModal = ({ isOpen, onClose, onSave, customers = [] }) => {
                         </div>
                     </div>
 
+                    <div>
+                        <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Status</label>
+                        <select
+                            name="status"
+                            value={form.status}
+                            onChange={handleChange}
+                            className="w-full p-2 rounded bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white"
+                        >
+                            {statusOptions.map((status) => (
+                                <option key={status} value={status}>
+                                    {status}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
                     <div className="flex justify-end gap-3 pt-4">
                         <button type="button" onClick={onClose} className="px-4 py-2 bg-gray-300 dark:bg-gray-600 rounded text-gray-800 dark:text-white">
                             Cancel
                         </button>
                         <button type="submit" className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded font-semibold">
-                            Save
+                            {initialData ? "Update" : "Create"}
                         </button>
                     </div>
                 </form>

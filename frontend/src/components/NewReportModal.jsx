@@ -23,8 +23,10 @@ function NewReportModal({ isOpen, onClose, onSubmit, engagement }) {
 
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md shadow-lg">
-                <h3 className="text-lg font-bold mb-4 text-gray-900 dark:text-gray-100">Create Report</h3>
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-md shadow-xl">
+                <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">
+                    Create Report
+                </h3>
                 <form onSubmit={handleSubmit}>
                     <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                         Report Title
@@ -33,20 +35,20 @@ function NewReportModal({ isOpen, onClose, onSubmit, engagement }) {
                         type="text"
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
-                        className="w-full px-3 py-2 mb-4 border border-gray-300 rounded dark:bg-gray-900 dark:text-white dark:border-gray-700"
+                        className="w-full px-3 py-2 mb-4 border rounded-md text-gray-900 dark:text-white bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                         required
                     />
                     <div className="flex justify-end gap-2">
                         <button
                             type="button"
                             onClick={onClose}
-                            className="px-4 py-2 text-sm bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white rounded hover:bg-gray-300"
+                            className="px-4 py-2 text-sm rounded-md text-gray-700 dark:text-white bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition"
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
-                            className="px-4 py-2 text-sm bg-indigo-600 text-white rounded hover:bg-indigo-700"
+                            className="px-4 py-2 text-sm rounded-md text-white bg-indigo-600 hover:bg-indigo-700 transition"
                         >
                             Create Report
                         </button>

@@ -5,8 +5,8 @@ import jwt from 'jsonwebtoken';
 const prisma = new PrismaClient();
 const TOKEN_EXPIRY = process.env.TOKEN_EXPIRY
 
-const privateKey = fs.readFileSync("src/keys/"+process.env.JWT_PRIVATE_KEY_PATH, 'utf8');
-const publicKey = fs.readFileSync("src/keys/"+process.env.JWT_PUBLIC_KEY_PATH, 'utf8');
+const privateKey = fs.readFileSync("src/keys/"+process.env.JWT_PRIVATE_KEY, 'utf8');
+const publicKey = fs.readFileSync("src/keys/"+process.env.JWT_PUBLIC_KEY, 'utf8');
 
 export function generateToken(user) {
     return jwt.sign(

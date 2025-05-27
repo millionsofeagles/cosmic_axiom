@@ -9,7 +9,7 @@ import routes from './routes/index.js';
 dotenv.config();
 
 const app = express();
-const port = process.env.PORT || 4000;
+const port = process.env.PORT || 3006;
 
 // __dirname shim for ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -25,6 +25,9 @@ app.use('/', routes);
 // Serve generated files
 app.use("/generated", express.static(path.join(__dirname, "..", "generated")));
 
-app.listen(port, () => {
-    console.log(`horizon running on http://localhost:${port}`);
+// Serve assets (favicon, etc.)
+app.use("/assets", express.static(path.join(__dirname, "..", "assets")));
+
+app.listen(port, '0.0.0.0', () => {
+    console.log(`horizon running on http://0.0.0.0:${port}`);
 });

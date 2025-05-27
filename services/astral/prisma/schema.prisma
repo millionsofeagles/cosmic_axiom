@@ -28,4 +28,23 @@ model User {
   createdAt    DateTime @default(now())
   lastLogin    DateTime?
   tokens       Token[]
+  apiKeys      ApiKey[]
+}
+
+model ApiKey {
+  id            String   @id @default(uuid())
+  name          String   // e.g., "Microsoft MSRC API", "GitHub API"
+  service       String   // e.g., "microsoft", "github", "custom"
+  encryptedKey  String   @db.Text // Encrypted API key
+  encryptedValue String?  @db.Text // Optional encrypted secret/value
+  createdBy     User     @relation(fields: [createdById], references: [id])
+  createdById   String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  lastUsedAt    DateTime?
+  expiresAt     DateTime?
+  isActive      Boolean  @default(true)
+  
+  @@index([service])
+  @@index([isActive])
 }

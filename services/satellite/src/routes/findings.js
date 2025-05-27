@@ -1,6 +1,9 @@
 import axios from 'axios';
+import dotenv from 'dotenv';
 import express from 'express';
 import { authenticateRequest } from '../middleware/authenticateRequest.js';
+
+dotenv.config();
 
 const router = express.Router();
 const LIBRARY_URL = process.env.LIBRARY_URL;
