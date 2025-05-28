@@ -42,20 +42,38 @@ router.get("/pdf/:filename", authenticateRequest, async (req, res) => {
     const token = req.headers.authorization;
 
     try {
+        console.log(`Fetching PDF: ${filename}`);
+        
         const pdfResponse = await axios.get(`${HORIZON_URL}/generated/${filename}`, {
             responseType: "stream",
             headers: { Authorization: token }
         });
 
+        console.log(`Successfully fetched PDF: ${filename}`);
+        
         // Set content headers for PDF
         res.setHeader("Content-Type", "application/pdf");
         res.setHeader("Content-Disposition", `inline; filename="${filename}"`);
+        res.setHeader("Cache-Control", "no-cache");
+        res.setHeader("Access-Control-Allow-Origin", "*");
+        res.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type");
+
+        // Handle stream errors
+        pdfResponse.data.on('error', (streamErr) => {
+            console.error('PDF stream error:', streamErr);
+            if (!res.headersSent) {
+                res.status(500).json({ error: "Stream error" });
+            }
+        });
 
         // Pipe PDF stream directly to the client
         pdfResponse.data.pipe(res);
+        
     } catch (err) {
         console.error("Failed to stream PDF from Horizon:", err.message);
-        res.status(500).json({ error: "Unable to stream PDF." });
+        if (!res.headersSent) {
+            res.status(500).json({ error: "Unable to stream PDF." });
+        }
     }
 });
 
@@ -80,6 +98,16 @@ router.post("/:reportId/generate-pdf", async (req, res) => {
             headers: { Authorization: token },
         });
         const report = reportRes.data;
+        
+        // Fetch sections with images from Singularity
+        const sectionsRes = await axios.get(`${process.env.SINGULARITY_URL}/sections/${reportId}`, {
+            headers: { Authorization: token },
+        });
+        const sections = sectionsRes.data;
+        
+        // Add sections to report object (overriding any existing sections)
+        report.sections = sections;
+        
         // Fetch engagement from Forge
         const engagementRes = await axios.get(`${process.env.FORGE_URL}/engagement/${report.engagementId}`, {
             headers: { Authorization: token },
@@ -189,23 +217,28 @@ router.get("/:reportId", authenticateRequest, async (req, res) => {
     const reportId = req.params.reportId;
 
     if (!reportId) {
-        res.status(404).json({ error: "Engagement Id Missing" });
+        return res.status(404).json({ error: "Report ID missing" });
     }
+    
     try {
-        // 1. Get report from Singularity by engagementId
+        console.log(`Fetching report ${reportId} from Singularity: ${SINGULARITY_URL}`);
+        
+        // 1. Get report from Singularity by reportId
         const reportRes = await axios.get(`${SINGULARITY_URL}/reports/${reportId}`, {
             headers: { Authorization: req.headers.authorization },
         });
 
-
         const report = reportRes.data;
+        console.log(`Found report with engagementId: ${report.engagementId}`);
 
-        // 2. Get engagement info from Astral (includes customer, etc.)
+        // 2. Get engagement info from Forge
+        console.log(`Fetching engagement ${report.engagementId} from Forge: ${FORGE_URL}`);
         const engagementRes = await axios.get(`${FORGE_URL}/engagement/${report.engagementId}`, {
             headers: { Authorization: req.headers.authorization },
         });
 
         const engagement = engagementRes.data;
+        console.log(`Found engagement: ${engagement.name}`);
 
         // 3. Return enriched report
         res.json({
@@ -215,7 +248,13 @@ router.get("/:reportId", authenticateRequest, async (req, res) => {
 
     } catch (error) {
         console.error("Error enriching report:", error.message);
-        res.status(500).json({ error: "Failed to fetch and enrich report" });
+        console.error("Error details:", error.response?.data || error);
+        
+        if (error.response?.status === 404) {
+            res.status(404).json({ error: "Report or engagement not found" });
+        } else {
+            res.status(500).json({ error: "Failed to fetch and enrich report" });
+        }
     }
 });
 

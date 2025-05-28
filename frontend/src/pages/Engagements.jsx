@@ -20,6 +20,7 @@ function Engagements() {
     const [sortOrder, setSortOrder] = useState("desc");
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(10);
+    const [isCreatingReport, setIsCreatingReport] = useState(false);
     const token = localStorage.getItem("token");
     const navigate = useNavigate();
 
@@ -120,6 +121,7 @@ function Engagements() {
     };
 
     const submitNewReport = async (title) => {
+        setIsCreatingReport(true);
         try {
             const res = await fetch(`${import.meta.env.VITE_SATELLITE_URL}/reports`, {
                 method: "POST",
@@ -130,14 +132,20 @@ function Engagements() {
                 body: JSON.stringify({ engagementId: selectedEngagement.id, title }),
             });
 
-            if (!res.ok) throw new Error("Failed to create report");
+            if (!res.ok) {
+                const error = await res.text();
+                throw new Error(`Failed to create report: ${error}`);
+            }
 
             const created = await res.json();
-            navigate(`/report-writer/${created.engagementId}`);
+            
+            // Navigate IMMEDIATELY - don't wait, don't clean up state first
+            window.location.href = `/report-writer/${created.id}`;
+            
         } catch (err) {
             console.error("Error creating report:", err);
-            alert("Failed to start report. Try again.");
-        } finally {
+            alert(`Failed to start report: ${err.message}`);
+            setIsCreatingReport(false);
             setIsReportModalOpen(false);
             setSelectedEngagement(null);
         }
@@ -213,8 +221,8 @@ function Engagements() {
             </div>
 
             {/* Status Stats Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-                {["Active", "Completed", "Upcoming"].map((status) => {
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-6">
+                {["PLANNED", "ACTIVE", "COMPLETED", "CANCELED"].map((status) => {
                     const count = statusCounts[status] || 0;
                     const isActive = statusFilter === status;
                     return (
@@ -222,18 +230,26 @@ function Engagements() {
                             key={status} 
                             onClick={() => setStatusFilter(isActive ? "" : status)}
                             className={`rounded-xl p-4 text-center transition-all duration-200 cursor-pointer border-2 ${
-                                status === "Active"
+                                status === "ACTIVE"
                                     ? isActive ? "bg-indigo-600 text-white border-indigo-600 shadow-lg" : "bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800 hover:bg-indigo-100 dark:hover:bg-indigo-900/30"
-                                    : status === "Completed"
+                                    : status === "COMPLETED"
                                         ? isActive ? "bg-green-600 text-white border-green-600 shadow-lg" : "bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 border-green-200 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-900/30"
-                                        : isActive ? "bg-yellow-600 text-white border-yellow-600 shadow-lg" : "bg-yellow-50 dark:bg-yellow-900/20 text-yellow-600 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800 hover:bg-yellow-100 dark:hover:bg-yellow-900/30"
+                                        : status === "CANCELED"
+                                            ? isActive ? "bg-red-600 text-white border-red-600 shadow-lg" : "bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border-red-200 dark:border-red-800 hover:bg-red-100 dark:hover:bg-red-900/30"
+                                            : isActive ? "bg-yellow-600 text-white border-yellow-600 shadow-lg" : "bg-yellow-50 dark:bg-yellow-900/20 text-yellow-600 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800 hover:bg-yellow-100 dark:hover:bg-yellow-900/30"
                             }`}
                         >
                             <div className="flex items-center justify-center mb-2">
-                                {status === "Active" ? <Calendar className="w-5 h-5" /> : status === "Completed" ? <FileText className="w-5 h-5" /> : <Users className="w-5 h-5" />}
+                                {status === "ACTIVE" ? <Calendar className="w-5 h-5" /> : status === "COMPLETED" ? <FileText className="w-5 h-5" /> : status === "CANCELED" ? <Trash2 className="w-5 h-5" /> : <Users className="w-5 h-5" />}
                             </div>
                             <div className="text-2xl font-bold mb-1">{count}</div>
-                            <div className="text-sm font-medium">{status}</div>
+                            <div className="text-sm font-medium">
+                                {status === "PLANNED" ? "Planned" :
+                                 status === "ACTIVE" ? "Active" :
+                                 status === "COMPLETED" ? "Completed" :
+                                 status === "CANCELED" ? "Canceled" :
+                                 status}
+                            </div>
                             {isActive && <div className="text-xs mt-1 opacity-90">Click to clear</div>}
                         </div>
                     );
@@ -260,9 +276,10 @@ function Engagements() {
                             className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500"
                         >
                             <option value="">All Statuses</option>
-                            <option value="Active">Active</option>
-                            <option value="Completed">Completed</option>
-                            <option value="Upcoming">Upcoming</option>
+                            <option value="PLANNED">Planned</option>
+                            <option value="ACTIVE">Active</option>
+                            <option value="COMPLETED">Completed</option>
+                            <option value="CANCELED">Canceled</option>
                         </select>
                         <button
                             onClick={clearFilters}
@@ -283,7 +300,7 @@ function Engagements() {
                             <tr>
                                 {[
                                     { key: "name", label: "Engagement Name" },
-                                    { key: "customer", label: "Client" },
+                                    { key: "customer", label: "Customer" },
                                     { key: "status", label: "Status" },
                                     { key: "startDate", label: "Start Date" },
                                     { key: "endDate", label: "End Date" },
@@ -313,13 +330,19 @@ function Engagements() {
                                 </td>
                                 <td className="px-6 py-4">
                                     <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                                        engagement.status === "Active"
+                                        engagement.status === "ACTIVE"
                                             ? "bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300"
-                                            : engagement.status === "Completed"
+                                            : engagement.status === "COMPLETED"
                                                 ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-                                                : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
+                                                : engagement.status === "CANCELED"
+                                                    ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
+                                                    : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
                                     }`}>
-                                        {engagement.status}
+                                        {engagement.status === "PLANNED" ? "Planned" :
+                                         engagement.status === "ACTIVE" ? "Active" :
+                                         engagement.status === "COMPLETED" ? "Completed" :
+                                         engagement.status === "CANCELED" ? "Canceled" :
+                                         engagement.status}
                                     </span>
                                 </td>
                                 <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
@@ -444,9 +467,15 @@ function Engagements() {
 
             <NewReportModal
                 isOpen={isReportModalOpen}
-                onClose={() => setIsReportModalOpen(false)}
+                onClose={() => {
+                    if (!isCreatingReport) {
+                        setIsReportModalOpen(false);
+                        setSelectedEngagement(null);
+                    }
+                }}
                 onSubmit={submitNewReport}
                 engagement={selectedEngagement}
+                isLoading={isCreatingReport}
             />
 
             <ScopeModal

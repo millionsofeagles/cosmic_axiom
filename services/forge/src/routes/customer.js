@@ -11,7 +11,12 @@ const prisma = new PrismaClient();
 router.get("/", authenticateRequest, async (req, res) => {
     try {
         const customers = await prisma.customer.findMany({
-            include: { contacts: true },
+            include: { 
+                contacts: true,
+                _count: {
+                    select: { engagements: true }
+                }
+            },
         });
         res.json(customers);
     } catch (err) {
@@ -26,7 +31,12 @@ router.get("/:id", authenticateRequest, async (req, res) => {
     try {
         const customer = await prisma.customer.findUnique({
             where: { id },
-            include: { contacts: true },
+            include: { 
+                contacts: true,
+                _count: {
+                    select: { engagements: true }
+                }
+            },
         });
         if (!customer) return res.status(404).json({ error: "Customer not found" });
         res.json(customer);
@@ -48,7 +58,12 @@ router.post("/", authenticateRequest, async (req, res) => {
                     create: contacts,
                 },
             },
-            include: { contacts: true },
+            include: { 
+                contacts: true,
+                _count: {
+                    select: { engagements: true }
+                }
+            },
         });
         res.status(201).json(customer);
     } catch (err) {

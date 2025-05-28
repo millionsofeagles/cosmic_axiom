@@ -207,13 +207,12 @@ export async function generatePdf({ report, engagement, existingFilename = null 
     const filename = existingFilename || `${uuidv4()}.pdf`;
     const filepath = path.join(outputDir, filename);
     
-    // Delete old file if it exists (for overwriting)
-    if (existingFilename && fs.existsSync(filepath)) {
-        fs.unlinkSync(filepath);
-    }
+    // Generate to a temporary file first, then atomic move to prevent 404s during generation
+    const tempFilename = `temp-${uuidv4()}.pdf`;
+    const tempFilepath = path.join(outputDir, tempFilename);
 
     await page.pdf({
-        path: filepath,
+        path: tempFilepath,
         format: "A4",
         printBackground: true,
         displayHeaderFooter: true,
@@ -237,6 +236,10 @@ export async function generatePdf({ report, engagement, existingFilename = null 
     });
 
     await browser.close();
+    
+    // Atomically move the temp file to the final location
+    fs.renameSync(tempFilepath, filepath);
+    
     return filename;
 }
 
@@ -346,13 +349,12 @@ export async function generateBriefingPdf({ report, engagement, existingFilename
     const filename = existingFilename || `briefing-${uuidv4()}.pdf`;
     const filepath = path.join(outputDir, filename);
     
-    // Delete old file if it exists (for overwriting)
-    if (existingFilename && fs.existsSync(filepath)) {
-        fs.unlinkSync(filepath);
-    }
+    // Generate to a temporary file first, then atomic move to prevent 404s during generation
+    const tempFilename = `temp-briefing-${uuidv4()}.pdf`;
+    const tempFilepath = path.join(outputDir, tempFilename);
 
     await page.pdf({
-        path: filepath,
+        path: tempFilepath,
         format: "A4",
         landscape: true,
         printBackground: true,
@@ -365,5 +367,9 @@ export async function generateBriefingPdf({ report, engagement, existingFilename
     });
 
     await browser.close();
+    
+    // Atomically move the temp file to the final location
+    fs.renameSync(tempFilepath, filepath);
+    
     return filename;
 }

@@ -44,14 +44,14 @@ model Report {
 
 model Section {
   id               String         @id @default(uuid())
-  report           Report         @relation(fields: [reportId], references: [id])
+  report           Report         @relation(fields: [reportId], references: [id], onDelete: Cascade)
   reportId         String
   type             SectionType
   position         Int
   title            String?
   content          String?        @db.Text
 
-  reportFinding    ReportFinding? @relation(fields: [reportFindingId], references: [id])
+  reportFinding    ReportFinding? @relation(fields: [reportFindingId], references: [id], onDelete: Cascade)
   reportFindingId  String?
 
   createdAt        DateTime       @default(now())
@@ -60,7 +60,7 @@ model Section {
 
 model ReportFinding {
   id             String         @id @default(uuid())
-  report         Report         @relation(fields: [reportId], references: [id])
+  report         Report         @relation(fields: [reportId], references: [id], onDelete: Cascade)
   reportId       String
   sections       Section[]
   images         FindingImage[]  // 0 or more images associated with this finding
@@ -80,12 +80,13 @@ model ReportFinding {
 
 model FindingImage {
   id               String         @id @default(uuid())
-  reportFinding    ReportFinding  @relation(fields: [reportFindingId], references: [id])
+  reportFinding    ReportFinding  @relation(fields: [reportFindingId], references: [id], onDelete: Cascade)
   reportFindingId  String
 
   title            String
-  caption          String
-  imageUrl         String
+  caption          String         @db.Text
+  imageData        String         @db.LongText  // Base64 encoded image data
+  mimeType         String         // e.g., "image/png", "image/jpeg"
 
   createdAt        DateTime       @default(now())
 }

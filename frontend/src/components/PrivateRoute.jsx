@@ -15,14 +15,14 @@ const PrivateRoute = ({ children }) => {
         if (decoded.exp < now) {
             // Token is expired
             localStorage.removeItem("token");
-            return <Navigate to="/login" replace />;
+            return <Navigate to="/" replace />;
         }
 
         return children;
     } catch (err) {
         // Invalid token
         localStorage.removeItem("token");
-        return <Navigate to="/login" replace />;
+        return <Navigate to="/" replace />;
     }
 };
 

@@ -185,7 +185,7 @@ function Customers() {
                         <Users className="w-5 h-5 text-green-600 dark:text-green-400" />
                     </div>
                     <div className="text-2xl font-bold text-green-900 dark:text-green-100">{customersWithEngagements}</div>
-                    <div className="text-sm text-green-700 dark:text-green-300">Active Clients</div>
+                    <div className="text-sm text-green-700 dark:text-green-300">With Engagements</div>
                 </div>
                 <div className="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-xl p-4 text-center">
                     <div className="flex items-center justify-center mb-2">

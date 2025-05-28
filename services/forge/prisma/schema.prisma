@@ -55,7 +55,7 @@ model Scope {
   description   String?
   inScope       Boolean   @default(true)
   notes         String?
-  engagement    Engagement @relation(fields: [engagementId], references: [id])
+  engagement    Engagement @relation(fields: [engagementId], references: [id], onDelete: Cascade)
   engagementId  String
 
   createdAt     DateTime  @default(now())
