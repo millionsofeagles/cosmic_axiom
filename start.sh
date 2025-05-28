@@ -127,8 +127,8 @@ for service in "${BACKEND_SERVICES[@]}"; do
     else
         # Check for placeholder values that need to be updated
         if [ "$service" = "nebula" ]; then
-            if grep -q "your_claude_api_key_here" "services/$service/.env"; then
-                echo -e "${YELLOW}⚠${RESET} ${BOLD}$service${RESET} .env contains placeholder API key"
+            if grep -q "your_.*_api_key_here" "services/$service/.env"; then
+                echo -e "${YELLOW}⚠${RESET} ${BOLD}$service${RESET} .env contains placeholder API keys - AI features will be disabled"
             fi
         fi
     fi

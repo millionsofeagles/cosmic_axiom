@@ -155,8 +155,8 @@ foreach ($service in $backendServices) {
         # Check for placeholder values that need to be updated
         if ($service -eq "nebula") {
             $content = Get-Content $envPath -Raw
-            if ($content -match "your_claude_api_key_here") {
-                Write-Host "⚠ $service .env contains placeholder API key" -ForegroundColor Yellow
+            if ($content -match "your_.*_api_key_here") {
+                Write-Host "⚠ $service .env contains placeholder API keys - AI features will be disabled" -ForegroundColor Yellow
             }
         }
     }

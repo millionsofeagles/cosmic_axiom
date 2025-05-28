@@ -28,26 +28,26 @@
 
 ### Core Functionality
 - **Modern Report Builder** - Intuitive drag-and-drop interface for creating professional pentest reports
-- **Finding Library** - Extensive database of vulnerability templates and recommendations
+- **Finding Library** - Extendable database of vulnerability templates and recommendations
 - **AI-Powered Content** - Generate executive summaries, methodologies, and conclusions with AI assistance
 - **Evidence Management** - Upload, organize, and embed screenshots and proof-of-concept files
 - **Scope Management** - Define and track engagement targets and testing boundaries
-- **Client Portal** - Dedicated client access for report viewing and collaboration
+- **Client Portal** - Dedicated client access for report viewing and collaboration (In progress)
 
 ### Technical Features
 - **Microservices Architecture** - Modular, scalable design with independent services
 - **Enterprise Authentication** - JWT-based auth with role-based access control
-- **Responsive Design** - Works seamlessly on desktop, tablet, and mobile devices
+- **Responsive Design** - Works seamlessly in multiple browsers
 - **Dark Mode Support** - Built-in dark/light theme switching
-- **Multiple Export Formats** - Generate PDF and DOCX reports with custom templates
+- **Multiple Export Formats** - Generate PDF and breifable slide deck reports with custom templates
 - **Real-time Collaboration** - Live editing and auto-save functionality
 
 ### Advanced Capabilities
-- **Analytics Dashboard** - Track findings, vulnerabilities, and engagement metrics
+- **Analytics Dashboard** - Track findings, vulnerabilities, and engagement metrics (In Progress)
 - **API Integration** - RESTful APIs for third-party tool integration
-- **Import/Export** - Support for Burp Suite, Nessus, and other scanning tools
+- **Import/Export** - Support for Burp Suite, Nessus, and other scanning tools (In Progress)
 - **Multi-tenant Support** - Isolated environments for different organizations
-- **Compliance Templates** - Pre-built templates for PCI DSS, SOC 2, and other frameworks
+- **Compliance Templates** - Pre-built templates for PCI DSS, SOC 2, and other frameworks (In Progress)
 
 ---
 
@@ -65,7 +65,7 @@ Cosmic Axiom follows a distributed microservices architecture, ensuring scalabil
 | **Singularity** | 3004 | Report Creation & Management | Node.js + Prisma |
 | **Satellite** | 3005 | API Gateway & Request Routing | Node.js + Express |
 | **Horizon** | 3006 | Document Generation (PDF/DOCX) | Node.js + Puppeteer |
-| **Nebula** | 3007 | AI Content Generation | Node.js + Claude API |
+| **Nebula** | 3007 | AI Content Generation | Node.js + Various AI API Integrations |
 | **Frontend** | 5173 | React Web Application | React + Vite + TailwindCSS |
 
 ### Data Flow
@@ -89,8 +89,6 @@ graph TB
 ---
 
 ## Quick Start
-
-Get up and running in minutes with our automated setup scripts:
 
 ### Prerequisites
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/)
@@ -130,7 +128,6 @@ cd ..
 ### Access the Application
 - **Web Interface**: http://localhost:5173
 - **Default Admin**: `admin@cosmic.com` / `admin123`
-- **Default User**: `user@cosmic.com` / `user123`
 
 ---
 
@@ -163,18 +160,20 @@ cd infra
 #### 3. Configure Environment Variables
 After running the setup script, review and update the `.env` files:
 
-**Required Configuration:**
+**AI Configuration (Optional):**
 ```bash
-# Update the Claude API key for AI features (if using)
-nano services/nebula/.env
-# Change: CLAUDE_API_KEY=your_claude_api_key_here
-# To: CLAUDE_API_KEY=your_actual_api_key
+# Update the AI provider API key in services/nebula/.env
+# The service supports multiple AI providers - configure the one you prefer:
+# - Claude (Anthropic)
+# - OpenAI 
+# - Local models via Ollama
+# See services/nebula/.env.example for all available options
 ```
 
 **Optional Configurations:**
 - Database connection strings (if using external MySQL)
 - Service ports (if you have conflicts)
-- Logging levels and other service-specific settings
+- Other service spcecific settings
 
 #### 4. Start Services
 The start script provides:
@@ -201,10 +200,10 @@ Each service includes a `.env.example` file that gets copied to `.env` during se
 #### Manual Configuration Required
 
 **Nebula (AI Service) - Optional but Recommended:**
-```bash
-# Edit services/nebula/.env
-CLAUDE_API_KEY=your_actual_claude_api_key_here  # Get from https://console.anthropic.com/
-```
+Configure one or more AI providers in `services/nebula/.env`:
+- **Claude API**: Set `CLAUDE_API_KEY` 
+- **OpenAI**: Set `OPENAI_API_KEY` (coming soon)
+- **Ollama**: Set `OLLAMA_BASE_URL` for local models
 
 #### Pre-configured Services
 
@@ -438,7 +437,5 @@ This project is licensed under the GNU General Public License v3.0 - see the [LI
 <div align="center">
 
 **[⬆ Back to Top](#cosmic-axiom)**
-
-Made with ❤️ by the security community
 
 </div>
