@@ -36,7 +36,9 @@ import {
     Calendar,
     Image,
     Upload,
-    Download
+    Download,
+    Lightbulb,
+    Plus
 } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
@@ -93,6 +95,38 @@ function ReportWriter() {
     const autoSaveTimerRef = useRef(null);
     const editInputRef = useRef(null);
     const fileInputRef = useRef(null);
+    
+    // AI Prompt Suggestions
+    const promptSuggestions = {
+        executive: [
+            "Focus on high-level business risks and impact to the organization",
+            "Emphasize critical and high severity findings with business context",
+            "Include overall security posture assessment and key recommendations",
+            "Highlight immediate action items and strategic improvements needed",
+            "Keep it concise and suitable for C-level executives"
+        ],
+        methodology: [
+            "Include OWASP, PTES, or NIST standards referenced during testing",
+            "Describe both automated and manual testing approaches used",
+            "Explain the phased approach taken (reconnaissance, scanning, exploitation, post-exploitation)",
+            "Mention any limitations or constraints during the assessment",
+            "Include details about testing windows and coordination with client teams"
+        ],
+        tools: [
+            "List specific tools used for each phase of testing (e.g., Nmap, Burp Suite, Metasploit)",
+            "Group tools by category (scanning, exploitation, post-exploitation, reporting)",
+            "Include version numbers for compliance and reproducibility",
+            "Mention any custom scripts or specialized techniques employed",
+            "Explain why certain tools were chosen for this specific engagement"
+        ],
+        conclusion: [
+            "Summarize the overall security posture and maturity level",
+            "Prioritize remediation efforts based on risk and effort required",
+            "Acknowledge positive security controls observed during testing",
+            "Provide strategic recommendations for long-term security improvements",
+            "Include next steps and recommendations for future assessments"
+        ]
+    };
     
     // Format date helper
     const formatEngagementDate = (dateString) => {
@@ -2106,7 +2140,7 @@ function ReportWriter() {
                     <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
                         <div className="fixed inset-0 bg-gray-500 bg-opacity-75 dark:bg-gray-900 dark:bg-opacity-75" onClick={() => !generatingAi && setShowAiPrompt(false)} />
                         
-                        <div className="inline-block w-full max-w-lg px-4 py-4 my-8 overflow-hidden text-left align-middle transition-all transform bg-white dark:bg-gray-800 shadow-xl rounded-lg">
+                        <div className="inline-block w-full max-w-2xl px-6 py-4 my-8 overflow-hidden text-left align-middle transition-all transform bg-white dark:bg-gray-800 shadow-xl rounded-lg">
                             <div className="flex justify-between items-center mb-4">
                                 <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                                     <Sparkles className="w-5 h-5 inline mr-2 text-indigo-600" />
@@ -2134,9 +2168,40 @@ function ReportWriter() {
                                     onChange={(e) => setAiPrompt(e.target.value)}
                                     placeholder={`Example: "Focus on the business impact and critical vulnerabilities found during the assessment..."`}
                                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none"
-                                    rows="4"
+                                    rows="6"
                                     disabled={generatingAi}
                                 />
+                            </div>
+
+                            {/* Prompt Suggestions */}
+                            <div className="mb-4">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <Lightbulb className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                        Suggested prompts (click to add):
+                                    </label>
+                                </div>
+                                <div className="space-y-2 max-h-40 overflow-y-auto">
+                                    {promptSuggestions[aiPromptSection]?.map((suggestion, index) => (
+                                        <button
+                                            key={index}
+                                            onClick={() => {
+                                                setAiPrompt(prev => {
+                                                    const trimmedPrev = prev.trim();
+                                                    if (trimmedPrev) {
+                                                        return trimmedPrev + ". " + suggestion;
+                                                    }
+                                                    return suggestion;
+                                                });
+                                            }}
+                                            disabled={generatingAi}
+                                            className="w-full text-left p-2 text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors disabled:opacity-50 flex items-start gap-2 group"
+                                        >
+                                            <Plus className="w-3 h-3 mt-0.5 flex-shrink-0 text-gray-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400" />
+                                            <span className="text-xs leading-relaxed">{suggestion}</span>
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
 
                             <div className="flex justify-end gap-3">

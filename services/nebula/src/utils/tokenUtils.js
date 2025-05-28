@@ -6,8 +6,8 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const privateKeyPath = path.join(__dirname, '..', 'keys', process.env.JWT_PRIVATE_KEY);
-const publicKeyPath = path.join(__dirname, '..', 'keys', process.env.JWT_PUBLIC_KEY);
+const privateKeyPath = path.join(__dirname, '..', 'keys', process.env.JWT_PRIVATE_KEY || 'private.key');
+const publicKeyPath = path.join(__dirname, '..', 'keys', process.env.JWT_PUBLIC_KEY || 'public.key.pub');
 
 let privateKey, publicKey;
 

@@ -62,7 +62,17 @@ router.post("/generate/:reportId", authenticateRequest, async (req, res) => {
         }
 
         // 6. Send all context data to Nebula AI service
-        const aiRes = await axios.post(`${NEBULA_URL}/ai/generate`, {
+        // Use section-specific endpoint if available, otherwise fall back to generic
+        const sectionEndpoints = {
+            executive: '/ai/generate/executive',
+            methodology: '/ai/generate/methodology',
+            tools: '/ai/generate/tools',
+            conclusion: '/ai/generate/conclusion'
+        };
+        
+        const endpoint = sectionEndpoints[sectionType] || '/ai/generate';
+        
+        const aiRes = await axios.post(`${NEBULA_URL}${endpoint}`, {
             prompt,
             sectionType,
             reportData,
