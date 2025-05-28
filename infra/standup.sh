@@ -129,7 +129,7 @@ else
 fi
 
 echo -e "${GREEN}✓ Environment configuration complete${RESET}"
-echo -e "${BOLD}${YELLOW}Note:${RESET} Please update the ${YELLOW}CLAUDE_API_KEY${RESET} in ${YELLOW}services/nebula/.env${RESET}"
+echo -e "${BOLD}${YELLOW}Note:${RESET} To enable AI features, configure your preferred AI provider in ${YELLOW}services/nebula/.env${RESET}"
 echo -e "      and review other settings in the .env files as needed."
 echo ""
 

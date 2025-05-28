@@ -170,7 +170,7 @@ if (Test-Path $frontendEnvExample) {
 }
 
 Write-Host "✓ Environment configuration complete" -ForegroundColor Green
-Write-Host "Note: Please update the CLAUDE_API_KEY in services\nebula\.env" -ForegroundColor Yellow
+Write-Host "Note: To enable AI features, configure your preferred AI provider in services\nebula\.env" -ForegroundColor Yellow
 Write-Host "      and review other settings in the .env files as needed." -ForegroundColor Gray
 Write-Host ""
 
