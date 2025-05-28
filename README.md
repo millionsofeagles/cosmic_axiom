@@ -64,7 +64,7 @@ Cosmic Axiom follows a distributed microservices architecture, ensuring scalabil
 | **Library** | 3003 | Finding Templates & Vulnerability DB | Node.js + Prisma |
 | **Singularity** | 3004 | Report Creation & Management | Node.js + Prisma |
 | **Satellite** | 3005 | API Gateway & Request Routing | Node.js + Express |
-| **Horizon** | 3006 | Document Generation (PDF/DOCX) | Node.js + Puppeteer |
+| **Horizon** | 3006 | Document Generation (PDF) | Node.js + Puppeteer |
 | **Nebula** | 3007 | AI Content Generation | Node.js + Various AI API Integrations |
 | **Frontend** | 5173 | React Web Application | React + Vite + TailwindCSS |
 
@@ -265,7 +265,7 @@ MySQL runs in Docker with the following default settings:
 4. **Generate a Report** from the Reports section
 5. **Add Findings** from the library or create custom ones
 6. **Use AI Assistance** to generate executive summaries and conclusions
-7. **Export** your report as PDF or DOCX
+7. **Export** your report as PDF or PDF Slide Deck
 
 ### Key Workflows
 
@@ -423,14 +423,6 @@ This project is licensed under the GNU General Public License v3.0 - see the [LI
 - **State changes** - Document changes made to the code
 - **Disclose source** - Source code must be made available
 - **Same license** - Derivatives must use the same license
-
----
-
-## Acknowledgments
-
-- **Security Community** - For inspiration and best practices
-- **Open Source Projects** - React, Node.js, Prisma, and countless others
-- **Contributors** - Everyone who helps make this project better
 
 ---
 
