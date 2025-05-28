@@ -148,16 +148,32 @@ function ReportDetails() {
                     const generateData = await generateRes.json();
                     const filename = generateData.url.split("/").pop();
                     
-                    // Step 4: Fetch the generated PDF
+                    // Step 4: Fetch the generated PDF with authentication
                     const resPdf = await fetch(`${import.meta.env.VITE_SATELLITE_URL}/reports/pdf/${filename}`, {
                         method: "GET",
-                        headers,
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        },
                     });
 
                     if (resPdf.ok) {
                         const blob = await resPdf.blob();
-                        const blobUrl = URL.createObjectURL(blob);
-                        setPdfBlobUrl(blobUrl);
+                        
+                        // Firefox often has issues with blob URLs in iframes, use data URL instead
+                        const isFirefox = navigator.userAgent.toLowerCase().includes('firefox');
+                        
+                        if (isFirefox) {
+                            const reader = new FileReader();
+                            reader.onload = function() {
+                                setPdfBlobUrl(reader.result);
+                            };
+                            reader.readAsDataURL(blob);
+                        } else {
+                            const blobUrl = URL.createObjectURL(blob);
+                            setPdfBlobUrl(blobUrl);
+                        }
+                    } else {
+                        console.error("Failed to fetch PDF:", resPdf.status, resPdf.statusText);
                     }
                 }
             } catch (err) {

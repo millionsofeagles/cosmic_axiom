@@ -1,14 +1,20 @@
 import { useEffect, useState } from "react";
 
-const statusOptions = ["Upcoming", "Active", "Completed"];
+const statusOptions = [
+    { value: "PLANNED", label: "Planned" },
+    { value: "ACTIVE", label: "Active" },
+    { value: "COMPLETED", label: "Completed" },
+    { value: "CANCELED", label: "Canceled" }
+];
 
 const NewEngagementModal = ({ isOpen, onClose, onSave, customers = [], initialData = null }) => {
     const [form, setForm] = useState({
         name: "",
+        description: "",
         customerId: "",
         startDate: "",
         endDate: "",
-        status: "Upcoming",
+        status: "PLANNED",
     });
 
     useEffect(() => {
@@ -17,19 +23,21 @@ const NewEngagementModal = ({ isOpen, onClose, onSave, customers = [], initialDa
                 // Edit mode - populate with existing data
                 setForm({
                     name: initialData.name || "",
+                    description: initialData.description || "",
                     customerId: initialData.customerId || "",
                     startDate: initialData.startDate ? new Date(initialData.startDate).toISOString().split('T')[0] : "",
                     endDate: initialData.endDate ? new Date(initialData.endDate).toISOString().split('T')[0] : "",
-                    status: initialData.status || "Upcoming",
+                    status: initialData.status || "PLANNED",
                 });
             } else {
                 // Create mode - reset form
                 setForm({
                     name: "",
+                    description: "",
                     customerId: customers[0]?.id || "",
                     startDate: "",
                     endDate: "",
-                    status: "Upcoming",
+                    status: "PLANNED",
                 });
             }
         }
@@ -42,7 +50,10 @@ const NewEngagementModal = ({ isOpen, onClose, onSave, customers = [], initialDa
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (!form.name || !form.customerId) return;
+        if (!form.name || !form.customerId || !form.startDate || !form.endDate || !form.status) {
+            alert("Please fill in all required fields");
+            return;
+        }
         onSave(form);
         onClose();
     };
@@ -57,7 +68,7 @@ const NewEngagementModal = ({ isOpen, onClose, onSave, customers = [], initialDa
                 </h2>
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
-                        <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Engagement Name</label>
+                        <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Engagement Name <span className="text-red-500">*</span></label>
                         <input
                             type="text"
                             name="name"
@@ -69,7 +80,19 @@ const NewEngagementModal = ({ isOpen, onClose, onSave, customers = [], initialDa
                     </div>
 
                     <div>
-                        <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Customer</label>
+                        <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
+                        <textarea
+                            name="description"
+                            value={form.description}
+                            onChange={handleChange}
+                            rows="3"
+                            placeholder="Brief description of the engagement..."
+                            className="w-full p-2 rounded bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white resize-vertical"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Customer <span className="text-red-500">*</span></label>
                         <select
                             name="customerId"
                             value={form.customerId}
@@ -88,38 +111,41 @@ const NewEngagementModal = ({ isOpen, onClose, onSave, customers = [], initialDa
 
                     <div className="flex gap-4">
                         <div className="flex-1">
-                            <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Start Date</label>
+                            <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Start Date <span className="text-red-500">*</span></label>
                             <input
                                 type="date"
                                 name="startDate"
                                 value={form.startDate}
                                 onChange={handleChange}
+                                required
                                 className="w-full p-2 rounded bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white"
                             />
                         </div>
                         <div className="flex-1">
-                            <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">End Date</label>
+                            <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">End Date <span className="text-red-500">*</span></label>
                             <input
                                 type="date"
                                 name="endDate"
                                 value={form.endDate}
                                 onChange={handleChange}
+                                required
                                 className="w-full p-2 rounded bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white"
                             />
                         </div>
                     </div>
 
                     <div>
-                        <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Status</label>
+                        <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Status <span className="text-red-500">*</span></label>
                         <select
                             name="status"
                             value={form.status}
                             onChange={handleChange}
+                            required
                             className="w-full p-2 rounded bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white"
                         >
                             {statusOptions.map((status) => (
-                                <option key={status} value={status}>
-                                    {status}
+                                <option key={status.value} value={status.value}>
+                                    {status.label}
                                 </option>
                             ))}
                         </select>

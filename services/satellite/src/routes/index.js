@@ -11,6 +11,8 @@ import cveRoutes from './cve.js';
 import testApiRoutes from './test-api.js';
 import newsRoutes from './news.js';
 import scopeRoutes from './scope.js';
+import imagesRoutes from './images.js';
+import aiRoutes from './ai.js';
 
 
 const router = Router();
@@ -27,6 +29,8 @@ router.use('/cve', cveRoutes);
 router.use('/test-api', testApiRoutes);
 router.use('/news', newsRoutes);
 router.use('/scope', scopeRoutes);
+router.use('/images', imagesRoutes);
+router.use('/ai', aiRoutes);
 
 
 

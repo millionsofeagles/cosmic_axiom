@@ -550,16 +550,23 @@
         {{#if reportFinding.images.length}}
         <div class="mt-6">
           <h4 class="font-semibold text-base mb-3 text-gray-800">Supporting Evidence</h4>
-          <div class="space-y-4">
+          <div class="space-y-6">
             {{#each reportFinding.images}}
-            <div class="border rounded-lg overflow-hidden shadow-sm">
-              <img src="{{this.imageUrl}}" alt="{{this.title}}" class="w-full max-w-2xl" />
-              <div class="bg-gray-50 px-4 py-2 border-t">
-                <p class="text-sm font-medium text-gray-800">{{this.title}}</p>
-                {{#if this.caption}}
-                <p class="text-sm text-gray-600 italic">{{this.caption}}</p>
-                {{/if}}
+            <div class="evidence-section">
+              <!-- Image Title -->
+              <h5 class="font-medium text-sm text-gray-900 mb-2">{{this.title}}</h5>
+              
+              <!-- Image -->
+              <div class="border rounded-lg overflow-hidden shadow-sm mb-2">
+                <img src="data:{{this.mimeType}};base64,{{this.imageData}}" alt="{{this.title}}" class="w-full max-w-3xl" />
               </div>
+              
+              <!-- Caption/Description -->
+              {{#if this.caption}}
+              <div class="bg-gray-50 rounded-lg p-4 text-sm">
+                <p class="text-gray-700 leading-relaxed" style="white-space: pre-wrap;">{{this.caption}}</p>
+              </div>
+              {{/if}}
             </div>
             {{/each}}
           </div>

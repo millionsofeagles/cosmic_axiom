@@ -89,10 +89,26 @@ router.put("/:id", authenticateRequest, async (req, res) => {
 // DELETE /engagement/:id
 router.delete("/:id", authenticateRequest, async (req, res) => {
     try {
+        // First, find and delete all reports associated with this engagement
+        const reportsRes = await axios.get(`${SINGULARITY_URL}/reports?engagementId=${req.params.id}`, {
+            headers: { Authorization: req.headers.authorization },
+        });
+        
+        const reports = reportsRes.data;
+        
+        // Delete each report (which will cascade delete sections, findings, and images)
+        for (const report of reports) {
+            await axios.delete(`${SINGULARITY_URL}/reports/${report.id}`, {
+                headers: { Authorization: req.headers.authorization },
+            });
+        }
+        
+        // Then delete the engagement (which will cascade delete scopes)
         await axios.delete(`${FORGE_URL}/engagement/${req.params.id}`, {
             headers: { Authorization: req.headers.authorization },
         });
-        res.json({ message: "Engagement deleted" });
+        
+        res.json({ message: "Engagement and all associated data deleted successfully" });
     } catch (err) {
         console.error(`DELETE /engagement/${req.params.id} failed:`, err.message);
         res.status(500).json({ error: "Failed to delete engagement" });

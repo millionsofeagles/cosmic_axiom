@@ -65,8 +65,21 @@ router.post("/", authenticateRequest, async (req, res) => {
     }
 
     try {
+        // Fetch the default template
+        const defaultTemplate = await prisma.defaultReportTemplate.findUnique({
+            where: { id: "singleton" }
+        });
+
+        // Create the report with template values if they exist
         const newReport = await prisma.report.create({
-            data: { title, engagementId },
+            data: { 
+                title, 
+                engagementId,
+                executiveSummary: defaultTemplate?.executiveSummary || "",
+                methodology: defaultTemplate?.methodology || "",
+                toolsAndTechniques: defaultTemplate?.toolsAndTechniques || "",
+                conclusion: defaultTemplate?.conclusion || ""
+            },
         });
 
         res.status(201).json(newReport);
@@ -132,7 +145,10 @@ router.put("/:id", authenticateRequest, async (req, res) => {
 // GET /reports - Get all reports
 router.get("/", authenticateRequest, async (req, res) => {
     try {
+        const { engagementId } = req.query;
+        
         const reports = await prisma.report.findMany({
+            where: engagementId ? { engagementId } : undefined,
             orderBy: { createdAt: "desc" },
         });
 

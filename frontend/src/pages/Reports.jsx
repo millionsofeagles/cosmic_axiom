@@ -9,27 +9,32 @@ function Reports() {
     const [loadingReportId, setLoadingReportId] = useState(null);
     const navigate = useNavigate();
 
-    // Helper function to get status styling
+    // Helper function to get engagement status styling
     const getStatusStyles = (status) => {
-        switch (status?.toLowerCase()) {
-            case 'completed':
+        switch (status) {
+            case 'COMPLETED':
                 return {
                     icon: CheckCircle,
                     className: 'text-green-600 bg-green-50 border-green-200 dark:text-green-400 dark:bg-green-900/20 dark:border-green-800'
                 };
-            case 'in_progress':
+            case 'ACTIVE':
                 return {
                     icon: AlertCircle,
+                    className: 'text-blue-600 bg-blue-50 border-blue-200 dark:text-blue-400 dark:bg-blue-900/20 dark:border-blue-800'
+                };
+            case 'PLANNED':
+                return {
+                    icon: Clock,
                     className: 'text-yellow-600 bg-yellow-50 border-yellow-200 dark:text-yellow-400 dark:bg-yellow-900/20 dark:border-yellow-800'
                 };
-            case 'draft':
+            case 'CANCELED':
                 return {
-                    icon: FileText,
-                    className: 'text-blue-600 bg-blue-50 border-blue-200 dark:text-blue-400 dark:bg-blue-900/20 dark:border-blue-800'
+                    icon: XCircle,
+                    className: 'text-red-600 bg-red-50 border-red-200 dark:text-red-400 dark:bg-red-900/20 dark:border-red-800'
                 };
             default:
                 return {
-                    icon: XCircle,
+                    icon: FileText,
                     className: 'text-gray-600 bg-gray-50 border-gray-200 dark:text-gray-400 dark:bg-gray-900/20 dark:border-gray-800'
                 };
         }
@@ -161,7 +166,8 @@ function Reports() {
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredReports.map((report) => {
-                    const statusStyle = getStatusStyles(report.status);
+                    const engagementStatus = report.engagement?.status;
+                    const statusStyle = getStatusStyles(engagementStatus);
                     const StatusIcon = statusStyle.icon;
                     
                     return (
@@ -169,11 +175,15 @@ function Reports() {
                             key={report.id}
                             className="group relative bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-700 shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden"
                         >
-                            {/* Status Badge */}
+                            {/* Engagement Status Badge */}
                             <div className="absolute top-4 right-4">
                                 <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${statusStyle.className}`}>
                                     <StatusIcon className="w-3.5 h-3.5" />
-                                    {report.status || 'Unknown'}
+                                    {engagementStatus === 'PLANNED' ? 'Planned' :
+                                     engagementStatus === 'ACTIVE' ? 'Active' :
+                                     engagementStatus === 'COMPLETED' ? 'Completed' :
+                                     engagementStatus === 'CANCELED' ? 'Canceled' :
+                                     'No Status'}
                                 </span>
                             </div>
                             

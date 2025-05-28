@@ -33,13 +33,19 @@ import {
     User,
     Mail,
     Phone,
-    Calendar
+    Calendar,
+    Image,
+    Upload,
+    Download,
+    Lightbulb,
+    Plus
 } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import DashboardLayout from "../layouts/DashboardLayout";
 import ConnectivityModal from "../components/ConnectivityModal";
 import AffectedSystemsModal from "../components/AffectedSystemsModal";
+import ImageManagementModal from "../components/ImageManagementModal";
 
 function ReportWriter() {
     const { reportId } = useParams();
@@ -62,6 +68,8 @@ function ReportWriter() {
     const [showConnectivityModal, setShowConnectivityModal] = useState(false);
     const [showAffectedSystemsModal, setShowAffectedSystemsModal] = useState(false);
     const [selectedFindingForSystems, setSelectedFindingForSystems] = useState(null);
+    const [showImageModal, setShowImageModal] = useState(false);
+    const [selectedFindingForImages, setSelectedFindingForImages] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedSeverityFilter, setSelectedSeverityFilter] = useState("");
     const [isDragging, setIsDragging] = useState(false);
@@ -72,8 +80,53 @@ function ReportWriter() {
     const [lastSaved, setLastSaved] = useState(null);
     const [showCustomerInfo, setShowCustomerInfo] = useState(true);
     
+    // AI prompt state
+    const [showAiPrompt, setShowAiPrompt] = useState(false);
+    const [aiPromptSection, setAiPromptSection] = useState("");
+    const [aiPrompt, setAiPrompt] = useState("");
+    const [generatingAi, setGeneratingAi] = useState(false);
+    
+    // Image management state
+    const [findingImages, setFindingImages] = useState({});
+    const [uploadingImage, setUploadingImage] = useState(null);
+    const [editingImageId, setEditingImageId] = useState(null);
+    const [editingImageField, setEditingImageField] = useState(null);
+    
     const autoSaveTimerRef = useRef(null);
     const editInputRef = useRef(null);
+    const fileInputRef = useRef(null);
+    
+    // AI Prompt Suggestions
+    const promptSuggestions = {
+        executive: [
+            "Focus on high-level business risks and impact to the organization",
+            "Emphasize critical and high severity findings with business context",
+            "Include overall security posture assessment and key recommendations",
+            "Highlight immediate action items and strategic improvements needed",
+            "Keep it concise and suitable for C-level executives"
+        ],
+        methodology: [
+            "Include OWASP, PTES, or NIST standards referenced during testing",
+            "Describe both automated and manual testing approaches used",
+            "Explain the phased approach taken (reconnaissance, scanning, exploitation, post-exploitation)",
+            "Mention any limitations or constraints during the assessment",
+            "Include details about testing windows and coordination with client teams"
+        ],
+        tools: [
+            "List specific tools used for each phase of testing (e.g., Nmap, Burp Suite, Metasploit)",
+            "Group tools by category (scanning, exploitation, post-exploitation, reporting)",
+            "Include version numbers for compliance and reproducibility",
+            "Mention any custom scripts or specialized techniques employed",
+            "Explain why certain tools were chosen for this specific engagement"
+        ],
+        conclusion: [
+            "Summarize the overall security posture and maturity level",
+            "Prioritize remediation efforts based on risk and effort required",
+            "Acknowledge positive security controls observed during testing",
+            "Provide strategic recommendations for long-term security improvements",
+            "Include next steps and recommendations for future assessments"
+        ]
+    };
     
     // Format date helper
     const formatEngagementDate = (dateString) => {
@@ -126,7 +179,16 @@ function ReportWriter() {
 
             const secRes = await fetch(`${import.meta.env.VITE_SATELLITE_URL}/reports/${reportId}/sections`, { headers });
             const secData = await secRes.json();
-            setSections(secData.sort((a, b) => a.position - b.position));
+            
+            // Ensure secData is an array before sorting
+            const sectionsArray = Array.isArray(secData) ? secData : [];
+            setSections(sectionsArray.sort((a, b) => a.position - b.position));
+
+            // Load images for each finding
+            const findingsWithImages = sectionsArray.filter(s => s.reportFinding?.id);
+            for (const section of findingsWithImages) {
+                await loadFindingImages(section.reportFinding.id);
+            }
 
             const findingRes = await fetch(`${import.meta.env.VITE_SATELLITE_URL}/findings`, { headers });
             const findingTemplates = await findingRes.json();
@@ -282,6 +344,116 @@ function ReportWriter() {
         setEditingField(null);
     };
 
+    // Image management functions
+    const loadFindingImages = async (reportFindingId) => {
+        try {
+            const response = await fetch(`${import.meta.env.VITE_SATELLITE_URL}/images/finding/${reportFindingId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (response.ok) {
+                const images = await response.json();
+                setFindingImages(prev => ({
+                    ...prev,
+                    [reportFindingId]: images
+                }));
+            }
+        } catch (err) {
+            console.error("Failed to load finding images:", err);
+        }
+    };
+
+    const uploadImage = async (reportFindingId, file, title, caption) => {
+        try {
+            setUploadingImage(reportFindingId);
+            
+            // Convert file to base64
+            const base64 = await new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result.split(',')[1]);
+                reader.readAsDataURL(file);
+            });
+
+            const response = await fetch(`${import.meta.env.VITE_SATELLITE_URL}/images`, {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    reportFindingId,
+                    title: title || file.name,
+                    caption: caption || "",
+                    imageData: base64,
+                    mimeType: file.type
+                })
+            });
+
+            if (response.ok) {
+                // Reload images for this finding
+                await loadFindingImages(reportFindingId);
+                return true;
+            } else {
+                throw new Error("Failed to upload image");
+            }
+        } catch (err) {
+            console.error("Failed to upload image:", err);
+            alert("Failed to upload image. Please try again.");
+            return false;
+        } finally {
+            setUploadingImage(null);
+        }
+    };
+
+    const updateImageMetadata = async (imageId, field, value) => {
+        try {
+            const response = await fetch(`${import.meta.env.VITE_SATELLITE_URL}/images/${imageId}`, {
+                method: "PUT",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ [field]: value })
+            });
+
+            if (response.ok) {
+                // Update local state
+                setFindingImages(prev => {
+                    const updated = { ...prev };
+                    Object.keys(updated).forEach(findingId => {
+                        updated[findingId] = updated[findingId].map(img => 
+                            img.id === imageId ? { ...img, [field]: value } : img
+                        );
+                    });
+                    return updated;
+                });
+            }
+        } catch (err) {
+            console.error("Failed to update image:", err);
+        }
+    };
+
+    const deleteImage = async (imageId, reportFindingId) => {
+        if (!confirm("Are you sure you want to delete this image?")) return;
+        
+        try {
+            const response = await fetch(`${import.meta.env.VITE_SATELLITE_URL}/images/${imageId}`, {
+                method: "DELETE",
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            if (response.ok) {
+                // Remove from local state
+                setFindingImages(prev => ({
+                    ...prev,
+                    [reportFindingId]: (prev[reportFindingId] || []).filter(img => img.id !== imageId)
+                }));
+            }
+        } catch (err) {
+            console.error("Failed to delete image:", err);
+        }
+    };
+
+
     // Add finding from template
     const addFindingFromTemplate = async (template) => {
         try {
@@ -392,6 +564,61 @@ function ReportWriter() {
         triggerAutoSave();
     };
 
+    // AI Generation Functions
+    const openAiPrompt = (sectionType) => {
+        setAiPromptSection(sectionType);
+        setAiPrompt("");
+        setShowAiPrompt(true);
+    };
+
+    const generateAiContent = async () => {
+        if (!aiPrompt.trim()) {
+            alert("Please enter a prompt for AI generation");
+            return;
+        }
+
+        setGeneratingAi(true);
+        try {
+            const response = await fetch(`${import.meta.env.VITE_SATELLITE_URL}/ai/generate/${reportId}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    prompt: aiPrompt,
+                    sectionType: aiPromptSection,
+                }),
+            });
+
+            if (!response.ok) throw new Error("Failed to generate AI content");
+
+            const result = await response.json();
+            
+            // Update the appropriate field with AI-generated content
+            const fieldMap = {
+                executive: 'executiveSummary',
+                methodology: 'methodology',
+                tools: 'toolsAndTechniques',
+                conclusion: 'conclusion'
+            };
+
+            setReport(prev => ({
+                ...prev,
+                [fieldMap[aiPromptSection]]: result.content
+            }));
+
+            triggerAutoSave();
+            setShowAiPrompt(false);
+
+        } catch (error) {
+            console.error("AI generation failed:", error);
+            alert("Failed to generate AI content. Please try again.");
+        } finally {
+            setGeneratingAi(false);
+        }
+    };
+
     // Handle affected systems save
     const handleAffectedSystemsSave = async (selectedSystems) => {
         if (!selectedFindingForSystems) return;
@@ -470,6 +697,32 @@ function ReportWriter() {
 
     // Generate HTML for preview
     const generateReportHTML = () => {
+        // HTML escape function to prevent XSS
+        const escapeHtml = (unsafe) => {
+            if (!unsafe) return '';
+            return String(unsafe)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        };
+
+        // Deep escape object properties
+        const escapeObject = (obj) => {
+            if (!obj) return obj;
+            if (typeof obj === 'string') return escapeHtml(obj);
+            if (Array.isArray(obj)) return obj.map(escapeObject);
+            if (typeof obj === 'object') {
+                const escaped = {};
+                for (const key in obj) {
+                    escaped[key] = escapeObject(obj[key]);
+                }
+                return escaped;
+            }
+            return obj;
+        };
+
         // Count findings by severity
         const findingSections = sections.filter(s => s.type?.toLowerCase() === "finding");
         const criticalCount = findingSections.filter(s => s.reportFinding?.severity === "CRITICAL").length;
@@ -484,8 +737,8 @@ function ReportWriter() {
             return new Date(date).toLocaleDateString();
         };
 
-        // Prepare data for template
-        const templateData = {
+        // Prepare data for template - escape all user input
+        const rawTemplateData = {
             report: {
                 title: report?.title || "Penetration Testing Report",
                 executiveSummary: report?.executiveSummary || "",
@@ -518,6 +771,9 @@ function ReportWriter() {
             },
             scopes: scopes || []
         };
+
+        // Escape all data to prevent XSS
+        const templateData = escapeObject(rawTemplateData);
 
         // Simple template replacement function
         const processTemplate = (template, data) => {
@@ -597,7 +853,6 @@ function ReportWriter() {
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>${templateData.report.title}</title>
-  <script src="https://cdn.tailwindcss.com"></script>
   <style>
     @media print {
       .page-break { page-break-before: always; }
@@ -609,7 +864,130 @@ function ReportWriter() {
       line-height: 1.5;
       color: #1a202c;
       font-size: 13px;
+      margin: 0;
+      padding: 0;
     }
+    
+    /* Layout utilities */
+    .h-screen { height: 100vh; }
+    .flex { display: flex; }
+    .flex-col { flex-direction: column; }
+    .justify-center { justify-content: center; }
+    .items-center { align-items: center; }
+    .items-baseline { align-items: baseline; }
+    .justify-between { justify-content: space-between; }
+    .text-center { text-align: center; }
+    .text-left { text-align: left; }
+    .text-justify { text-align: justify; }
+    .relative { position: relative; }
+    .absolute { position: absolute; }
+    .mx-auto { margin-left: auto; margin-right: auto; }
+    
+    /* Spacing utilities */
+    .px-10 { padding-left: 2.5rem; padding-right: 2.5rem; }
+    .py-8 { padding-top: 2rem; padding-bottom: 2rem; }
+    .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
+    .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+    .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+    .p-6 { padding: 1.5rem; }
+    .p-4 { padding: 1rem; }
+    .mb-6 { margin-bottom: 1.5rem; }
+    .mb-8 { margin-bottom: 2rem; }
+    .mb-3 { margin-bottom: 0.75rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .mb-2 { margin-bottom: 0.5rem; }
+    .mt-6 { margin-top: 1.5rem; }
+    .mt-8 { margin-top: 2rem; }
+    .mt-4 { margin-top: 1rem; }
+    .space-y-3 > * + * { margin-top: 0.75rem; }
+    .space-y-6 > * + * { margin-top: 1.5rem; }
+    .gap-2 { gap: 0.5rem; }
+    .gap-4 { gap: 1rem; }
+    
+    /* Typography utilities */
+    .text-4xl { font-size: 2.25rem; line-height: 2.5rem; }
+    .text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
+    .text-2xl { font-size: 1.5rem; line-height: 2rem; }
+    .text-xl { font-size: 1.25rem; line-height: 1.75rem; }
+    .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+    .text-base { font-size: 1rem; line-height: 1.5rem; }
+    .text-sm { font-size: 0.875rem; line-height: 1.25rem; }
+    .text-xs { font-size: 0.75rem; line-height: 1rem; }
+    .font-bold { font-weight: 700; }
+    .font-semibold { font-weight: 600; }
+    .font-medium { font-weight: 500; }
+    .leading-relaxed { line-height: 1.625; }
+    .uppercase { text-transform: uppercase; }
+    
+    /* Color utilities */
+    .text-gray-900 { color: #111827; }
+    .text-gray-800 { color: #1f2937; }
+    .text-gray-700 { color: #374151; }
+    .text-gray-600 { color: #4b5563; }
+    .text-gray-500 { color: #6b7280; }
+    .text-gray-400 { color: #9ca3af; }
+    .text-indigo-600 { color: #4f46e5; }
+    .text-red-600 { color: #dc2626; }
+    .text-orange-600 { color: #ea580c; }
+    .text-yellow-600 { color: #ca8a04; }
+    .text-blue-600 { color: #2563eb; }
+    .text-green-600 { color: #16a34a; }
+    .text-white { color: white; }
+    .bg-gray-50 { background-color: #f9fafb; }
+    .bg-gray-100 { background-color: #f3f4f6; }
+    .bg-gray-200 { background-color: #e5e7eb; }
+    .bg-white { background-color: white; }
+    
+    /* Border utilities */
+    .border { border-width: 1px; }
+    .border-b { border-bottom-width: 1px; }
+    .border-gray-200 { border-color: #e5e7eb; }
+    .rounded-lg { border-radius: 0.5rem; }
+    .rounded-full { border-radius: 9999px; }
+    .rounded { border-radius: 0.25rem; }
+    
+    /* Grid utilities */
+    .grid { display: grid; }
+    .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+    @media (min-width: 768px) {
+      .md\\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .md\\:grid-cols-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+    }
+    
+    /* Width utilities */
+    .w-20 { width: 5rem; }
+    .h-20 { height: 5rem; }
+    .w-full { width: 100%; }
+    .w-1\\/3 { width: 33.333333%; }
+    .max-w-none { max-width: none; }
+    
+    /* List utilities */
+    .list-disc { list-style-type: disc; }
+    .list-inside { list-style-position: inside; }
+    
+    /* Position utilities */
+    .top-8 { top: 2rem; }
+    .right-8 { right: 2rem; }
+    
+    /* Other utilities */
+    .overflow-x-auto { overflow-x: auto; }
+    .overflow-hidden { overflow: hidden; }
+    .min-w-full { min-width: 100%; }
+    .truncate { 
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .divide-y > * + * { border-top-width: 1px; }
+    .divide-gray-200 > * + * { border-color: #e5e7eb; }
+    
+    /* Prose styles */
+    .prose { color: #374151; max-width: 65ch; }
+    .prose p { margin-top: 1.25em; margin-bottom: 1.25em; }
+    
+    /* Custom component styles */
+    .font-mono { font-family: 'Consolas', 'Monaco', 'Courier New', monospace; }
     
     .gradient-text {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -1417,6 +1795,97 @@ function ReportWriter() {
                                                                     )}
                                                                 </div>
                                                             </div>
+
+                                                            {/* Supporting Evidence (Images) */}
+                                                            {section.reportFinding?.id && (
+                                                                <div>
+                                                                    <div className="flex items-center justify-between mb-2">
+                                                                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                                            Supporting Evidence
+                                                                        </label>
+                                                                        <button
+                                                                            onClick={() => {
+                                                                                setSelectedFindingForImages(section);
+                                                                                setShowImageModal(true);
+                                                                            }}
+                                                                            className="flex items-center gap-1 px-3 py-1 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+                                                                        >
+                                                                            <Image className="w-3 h-3" />
+                                                                            Manage Images
+                                                                        </button>
+                                                                    </div>
+                                                                    <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                                                                        {(findingImages[section.reportFinding.id] || []).length > 0 ? (
+                                                                            <div className="overflow-hidden border border-gray-200 dark:border-gray-600 rounded-lg">
+                                                                                <table className="w-full">
+                                                                                    <thead className="bg-gray-100 dark:bg-gray-800">
+                                                                                        <tr>
+                                                                                            <th className="px-3 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                                                                                Preview
+                                                                                            </th>
+                                                                                            <th className="px-3 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                                                                                Title
+                                                                                            </th>
+                                                                                            <th className="px-3 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                                                                                Caption
+                                                                                            </th>
+                                                                                            <th className="px-3 py-2 text-center text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                                                                                Actions
+                                                                                            </th>
+                                                                                        </tr>
+                                                                                    </thead>
+                                                                                    <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-600">
+                                                                                        {findingImages[section.reportFinding.id].map((image) => (
+                                                                                            <tr 
+                                                                                                key={image.id}
+                                                                                                className="hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
+                                                                                                onClick={() => {
+                                                                                                    setSelectedFindingForImages(section);
+                                                                                                    setShowImageModal(true);
+                                                                                                }}
+                                                                                            >
+                                                                                                <td className="px-3 py-2">
+                                                                                                    <img
+                                                                                                        src={`data:${image.mimeType};base64,${image.imageData}`}
+                                                                                                        alt={image.title}
+                                                                                                        className="w-12 h-12 object-cover rounded border border-gray-200 dark:border-gray-600"
+                                                                                                    />
+                                                                                                </td>
+                                                                                                <td className="px-3 py-2 text-sm font-medium text-gray-900 dark:text-white">
+                                                                                                    {image.title}
+                                                                                                </td>
+                                                                                                <td className="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 max-w-xs">
+                                                                                                    <div className="truncate">
+                                                                                                        {image.caption || 'No caption'}
+                                                                                                    </div>
+                                                                                                </td>
+                                                                                                <td className="px-3 py-2 text-center">
+                                                                                                    <button
+                                                                                                        onClick={(e) => {
+                                                                                                            e.stopPropagation();
+                                                                                                            deleteImage(image.id, section.reportFinding.id);
+                                                                                                        }}
+                                                                                                        className="text-red-600 hover:text-red-700 text-xs"
+                                                                                                        title="Delete image"
+                                                                                                    >
+                                                                                                        <Trash2 className="w-4 h-4" />
+                                                                                                    </button>
+                                                                                                </td>
+                                                                                            </tr>
+                                                                                        ))}
+                                                                                    </tbody>
+                                                                                </table>
+                                                                            </div>
+                                                                        ) : (
+                                                                            <div className="text-center py-8">
+                                                                                <Image className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                                                                                <p className="text-sm text-gray-400 italic">No images added yet</p>
+                                                                                <p className="text-xs text-gray-500 mt-1">Click "Manage Images" to upload supporting evidence</p>
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+                                                            )}
                                                                 </>
                                                             )}
                                                         </div>
@@ -1467,21 +1936,30 @@ function ReportWriter() {
                                             {activeSection === "tools" && "Tools & Techniques"}
                                             {activeSection === "conclusion" && "Conclusion"}
                                         </h2>
-                                        <button
-                                            onClick={() => {
-                                                const fieldMap = {
-                                                    executive: 'executiveSummary',
-                                                    methodology: 'methodology',
-                                                    tools: 'toolsAndTechniques',
-                                                    conclusion: 'conclusion'
-                                                };
-                                                resetNarrativeField(fieldMap[activeSection]);
-                                            }}
-                                            className="flex items-center gap-2 px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg transition-colors"
-                                        >
-                                            <RefreshCw className="w-4 h-4" />
-                                            Reset to Original
-                                        </button>
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                onClick={() => openAiPrompt(activeSection)}
+                                                className="flex items-center gap-2 px-3 py-1.5 text-sm bg-indigo-100 hover:bg-indigo-200 dark:bg-indigo-900/30 dark:hover:bg-indigo-900/50 text-indigo-700 dark:text-indigo-400 rounded-lg transition-colors"
+                                            >
+                                                <Sparkles className="w-4 h-4" />
+                                                AI Generate
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    const fieldMap = {
+                                                        executive: 'executiveSummary',
+                                                        methodology: 'methodology',
+                                                        tools: 'toolsAndTechniques',
+                                                        conclusion: 'conclusion'
+                                                    };
+                                                    resetNarrativeField(fieldMap[activeSection]);
+                                                }}
+                                                className="flex items-center gap-2 px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg transition-colors"
+                                            >
+                                                <RefreshCw className="w-4 h-4" />
+                                                Reset to Original
+                                            </button>
+                                        </div>
                                     </div>
 
                                     <div className="bg-white dark:bg-gray-800 rounded-xl p-6">
@@ -1610,6 +2088,21 @@ function ReportWriter() {
                 onSave={handleAffectedSystemsSave}
             />
 
+            {/* Image Management Modal */}
+            <ImageManagementModal
+                isOpen={showImageModal}
+                onClose={() => {
+                    setShowImageModal(false);
+                    setSelectedFindingForImages(null);
+                }}
+                images={selectedFindingForImages?.reportFinding?.id ? (findingImages[selectedFindingForImages.reportFinding.id] || []) : []}
+                onUpload={uploadImage}
+                onUpdate={updateImageMetadata}
+                onDelete={deleteImage}
+                uploading={selectedFindingForImages?.reportFinding?.id ? uploadingImage === selectedFindingForImages.reportFinding.id : false}
+                reportFindingId={selectedFindingForImages?.reportFinding?.id}
+            />
+
             {/* Preview Modal */}
             {showPreview && (
                 <div className="fixed inset-0 z-50 overflow-y-auto">
@@ -1635,6 +2128,107 @@ function ReportWriter() {
                                     className="w-full h-[80vh]"
                                     title="Report Preview"
                                 />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* AI Prompt Modal */}
+            {showAiPrompt && (
+                <div className="fixed inset-0 z-50 overflow-y-auto">
+                    <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
+                        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 dark:bg-gray-900 dark:bg-opacity-75" onClick={() => !generatingAi && setShowAiPrompt(false)} />
+                        
+                        <div className="inline-block w-full max-w-2xl px-6 py-4 my-8 overflow-hidden text-left align-middle transition-all transform bg-white dark:bg-gray-800 shadow-xl rounded-lg">
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                                    <Sparkles className="w-5 h-5 inline mr-2 text-indigo-600" />
+                                    AI Generate {aiPromptSection === "executive" && "Executive Summary"}
+                                    {aiPromptSection === "methodology" && "Methodology"}
+                                    {aiPromptSection === "tools" && "Tools & Techniques"}
+                                    {aiPromptSection === "conclusion" && "Conclusion"}
+                                </h3>
+                                {!generatingAi && (
+                                    <button
+                                        onClick={() => setShowAiPrompt(false)}
+                                        className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                                    >
+                                        <X className="w-5 h-5" />
+                                    </button>
+                                )}
+                            </div>
+
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    What would you like the AI to focus on or include?
+                                </label>
+                                <textarea
+                                    value={aiPrompt}
+                                    onChange={(e) => setAiPrompt(e.target.value)}
+                                    placeholder={`Example: "Focus on the business impact and critical vulnerabilities found during the assessment..."`}
+                                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none"
+                                    rows="6"
+                                    disabled={generatingAi}
+                                />
+                            </div>
+
+                            {/* Prompt Suggestions */}
+                            <div className="mb-4">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <Lightbulb className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                        Suggested prompts (click to add):
+                                    </label>
+                                </div>
+                                <div className="space-y-2 max-h-40 overflow-y-auto">
+                                    {promptSuggestions[aiPromptSection]?.map((suggestion, index) => (
+                                        <button
+                                            key={index}
+                                            onClick={() => {
+                                                setAiPrompt(prev => {
+                                                    const trimmedPrev = prev.trim();
+                                                    if (trimmedPrev) {
+                                                        return trimmedPrev + ". " + suggestion;
+                                                    }
+                                                    return suggestion;
+                                                });
+                                            }}
+                                            disabled={generatingAi}
+                                            className="w-full text-left p-2 text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors disabled:opacity-50 flex items-start gap-2 group"
+                                        >
+                                            <Plus className="w-3 h-3 mt-0.5 flex-shrink-0 text-gray-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400" />
+                                            <span className="text-xs leading-relaxed">{suggestion}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="flex justify-end gap-3">
+                                <button
+                                    onClick={() => setShowAiPrompt(false)}
+                                    disabled={generatingAi}
+                                    className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors disabled:opacity-50"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={generateAiContent}
+                                    disabled={generatingAi || !aiPrompt.trim()}
+                                    className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors disabled:opacity-50 flex items-center gap-2"
+                                >
+                                    {generatingAi ? (
+                                        <>
+                                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                                            Generating...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Sparkles className="w-4 h-4" />
+                                            Generate Content
+                                        </>
+                                    )}
+                                </button>
                             </div>
                         </div>
                     </div>
