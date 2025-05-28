@@ -1,4 +1,4 @@
-# 🛡️ Cosmic Axiom
+# Cosmic Axiom
 
 > **Modern Penetration Testing Report Platform**  
 > A scalable, AI-powered microservices platform for creating, managing, and exporting professional penetration testing reports.
@@ -10,48 +10,48 @@
 
 ---
 
-## 📋 Table of Contents
+## Table of Contents
 
-- [🌟 Features](#-features)
-- [🏗️ Architecture](#️-architecture)
-- [🚀 Quick Start](#-quick-start)
-- [💻 Installation](#-installation)
-- [🔧 Configuration](#-configuration)
-- [📖 Usage](#-usage)
-- [🛠️ Development](#️-development)
-- [🤝 Contributing](#-contributing)
-- [📄 License](#-license)
+- [Features](#features)
+- [Architecture](#architecture)
+- [Quick Start](#quick-start)
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Usage](#usage)
+- [Development](#development)
+- [Contributing](#contributing)
+- [License](#license)
 
 ---
 
-## 🌟 Features
+## Features
 
 ### Core Functionality
-- **📊 Modern Report Builder** - Intuitive drag-and-drop interface for creating professional pentest reports
-- **🔍 Finding Library** - Extensive database of vulnerability templates and recommendations
-- **🤖 AI-Powered Content** - Generate executive summaries, methodologies, and conclusions with AI assistance
-- **📸 Evidence Management** - Upload, organize, and embed screenshots and proof-of-concept files
-- **🎯 Scope Management** - Define and track engagement targets and testing boundaries
-- **👥 Client Portal** - Dedicated client access for report viewing and collaboration
+- **Modern Report Builder** - Intuitive drag-and-drop interface for creating professional pentest reports
+- **Finding Library** - Extensive database of vulnerability templates and recommendations
+- **AI-Powered Content** - Generate executive summaries, methodologies, and conclusions with AI assistance
+- **Evidence Management** - Upload, organize, and embed screenshots and proof-of-concept files
+- **Scope Management** - Define and track engagement targets and testing boundaries
+- **Client Portal** - Dedicated client access for report viewing and collaboration
 
 ### Technical Features
-- **🏗️ Microservices Architecture** - Modular, scalable design with independent services
-- **🔐 Enterprise Authentication** - JWT-based auth with role-based access control
-- **📱 Responsive Design** - Works seamlessly on desktop, tablet, and mobile devices
-- **🌙 Dark Mode Support** - Built-in dark/light theme switching
-- **📄 Multiple Export Formats** - Generate PDF and DOCX reports with custom templates
-- **🔄 Real-time Collaboration** - Live editing and auto-save functionality
+- **Microservices Architecture** - Modular, scalable design with independent services
+- **Enterprise Authentication** - JWT-based auth with role-based access control
+- **Responsive Design** - Works seamlessly on desktop, tablet, and mobile devices
+- **Dark Mode Support** - Built-in dark/light theme switching
+- **Multiple Export Formats** - Generate PDF and DOCX reports with custom templates
+- **Real-time Collaboration** - Live editing and auto-save functionality
 
 ### Advanced Capabilities
-- **📈 Analytics Dashboard** - Track findings, vulnerabilities, and engagement metrics
-- **🔗 API Integration** - RESTful APIs for third-party tool integration
-- **📦 Import/Export** - Support for Burp Suite, Nessus, and other scanning tools
-- **🏢 Multi-tenant Support** - Isolated environments for different organizations
-- **📋 Compliance Templates** - Pre-built templates for PCI DSS, SOC 2, and other frameworks
+- **Analytics Dashboard** - Track findings, vulnerabilities, and engagement metrics
+- **API Integration** - RESTful APIs for third-party tool integration
+- **Import/Export** - Support for Burp Suite, Nessus, and other scanning tools
+- **Multi-tenant Support** - Isolated environments for different organizations
+- **Compliance Templates** - Pre-built templates for PCI DSS, SOC 2, and other frameworks
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
 Cosmic Axiom follows a distributed microservices architecture, ensuring scalability, maintainability, and fault isolation.
 
@@ -59,14 +59,14 @@ Cosmic Axiom follows a distributed microservices architecture, ensuring scalabil
 
 | Service | Port | Purpose | Technology |
 |---------|------|---------|------------|
-| **🌟 Astral** | 3001 | Authentication & User Management | Node.js + Prisma |
-| **🔨 Forge** | 3002 | Customer & Engagement Management | Node.js + Prisma |
-| **📚 Library** | 3003 | Finding Templates & Vulnerability DB | Node.js + Prisma |
-| **🎯 Singularity** | 3004 | Report Creation & Management | Node.js + Prisma |
-| **🛰️ Satellite** | 3005 | API Gateway & Request Routing | Node.js + Express |
-| **🌅 Horizon** | 3006 | Document Generation (PDF/DOCX) | Node.js + Puppeteer |
-| **☁️ Nebula** | 3007 | AI Content Generation | Node.js + Claude API |
-| **🖥️ Frontend** | 5173 | React Web Application | React + Vite + TailwindCSS |
+| **Astral** | 3001 | Authentication & User Management | Node.js + Prisma |
+| **Forge** | 3002 | Customer & Engagement Management | Node.js + Prisma |
+| **Library** | 3003 | Finding Templates & Vulnerability DB | Node.js + Prisma |
+| **Singularity** | 3004 | Report Creation & Management | Node.js + Prisma |
+| **Satellite** | 3005 | API Gateway & Request Routing | Node.js + Express |
+| **Horizon** | 3006 | Document Generation (PDF/DOCX) | Node.js + Puppeteer |
+| **Nebula** | 3007 | AI Content Generation | Node.js + Claude API |
+| **Frontend** | 5173 | React Web Application | React + Vite + TailwindCSS |
 
 ### Data Flow
 
@@ -88,7 +88,7 @@ graph TB
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 Get up and running in minutes with our automated setup scripts:
 
@@ -134,7 +134,7 @@ cd ..
 
 ---
 
-## 💻 Installation
+## Installation
 
 ### Detailed Setup Instructions
 
@@ -192,7 +192,7 @@ The start script provides:
 
 ---
 
-## 🔧 Configuration
+## Configuration
 
 ### Environment Variables
 
@@ -256,7 +256,7 @@ MySQL runs in Docker with the following default settings:
 
 ---
 
-## 📖 Usage
+## Usage
 
 ### Creating Your First Report
 
@@ -294,7 +294,7 @@ MySQL runs in Docker with the following default settings:
 
 ---
 
-## 🛠️ Development
+## Development
 
 ### Project Structure
 ```
@@ -372,7 +372,7 @@ Each service exposes RESTful APIs. Key endpoints:
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 We welcome contributions from the security community! Here's how you can help:
 
@@ -399,35 +399,35 @@ We welcome contributions from the security community! Here's how you can help:
 - Tag issues appropriately (bug, enhancement, etc.)
 
 ### Areas for Contribution
-- 🔧 Additional scanning tool integrations
-- 🎨 UI/UX improvements
-- 🔒 Security enhancements
-- 📊 Analytics and reporting features
-- 🌐 Internationalization
-- 📱 Mobile app development
+- Additional scanning tool integrations
+- UI/UX improvements
+- Security enhancements
+- Analytics and reporting features
+- Internationalization
+- Mobile app development
 
 ---
 
-## 📄 License
+## License
 
 This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
 
 ### What this means:
-- ✅ **Commercial use** - Use in commercial projects
-- ✅ **Modification** - Modify the source code
-- ✅ **Distribution** - Distribute the software
-- ✅ **Patent use** - Use any patents
-- ✅ **Private use** - Use privately
+- **Commercial use** - Use in commercial projects
+- **Modification** - Modify the source code
+- **Distribution** - Distribute the software
+- **Patent use** - Use any patents
+- **Private use** - Use privately
 
 **Requirements:**
-- 📝 **License and copyright notice** - Include license in distributions
-- 📝 **State changes** - Document changes made to the code
-- 📝 **Disclose source** - Source code must be made available
-- 📝 **Same license** - Derivatives must use the same license
+- **License and copyright notice** - Include license in distributions
+- **State changes** - Document changes made to the code
+- **Disclose source** - Source code must be made available
+- **Same license** - Derivatives must use the same license
 
 ---
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - **Security Community** - For inspiration and best practices
 - **Open Source Projects** - React, Node.js, Prisma, and countless others
@@ -437,7 +437,7 @@ This project is licensed under the GNU General Public License v3.0 - see the [LI
 
 <div align="center">
 
-**[⬆ Back to Top](#-cosmic-axiom)**
+**[⬆ Back to Top](#cosmic-axiom)**
 
 Made with ❤️ by the security community
 
