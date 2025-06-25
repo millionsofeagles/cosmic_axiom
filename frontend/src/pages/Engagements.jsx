@@ -1,8 +1,9 @@
-import { Plus, Edit2, Trash2, Search, Filter, Calendar, Users, FileText, ChevronDown, ChevronUp, Target } from "lucide-react";
+import { Plus, Edit2, Trash2, Search, Filter, Calendar, Users, FileText, ChevronDown, ChevronUp, Target, Shield } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import NewEngagementModal from "../components/NewEngagementModal";
 import NewReportModal from "../components/NewReportModal";
+import NewRoEModal from "../components/NewRoEModal";
 import ScopeModal from "../components/ScopeModal";
 import DashboardLayout from "../layouts/DashboardLayout";
 
@@ -10,6 +11,7 @@ function Engagements() {
     const [engagements, setEngagements] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+    const [isRoEModalOpen, setIsRoEModalOpen] = useState(false);
     const [isScopeModalOpen, setIsScopeModalOpen] = useState(false);
     const [selectedEngagement, setSelectedEngagement] = useState(null);
     const [editingEngagement, setEditingEngagement] = useState(null);
@@ -21,6 +23,7 @@ function Engagements() {
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(10);
     const [isCreatingReport, setIsCreatingReport] = useState(false);
+    const [isCreatingRoE, setIsCreatingRoE] = useState(false);
     const token = localStorage.getItem("token");
     const navigate = useNavigate();
 
@@ -120,6 +123,11 @@ function Engagements() {
         setIsReportModalOpen(true);
     };
 
+    const handleStartRoE = (engagement) => {
+        setSelectedEngagement(engagement);
+        setIsRoEModalOpen(true);
+    };
+
     const submitNewReport = async (title) => {
         setIsCreatingReport(true);
         try {
@@ -147,6 +155,37 @@ function Engagements() {
             alert(`Failed to start report: ${err.message}`);
             setIsCreatingReport(false);
             setIsReportModalOpen(false);
+            setSelectedEngagement(null);
+        }
+    };
+
+    const submitNewRoE = async (title) => {
+        setIsCreatingRoE(true);
+        try {
+            const res = await fetch(`${import.meta.env.VITE_SATELLITE_URL}/roe`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ engagementId: selectedEngagement.id, title }),
+            });
+
+            if (!res.ok) {
+                const error = await res.text();
+                throw new Error(`Failed to create RoE: ${error}`);
+            }
+
+            const created = await res.json();
+            
+            // Navigate to RoE builder
+            window.location.href = `/engagements/${selectedEngagement.id}/roe/${created.id}`;
+            
+        } catch (err) {
+            console.error("Error creating RoE:", err);
+            alert(`Failed to start RoE: ${err.message}`);
+            setIsCreatingRoE(false);
+            setIsRoEModalOpen(false);
             setSelectedEngagement(null);
         }
     };
@@ -370,6 +409,23 @@ function Engagements() {
                                             <Target size={14} />
                                             Scope
                                         </button>
+                                        {engagement.roe ? (
+                                            <Link
+                                                to={`/engagements/${engagement.id}/roe`}
+                                                className="text-orange-600 hover:text-orange-900 dark:text-orange-400 dark:hover:text-orange-300 transition-colors flex items-center gap-1"
+                                            >
+                                                <Shield size={14} />
+                                                Manage RoE
+                                            </Link>
+                                        ) : (
+                                            <button
+                                                onClick={() => handleStartRoE(engagement)}
+                                                className="text-orange-600 hover:text-orange-900 dark:text-orange-400 dark:hover:text-orange-300 transition-colors flex items-center gap-1"
+                                            >
+                                                <Shield size={14} />
+                                                Start RoE
+                                            </button>
+                                        )}
                                         <button 
                                             onClick={() => handleDeleteEngagement(engagement.id)}
                                             className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 transition-colors flex items-center gap-1"
@@ -476,6 +532,19 @@ function Engagements() {
                 onSubmit={submitNewReport}
                 engagement={selectedEngagement}
                 isLoading={isCreatingReport}
+            />
+
+            <NewRoEModal
+                isOpen={isRoEModalOpen}
+                onClose={() => {
+                    if (!isCreatingRoE) {
+                        setIsRoEModalOpen(false);
+                        setSelectedEngagement(null);
+                    }
+                }}
+                onSubmit={submitNewRoE}
+                engagement={selectedEngagement}
+                isLoading={isCreatingRoE}
             />
 
             <ScopeModal

@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{roe.title}} - Rules of Engagement</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @media print {
+      .page-break { page-break-before: always; }
+      .no-break { page-break-inside: avoid; }
+      .keep-together { page-break-inside: avoid; }
+      
+      /* Prevent awkward breaks in tables */
+      table { page-break-inside: auto; }
+      tr { page-break-inside: avoid; page-break-after: auto; }
+      thead { display: table-header-group; }
+      tfoot { display: table-footer-group; }
+      
+      /* Prevent breaks right after headers */
+      h1, h2, h3, h4, h5, h6 {
+        page-break-after: avoid;
+        page-break-inside: avoid;
+      }
+      
+      /* Keep headers with at least 2 lines of content */
+      h1 + *, h2 + *, h3 + *, h4 + * {
+        page-break-before: avoid;
+      }
+      
+      /* Avoid breaking inside paragraphs */
+      p {
+        orphans: 3;
+        widows: 3;
+      }
+      
+      /* Keep section boxes together when possible */
+      .section-box {
+        page-break-inside: avoid;
+      }
+      
+      /* Allow breaking inside very long sections */
+      .section-box.can-break {
+        page-break-inside: auto;
+      }
+      
+      /* Special handling for subsections */
+      .roe-section {
+        page-break-before: auto;
+        page-break-inside: auto;
+      }
+      
+      /* Keep section headers with content */
+      .roe-section h4 {
+        page-break-after: avoid;
+        margin-bottom: 0.5rem;
+      }
+      
+      /* Allow paragraphs to break naturally */
+      .roe-section p {
+        page-break-inside: auto;
+        orphans: 3;
+        widows: 3;
+      }
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      line-height: 1.5;
+      color: #1a202c;
+      font-size: 13px;
+    }
+    
+    .gradient-text {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .status-draft { background-color: #f59e0b; color: white; }
+    .status-approved { background-color: #10b981; color: white; }
+    .status-active { background-color: #3b82f6; color: white; }
+    .status-expired { background-color: #ef4444; color: white; }
+    .status-archived { background-color: #6b7280; color: white; }
+    
+    .section-header {
+      border-bottom: 3px solid #e5e7eb;
+      padding-bottom: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .section-box {
+      border: 1px solid #e5e7eb;
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      background-color: #f9fafb;
+    }
+    
+    .authorization-box {
+      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+      border-left: 4px solid #f59e0b;
+    }
+    
+    .scope-box {
+      background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+      border-left: 4px solid #3b82f6;
+    }
+    
+    .testing-window-box {
+      background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+      border-left: 4px solid #10b981;
+    }
+    
+    .restrictions-box {
+      background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+      border-left: 4px solid #ef4444;
+    }
+    
+    .emergency-box {
+      background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+      border-left: 4px solid #dc2626;
+      border: 2px solid #dc2626;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+    }
+    
+    th, td {
+      border: 1px solid #e5e7eb;
+      padding: 0.75rem;
+      text-align: left;
+    }
+    
+    th {
+      background-color: #f3f4f6;
+      font-weight: 600;
+    }
+    
+    .contact-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+    
+    .contact-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 0.5rem;
+      padding: 1rem;
+    }
+    
+    .warning-banner {
+      background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+      border: 2px solid #dc2626;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      margin: 1rem 0;
+      text-align: center;
+    }
+  </style>
+</head>
+<body class="text-gray-900">
+
+  <!-- Cover Page -->
+  <div class="h-screen flex flex-col justify-center items-center page-break relative">
+    <!-- Watermark -->
+    <div class="absolute top-8 left-8 opacity-10">
+      <img src="https://cdn-icons-png.flaticon.com/512/3212/3212608.png" alt="Cosmic Axiom" class="w-32 h-32" />
+    </div>
+    
+    <div class="absolute top-8 right-8 text-sm text-gray-500">
+      <span class="px-3 py-1 bg-red-100 text-red-700 rounded-full font-semibold">{{#if roe.classification}}{{roe.classification}}{{else}}CONFIDENTIAL{{/if}}</span>
+    </div>
+    
+    <div class="text-center">
+      <div class="mb-6">
+        <svg class="w-20 h-20 mx-auto text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+        </svg>
+      </div>
+      
+      <h1 class="text-4xl font-bold mb-6 gradient-text" style="line-height: 1.3;">Rules of Engagement</h1>
+      <h2 class="text-xl text-gray-600 mb-8">{{roe.title}}</h2>
+    </div>
+    
+    <div class="w-[80%] bg-gray-50 rounded-lg p-6 mt-6">
+      <table class="w-full text-left">
+        <tr>
+          <td class="font-semibold text-gray-700 py-2 w-1/3">Client Organization:</td>
+          <td class="text-gray-900">{{#if engagement.customerName}}{{engagement.customerName}}{{else if engagement.customer}}{{engagement.customer}}{{else}}Not Specified{{/if}}</td>
+        </tr>
+        <tr>
+          <td class="font-semibold text-gray-700 py-2">Document Version:</td>
+          <td class="text-gray-900">{{roe.version}}</td>
+        </tr>
+        <tr>
+          <td class="font-semibold text-gray-700 py-2">Status:</td>
+          <td class="text-gray-900">
+            <span class="px-2 py-1 rounded text-xs font-semibold status-{{toLowerCase roe.status}}">
+              {{roe.status}}
+            </span>
+          </td>
+        </tr>
+        <tr>
+          <td class="font-semibold text-gray-700 py-2">Created Date:</td>
+          <td class="text-gray-900">{{roe.createdAt}}</td>
+        </tr>
+        {{#if roe.approvedAt}}
+        <tr>
+          <td class="font-semibold text-gray-700 py-2">Approved Date:</td>
+          <td class="text-gray-900">{{roe.approvedAt}}</td>
+        </tr>
+        {{/if}}
+        {{#if roe.expiresAt}}
+        <tr>
+          <td class="font-semibold text-gray-700 py-2">Expires:</td>
+          <td class="text-gray-900">{{roe.expiresAt}}</td>
+        </tr>
+        {{/if}}
+      </table>
+    </div>
+    
+    <div class="absolute bottom-8 text-center text-sm text-gray-500">
+      <p>Prepared by {{engagement.organization}}</p>
+      <p class="mt-1 text-xs">Generated with Cosmic Axiom Security Platform</p>
+    </div>
+  </div>
+
+  <!-- Document Control & Authorization -->
+  <div class="px-10 py-8 page-break">
+    <h2 class="text-2xl font-bold mb-6 section-header">Document Control & Authorization</h2>
+    
+    {{#if roe.authorizedBy}}
+    <div class="authorization-box section-box keep-together">
+      <h3 class="text-xl font-semibold mb-4 text-yellow-800">Authorization</h3>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <p class="text-sm font-semibold text-gray-700">Authorized By:</p>
+          <p class="text-gray-900">{{roe.authorizedBy}}</p>
+        </div>
+        {{#if roe.authorizedTitle}}
+        <div>
+          <p class="text-sm font-semibold text-gray-700">Title:</p>
+          <p class="text-gray-900">{{roe.authorizedTitle}}</p>
+        </div>
+        {{/if}}
+        {{#if roe.authorizedDate}}
+        <div>
+          <p class="text-sm font-semibold text-gray-700">Date Authorized:</p>
+          <p class="text-gray-900">{{roe.authorizedDate}}</p>
+        </div>
+        {{/if}}
+      </div>
+    </div>
+    {{/if}}
+    
+    <div class="mb-8 keep-together">
+      <h3 class="text-xl font-semibold mb-4 text-gray-800">Distribution</h3>
+      <table class="w-full">
+        <thead>
+          <tr>
+            <th class="text-left">Name</th>
+            <th class="text-left">Title</th>
+            <th class="text-left">Organization</th>
+            <th class="text-left">Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>{{engagement.contactName}}</td>
+            <td>{{engagement.contactTitle}}</td>
+            <td>{{#if engagement.customerName}}{{engagement.customerName}}{{else if engagement.customer}}{{engagement.customer}}{{else}}Not Specified{{/if}}</td>
+            <td>{{roe.createdAt}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    
+    <div class="warning-banner">
+      <h3 class="text-xl font-semibold mb-3 text-red-800">IMPORTANT NOTICE</h3>
+      <p class="text-gray-700">
+        This document contains confidential information regarding authorized penetration testing activities. 
+        All testing activities must be conducted strictly within the parameters defined herein. 
+        Any deviation from these rules may result in immediate termination of testing and potential legal consequences.
+      </p>
+    </div>
+  </div>
+
+  <!-- Dynamic Sections -->
+  {{#each roe.sections}}
+  <div class="px-10 py-8 {{#unless @first}}page-break{{/unless}}">
+    {{#ifCond type "===" "AUTHORIZATION"}}
+    <h2 class="text-2xl font-bold mb-6 section-header">{{#if title}}{{title}}{{else}}Authorization Details{{/if}}</h2>
+    <div class="authorization-box section-box">
+      <div class="roe-section">
+        <div class="prose max-w-none">
+          <p class="text-gray-800 leading-relaxed">{{content}}</p>
+        </div>
+      </div>
+    </div>
+    {{/ifCond}}
+    
+    {{#ifCond type "===" "SCOPE"}}
+    <h2 class="text-2xl font-bold mb-6 section-header">{{#if title}}{{title}}{{else}}Scope Definition{{/if}}</h2>
+    <div class="scope-box section-box">
+      <div class="roe-section">
+        <div class="prose max-w-none">
+          <p class="text-gray-800 leading-relaxed">{{content}}</p>
+        </div>
+        {{#if data.inScopeAssets}}
+        <div class="mt-4">
+          <h4 class="font-semibold text-blue-800 mb-2">In-Scope Assets:</h4>
+          <ul class="list-disc list-inside text-gray-700">
+            {{#each data.inScopeAssets}}
+            <li>{{this}}</li>
+            {{/each}}
+          </ul>
+        </div>
+        {{/if}}
+        {{#if data.outOfScopeAssets}}
+        <div class="mt-4">
+          <h4 class="font-semibold text-red-800 mb-2">Out-of-Scope Assets:</h4>
+          <ul class="list-disc list-inside text-gray-700">
+            {{#each data.outOfScopeAssets}}
+            <li>{{this}}</li>
+            {{/each}}
+          </ul>
+        </div>
+        {{/if}}
+      </div>
+    </div>
+    {{/ifCond}}
+    
+    {{#ifCond type "===" "TESTING_WINDOW"}}
+    <h2 class="text-2xl font-bold mb-6 section-header">{{#if title}}{{title}}{{else}}Testing Window{{/if}}</h2>
+    <div class="testing-window-box section-box">
+      <div class="roe-section">
+        <div class="prose max-w-none">
+          <p class="text-gray-800 leading-relaxed">{{content}}</p>
+        </div>
+        {{#if ../roe.testingWindow}}
+        <div class="mt-4 grid grid-cols-2 gap-4">
+          {{#if ../roe.testingWindow.start}}
+          <div>
+            <h4 class="font-semibold text-green-800 mb-1">Start Date:</h4>
+            <p class="text-gray-700">{{../roe.testingWindow.start}}</p>
+          </div>
+          {{/if}}
+          {{#if ../roe.testingWindow.end}}
+          <div>
+            <h4 class="font-semibold text-green-800 mb-1">End Date:</h4>
+            <p class="text-gray-700">{{../roe.testingWindow.end}}</p>
+          </div>
+          {{/if}}
+        </div>
+        {{#if ../roe.testingWindow.blackoutPeriods}}
+        <div class="mt-4">
+          <h4 class="font-semibold text-red-800 mb-2">Blackout Periods:</h4>
+          <ul class="list-disc list-inside text-gray-700">
+            {{#each ../roe.testingWindow.blackoutPeriods}}
+            <li>{{this}}</li>
+            {{/each}}
+          </ul>
+        </div>
+        {{/if}}
+        {{/if}}
+      </div>
+    </div>
+    {{/ifCond}}
+    
+    {{#ifCond type "===" "METHODOLOGY"}}
+    <h2 class="text-2xl font-bold mb-6 section-header">{{#if title}}{{title}}{{else}}Approved Testing Methodology{{/if}}</h2>
+    <div class="section-box">
+      <div class="roe-section">
+        <div class="prose max-w-none">
+          <p class="text-gray-800 leading-relaxed">{{content}}</p>
+        </div>
+        {{#if data.allowedMethods}}
+        <div class="mt-4">
+          <h4 class="font-semibold text-gray-800 mb-2">Allowed Testing Methods:</h4>
+          <ul class="list-disc list-inside text-gray-700">
+            {{#each data.allowedMethods}}
+            <li>{{this}}</li>
+            {{/each}}
+          </ul>
+        </div>
+        {{/if}}
+      </div>
+    </div>
+    {{/ifCond}}
+    
+    {{#ifCond type "===" "RESTRICTIONS"}}
+    <h2 class="text-2xl font-bold mb-6 section-header">{{#if title}}{{title}}{{else}}Restrictions & Limitations{{/if}}</h2>
+    <div class="restrictions-box section-box">
+      <div class="roe-section">
+        <div class="prose max-w-none">
+          <p class="text-gray-800 leading-relaxed">{{content}}</p>
+        </div>
+        {{#if data.forbiddenActivities}}
+        <div class="mt-4">
+          <h4 class="font-semibold text-red-800 mb-2">Explicitly Forbidden Activities:</h4>
+          <ul class="list-disc list-inside text-gray-700">
+            {{#each data.forbiddenActivities}}
+            <li>{{this}}</li>
+            {{/each}}
+          </ul>
+        </div>
+        {{/if}}
+      </div>
+    </div>
+    {{/ifCond}}
+    
+    {{#ifCond type "===" "COMMUNICATION"}}
+    <h2 class="text-2xl font-bold mb-6 section-header">{{#if title}}{{title}}{{else}}Communication Protocols{{/if}}</h2>
+    <div class="section-box">
+      <div class="roe-section">
+        <div class="prose max-w-none">
+          <p class="text-gray-800 leading-relaxed">{{content}}</p>
+        </div>
+        {{#if data.contacts}}
+        <div class="contact-grid mt-4">
+          {{#each data.contacts}}
+          <div class="contact-card">
+            <h4 class="font-semibold text-gray-800">{{this.role}}</h4>
+            <p class="text-gray-700">{{this.name}}</p>
+            {{#if this.phone}}<p class="text-sm text-gray-600">📞 {{this.phone}}</p>{{/if}}
+            {{#if this.email}}<p class="text-sm text-gray-600">✉️ {{this.email}}</p>{{/if}}
+            {{#if this.availability}}<p class="text-xs text-gray-500">{{this.availability}}</p>{{/if}}
+          </div>
+          {{/each}}
+        </div>
+        {{/if}}
+      </div>
+    </div>
+    {{/ifCond}}
+    
+    {{#ifCond type "===" "EMERGENCY"}}
+    <h2 class="text-2xl font-bold mb-6 section-header">{{#if title}}{{title}}{{else}}Emergency Procedures{{/if}}</h2>
+    <div class="emergency-box section-box">
+      <div class="roe-section">
+        <div class="prose max-w-none">
+          <p class="text-gray-800 leading-relaxed">{{content}}</p>
+        </div>
+        {{#if ../roe.emergencyContact}}
+        <div class="mt-4 bg-white bg-opacity-50 rounded p-4">
+          <h4 class="font-semibold text-red-800 mb-2">Emergency Contact:</h4>
+          <div class="grid grid-cols-2 gap-2">
+            {{#if ../roe.emergencyContact.name}}
+            <p><strong>Name:</strong> {{../roe.emergencyContact.name}}</p>
+            {{/if}}
+            {{#if ../roe.emergencyContact.phone}}
+            <p><strong>Phone:</strong> {{../roe.emergencyContact.phone}}</p>
+            {{/if}}
+            {{#if ../roe.emergencyContact.email}}
+            <p><strong>Email:</strong> {{../roe.emergencyContact.email}}</p>
+            {{/if}}
+            {{#if ../roe.emergencyContact.availability}}
+            <p><strong>Availability:</strong> {{../roe.emergencyContact.availability}}</p>
+            {{/if}}
+          </div>
+        </div>
+        {{/if}}
+      </div>
+    </div>
+    {{/ifCond}}
+    
+    {{#ifCond type "===" "LEGAL"}}
+    <h2 class="text-2xl font-bold mb-6 section-header">{{#if title}}{{title}}{{else}}Legal & Compliance{{/if}}</h2>
+    <div class="section-box">
+      <div class="roe-section">
+        <div class="prose max-w-none">
+          <p class="text-gray-800 leading-relaxed">{{content}}</p>
+        </div>
+      </div>
+    </div>
+    {{/ifCond}}
+    
+    {{#ifCond type "===" "CUSTOM"}}
+    <h2 class="text-2xl font-bold mb-6 section-header">{{title}}</h2>
+    <div class="section-box">
+      <div class="roe-section">
+        <div class="prose max-w-none">
+          <p class="text-gray-800 leading-relaxed">{{content}}</p>
+        </div>
+      </div>
+    </div>
+    {{/ifCond}}
+  </div>
+  {{/each}}
+
+  <!-- Acknowledgment & Signatures -->
+  <div class="px-10 py-8 page-break">
+    <h2 class="text-2xl font-bold mb-6 section-header">Acknowledgment & Signatures</h2>
+    
+    <div class="mb-8">
+      <p class="text-gray-800 leading-relaxed mb-6">
+        By signing below, all parties acknowledge that they have read, understood, and agree to abide by 
+        the terms and conditions outlined in this Rules of Engagement document.
+      </p>
+      
+      <div class="grid grid-cols-2 gap-8 mt-8">
+        <div class="border-t-2 border-gray-300 pt-4">
+          <div class="text-center">
+            <p class="font-semibold">Client Representative</p>
+            <p class="text-sm text-gray-600 mt-2">{{engagement.contactName}}</p>
+            <p class="text-sm text-gray-600">{{engagement.contactTitle}}</p>
+            <p class="text-sm text-gray-600">{{#if engagement.customerName}}{{engagement.customerName}}{{else if engagement.customer}}{{engagement.customer}}{{else}}Client Organization{{/if}}</p>
+            <div class="mt-8 border-b border-gray-300 w-48 mx-auto"></div>
+            <p class="text-xs text-gray-500 mt-2">Signature / Date</p>
+          </div>
+        </div>
+        
+        <div class="border-t-2 border-gray-300 pt-4">
+          <div class="text-center">
+            <p class="font-semibold">Testing Organization</p>
+            {{#if roe.authorizedBy}}
+            <p class="text-sm text-gray-600 mt-2">{{roe.authorizedBy}}</p>
+            <p class="text-sm text-gray-600">{{roe.authorizedTitle}}</p>
+            {{/if}}
+            <p class="text-sm text-gray-600">{{engagement.organization}}</p>
+            <div class="mt-8 border-b border-gray-300 w-48 mx-auto"></div>
+            <p class="text-xs text-gray-500 mt-2">Signature / Date</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="px-10 py-8">
+    <div class="text-center text-sm text-gray-500 border-t border-gray-200 pt-4">
+      <p>Document generated on {{roe.generatedDate}} using Cosmic Axiom Security Platform</p>
+      <p class="mt-1">© {{roe.year}} {{engagement.organization}}. All rights reserved.</p>
+    </div>
+  </div>
+
+</body>
+</html>

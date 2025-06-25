@@ -120,10 +120,28 @@ export async function generatePdf({ report, engagement, existingFilename = null 
 
     // Process sections - ensure all have uppercase type
     if (report.sections) {
-        report.sections = report.sections.map(s => ({
-            ...s,
-            type: s.type ? s.type.toUpperCase() : s.type
-        }));
+        report.sections = report.sections.map(s => {
+            // Check if finding is very long (might need page breaks)
+            let isLongFinding = false;
+            if (s.type === "FINDING" && s.reportFinding) {
+                const finding = s.reportFinding;
+                const totalLength = 
+                    (finding.description?.length || 0) +
+                    (finding.impact?.length || 0) +
+                    (finding.recommendation?.length || 0) +
+                    (finding.evidence?.length || 0);
+                
+                // If content is over 2000 chars or has many images, allow breaks
+                isLongFinding = totalLength > 2000 || 
+                    (finding.images && finding.images.length > 2);
+            }
+            
+            return {
+                ...s,
+                type: s.type ? s.type.toUpperCase() : s.type,
+                isLongFinding
+            };
+        });
     }
     
     // Process findings
@@ -363,6 +381,126 @@ export async function generateBriefingPdf({ report, engagement, existingFilename
             bottom: "0.5in",
             left: "0.5in",
             right: "0.5in"
+        },
+    });
+
+    await browser.close();
+    
+    // Atomically move the temp file to the final location
+    fs.renameSync(tempFilepath, filepath);
+    
+    return filename;
+}
+export async function generateRoePdf({ roe, engagement, existingFilename = null }) {
+    const roeTemplatePath = path.resolve("templates/roe.html");
+    const html = fs.readFileSync(roeTemplatePath, "utf8");
+    const template = Handlebars.compile(html);
+
+    // Ensure engagement has customerName field
+    if (!engagement.customerName && engagement.customer) {
+        engagement.customerName = engagement.customer;
+    }
+
+    // Process sections - ensure all have uppercase type
+    if (roe.sections) {
+        roe.sections = roe.sections.map(s => ({
+            ...s,
+            type: s.type ? s.type.toUpperCase() : s.type
+        }));
+    }
+
+    // Add generated date and year
+    roe.generatedDate = new Date().toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+    roe.year = new Date().getFullYear();
+    
+    // Format dates
+    if (roe.createdAt) {
+        roe.createdAt = new Date(roe.createdAt).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    }
+    if (roe.approvedAt) {
+        roe.approvedAt = new Date(roe.approvedAt).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    }
+    if (roe.expiresAt) {
+        roe.expiresAt = new Date(roe.expiresAt).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    }
+    if (roe.authorizedDate) {
+        roe.authorizedDate = new Date(roe.authorizedDate).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    }
+    
+    // Format engagement dates
+    if (engagement.startDate) {
+        engagement.startDate = new Date(engagement.startDate).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    }
+    if (engagement.endDate) {
+        engagement.endDate = new Date(engagement.endDate).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    }
+
+    const content = template({ roe, engagement });
+
+    const browser = await puppeteer.launch({
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+    });
+    const page = await browser.newPage();
+    await page.setContent(content, { waitUntil: "networkidle0" });
+
+    // Use existing filename if provided, otherwise generate new one
+    const filename = existingFilename || `roe-${uuidv4()}.pdf`;
+    const filepath = path.join(outputDir, filename);
+    
+    // Generate to a temporary file first, then atomic move to prevent 404s during generation
+    const tempFilename = `temp-roe-${uuidv4()}.pdf`;
+    const tempFilepath = path.join(outputDir, tempFilename);
+
+    await page.pdf({
+        path: tempFilepath,
+        format: "A4",
+        printBackground: true,
+        displayHeaderFooter: true,
+        headerTemplate: `
+            <div style="font-size:10px;text-align:center;width:100%;padding:0 1cm;color:#666;">
+                <span style="float:left;">${engagement.customerName || 'Confidential'}</span>
+                <span style="float:right;">Rules of Engagement - ${roe.classification || 'CONFIDENTIAL'}</span>
+            </div>`,
+        footerTemplate: `
+            <div style="font-size:10px;text-align:center;width:100%;color:#666;">
+                Page <span class="pageNumber"></span> of <span class="totalPages"></span>
+                <span style="margin-left:2em;">|</span>
+                <span style="margin-left:2em;">Generated by Cosmic Axiom</span>
+            </div>`,
+        margin: { 
+            top: "1.5cm", 
+            bottom: "1.5cm",
+            left: "1.5cm",
+            right: "1.5cm"
         },
     });
 

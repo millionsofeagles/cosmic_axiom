@@ -9,6 +9,74 @@
     @media print {
       .page-break { page-break-before: always; }
       .no-break { page-break-inside: avoid; }
+      .keep-together { page-break-inside: avoid; }
+      
+      /* Prevent awkward breaks in tables */
+      table { page-break-inside: auto; }
+      tr { page-break-inside: avoid; page-break-after: auto; }
+      thead { display: table-header-group; }
+      tfoot { display: table-footer-group; }
+      
+      /* Prevent breaks right after headers */
+      h1, h2, h3, h4, h5, h6 {
+        page-break-after: avoid;
+        page-break-inside: avoid;
+      }
+      
+      /* Keep headers with at least 2 lines of content */
+      h1 + *, h2 + *, h3 + *, h4 + * {
+        page-break-before: avoid;
+      }
+      
+      /* Avoid breaking inside paragraphs */
+      p {
+        orphans: 3;
+        widows: 3;
+      }
+      
+      /* Keep finding boxes together when possible */
+      .finding-box {
+        page-break-inside: avoid;
+      }
+      
+      /* Allow breaking inside very long finding boxes */
+      .finding-box.can-break {
+        page-break-inside: auto;
+      }
+      
+      /* Keep evidence sections together with their headers */
+      .evidence-section {
+        page-break-inside: avoid;
+      }
+      
+      /* Special handling for subsections within findings */
+      .finding-section {
+        page-break-before: auto;
+        page-break-inside: auto;
+      }
+      
+      /* Keep section headers with at least some content */
+      .finding-section h4 {
+        page-break-after: avoid;
+        margin-bottom: 0.5rem;
+      }
+      
+      /* Allow paragraphs to break naturally */
+      .finding-section p {
+        page-break-inside: auto;
+        orphans: 3;
+        widows: 3;
+      }
+      
+      /* Keep images with their captions */
+      .image-with-caption {
+        page-break-inside: avoid;
+      }
+      
+      /* But allow multiple images to break between them */
+      .image-with-caption + .image-with-caption {
+        page-break-before: auto;
+      }
     }
     
     body {
@@ -145,7 +213,7 @@
   <div class="px-10 py-8 page-break">
     <h2 class="text-2xl font-bold mb-6 section-header">Document Control</h2>
     
-    <div class="mb-8">
+    <div class="mb-8 keep-together">
       <h3 class="text-xl font-semibold mb-4 text-gray-800">Distribution</h3>
       <table class="w-full">
         <thead>
@@ -167,7 +235,7 @@
       </table>
     </div>
     
-    <div class="mb-8">
+    <div class="mb-8 keep-together">
       <h3 class="text-xl font-semibold mb-4 text-gray-800">Version History</h3>
       <table class="w-full">
         <thead>
@@ -189,7 +257,7 @@
       </table>
     </div>
     
-    <div class="bg-red-50 border-l-4 border-red-500 p-6 rounded">
+    <div class="bg-red-50 border-l-4 border-red-500 p-6 rounded keep-together">
       <h3 class="text-xl font-semibold mb-3 text-red-800">Confidentiality Statement</h3>
       <p class="text-gray-700">
         This document contains confidential and proprietary information and is intended solely for the use of {{#if engagement.customerName}}{{engagement.customerName}}{{else if engagement.customer}}{{engagement.customer}}{{else}}the client organization{{/if}}. 
@@ -263,7 +331,7 @@
     </div>
     
     {{#if report.findings}}
-    <div class="mt-8 bg-gray-50 rounded-lg p-6">
+    <div class="mt-8 bg-gray-50 rounded-lg p-6 keep-together">
       <h3 class="text-xl font-semibold mb-4">Key Statistics</h3>
       <div class="grid grid-cols-2 md:grid-cols-{{#if report.informationalCount}}5{{else}}4{{/if}} gap-4">
         <div class="text-center">
@@ -382,6 +450,7 @@
       Risk ratings are determined based on the likelihood of exploitation and the potential impact to the organization.
     </p>
     
+    <div class="keep-together">
     <table class="w-full">
       <thead>
         <tr>
@@ -413,6 +482,7 @@
         </tr>
       </tbody>
     </table>
+    </div>
   </div>
 
   <!-- Findings Summary -->
@@ -420,11 +490,12 @@
     <h2 class="text-2xl font-bold mb-6 section-header">3. Findings Summary</h2>
     
     {{#if report.chartImage}}
-    <div class="mb-8 text-center">
+    <div class="mb-8 text-center keep-together">
       <img src="{{report.chartImage}}" alt="Findings Distribution" class="inline-block rounded shadow-lg" style="max-width: 600px;" />
     </div>
     {{/if}}
     
+    <div class="keep-together">
     <table class="w-full">
       <thead>
         <tr>
@@ -449,6 +520,7 @@
         {{/each}}
       </tbody>
     </table>
+    </div>
   </div>
 
   <!-- Connectivity Sections -->
@@ -481,37 +553,39 @@
       <h2 class="text-2xl font-bold mb-6 section-header">{{#if ../report.hasConnectivity}}5{{else}}4{{/if}}. Detailed Findings</h2>
     {{else}}
     <!-- Subsequent findings start on new pages -->
-    <div class="px-10 py-8 page-break no-break">
+    <div class="px-10 py-8 page-break">
     {{/if}}
-      <div class="finding-box">
-        <div class="flex items-start justify-between mb-4">
-          <h3 class="text-xl font-bold text-gray-900">{{reportFinding.title}}</h3>
-          <span class="px-3 py-1 rounded-full text-sm font-semibold severity-{{toLowerCase reportFinding.severity}}">
-            {{reportFinding.severity}}
-          </span>
+      <div class="finding-box{{#if isLongFinding}} can-break{{/if}}">
+        <div class="keep-together">
+          <div class="flex items-start justify-between mb-4">
+            <h3 class="text-xl font-bold text-gray-900">{{reportFinding.title}}</h3>
+            <span class="px-3 py-1 rounded-full text-sm font-semibold severity-{{toLowerCase reportFinding.severity}}">
+              {{reportFinding.severity}}
+            </span>
+          </div>
+          
+          {{#if reportFinding.cveId}}
+          <div class="mb-4">
+            <span class="text-sm text-gray-600">CVE Reference: </span>
+            <span class="text-sm font-mono">{{reportFinding.cveId}}</span>
+          </div>
+          {{/if}}
         </div>
         
-        {{#if reportFinding.cveId}}
-        <div class="mb-4">
-          <span class="text-sm text-gray-600">CVE Reference: </span>
-          <span class="text-sm font-mono">{{reportFinding.cveId}}</span>
-        </div>
-        {{/if}}
-        
-        <div class="mb-6">
+        <div class="mb-6 finding-section">
           <h4 class="font-semibold text-base mb-2 text-gray-800">Description</h4>
           <p class="text-gray-700 leading-relaxed">{{reportFinding.description}}</p>
         </div>
         
         {{#if reportFinding.impact}}
-        <div class="mb-6">
+        <div class="mb-6 finding-section">
           <h4 class="font-semibold text-base mb-2 text-gray-800">Impact</h4>
           <p class="text-gray-700 leading-relaxed">{{reportFinding.impact}}</p>
         </div>
         {{/if}}
         
         {{#if reportFinding.affectedSystems}}
-        <div class="mb-6">
+        <div class="mb-6 keep-together">
           <h4 class="font-semibold text-base mb-2 text-gray-800">Affected Systems</h4>
           <ul class="list-disc list-inside text-gray-700">
             {{#each reportFinding.affectedSystems}}
@@ -522,14 +596,14 @@
         {{/if}}
         
         {{#if reportFinding.recommendation}}
-        <div class="mb-6">
+        <div class="mb-6 finding-section">
           <h4 class="font-semibold text-base mb-2 text-gray-800">Recommendation</h4>
           <p class="text-gray-700 leading-relaxed">{{reportFinding.recommendation}}</p>
         </div>
         {{/if}}
         
         {{#if reportFinding.references}}
-        <div class="mb-6">
+        <div class="mb-6 keep-together">
           <h4 class="font-semibold text-base mb-2 text-gray-800">References</h4>
           <ul class="list-disc list-inside text-gray-700">
             {{#each reportFinding.references}}
@@ -540,7 +614,7 @@
         {{/if}}
         
         {{#if reportFinding.evidence}}
-        <div>
+        <div class="finding-section">
           <h4 class="font-semibold text-base mb-2 text-gray-800">Evidence</h4>
           <div class="evidence-box">{{reportFinding.evidence}}</div>
         </div>
@@ -548,11 +622,11 @@
         
         {{#if reportFinding.images}}
         {{#if reportFinding.images.length}}
-        <div class="mt-6">
+        <div class="mt-6 finding-section">
           <h4 class="font-semibold text-base mb-3 text-gray-800">Supporting Evidence</h4>
           <div class="space-y-6">
             {{#each reportFinding.images}}
-            <div class="evidence-section">
+            <div class="image-with-caption">
               <!-- Image Title -->
               <h5 class="font-medium text-sm text-gray-900 mb-2">{{this.title}}</h5>
               
@@ -582,7 +656,7 @@
   <div class="px-10 py-8 page-break">
     <h2 class="text-2xl font-bold mb-6 section-header">{{#if report.hasConnectivity}}6{{else}}5{{/if}}. Recommendations</h2>
     
-    <div class="mb-8">
+    <div class="mb-8 keep-together">
       <h3 class="text-xl font-semibold mb-4 text-red-700">Immediate Actions (Critical & High)</h3>
       <ol class="list-decimal list-inside space-y-2 text-gray-700">
         <li>Address all critical findings within 24-48 hours</li>
@@ -592,7 +666,7 @@
       </ol>
     </div>
     
-    <div class="mb-8">
+    <div class="mb-8 keep-together">
       <h3 class="text-xl font-semibold mb-4 text-yellow-700">Short-term Actions (Medium)</h3>
       <ol class="list-decimal list-inside space-y-2 text-gray-700">
         <li>Schedule remediation within standard maintenance windows</li>
@@ -601,7 +675,7 @@
       </ol>
     </div>
     
-    <div class="mb-8">
+    <div class="mb-8 keep-together">
       <h3 class="text-xl font-semibold mb-4 text-blue-700">Long-term Actions (Low & Process)</h3>
       <ol class="list-decimal list-inside space-y-2 text-gray-700">
         <li>Include in next scheduled patching cycle</li>

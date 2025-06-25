@@ -336,6 +336,73 @@ router.post("/:reportId/generate-briefing", authenticateRequest, async (req, res
     }
 });
 
+// POST /reports/generate-roe - Generate RoE PDF
+router.post("/generate-roe", authenticateRequest, async (req, res) => {
+    const { roe, engagement } = req.body;
+    const token = req.headers.authorization;
+    
+    if (!roe || !engagement) {
+        return res.status(400).json({ error: "Missing roe or engagement data" });
+    }
+
+    try {
+        // Send to Horizon to generate the RoE PDF
+        const horizonRes = await axios.post(
+            `${HORIZON_URL}/generate-roe`,
+            { roe, engagement },
+            {
+                headers: { Authorization: token },
+            }
+        );
+
+        res.status(200).json(horizonRes.data);
+    } catch (err) {
+        console.error("Error in BFF /generate-roe:", err.message);
+        res.status(500).json({ error: "Failed to generate RoE PDF" });
+    }
+});
+
+// GET /reports/file/:filename - Get generated file (reports or RoE)
+router.get("/file/:filename", authenticateRequest, async (req, res) => {
+    const { filename } = req.params;
+    const token = req.headers.authorization;
+
+    try {
+        console.log(`Fetching file: ${filename}`);
+        
+        const fileResponse = await axios.get(`${HORIZON_URL}/generated/${filename}`, {
+            responseType: "stream",
+            headers: { Authorization: token }
+        });
+
+        console.log(`Successfully fetched file: ${filename}`);
+        
+        // Set content headers for PDF
+        res.setHeader("Content-Type", "application/pdf");
+        res.setHeader("Content-Disposition", `inline; filename="${filename}"`);
+        res.setHeader("Cache-Control", "no-cache");
+        res.setHeader("Access-Control-Allow-Origin", "*");
+        res.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type");
+
+        // Handle stream errors
+        fileResponse.data.on('error', (streamErr) => {
+            console.error('File stream error:', streamErr);
+            if (!res.headersSent) {
+                res.status(500).json({ error: "Stream error" });
+            }
+        });
+
+        // Pipe file stream directly to the client
+        fileResponse.data.pipe(res);
+        
+    } catch (err) {
+        console.error("Failed to stream file from Horizon:", err.message);
+        if (!res.headersSent) {
+            res.status(500).json({ error: "Unable to stream file." });
+        }
+    }
+});
+
 // DELETE /reports/:id - Delete a report
 router.delete("/:id", authenticateRequest, async (req, res) => {
     try {
