@@ -5,6 +5,7 @@ FLUSH PRIVILEGES;
 -- Create one database per microservice
 CREATE DATABASE IF NOT EXISTS astral;
 CREATE DATABASE IF NOT EXISTS library;
+CREATE DATABASE IF NOT EXISTS singularity;
 
 GRANT ALL PRIVILEGES ON *.* TO 'microservice_user'@'%' WITH GRANT OPTION;
 FLUSH PRIVILEGES;

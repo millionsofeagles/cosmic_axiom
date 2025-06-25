@@ -546,11 +546,11 @@ function ReportDetails() {
                                         <iframe
                                             ref={pdfIframeRef}
                                             src={pdfBlobUrl}
-                                            className="w-full h-[80vh] border-0"
+                                            className="w-full h-[calc(100vh-12rem)] border-0"
                                             title="PDF Report Preview"
                                         />
                                     ) : (
-                                        <div className="flex items-center justify-center h-[80vh] bg-gray-50 dark:bg-gray-900">
+                                        <div className="flex items-center justify-center h-[calc(100vh-12rem)] bg-gray-50 dark:bg-gray-900">
                                             <div className="text-center">
                                                 <FileText className="w-24 h-24 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
                                                 <p className="text-lg font-medium text-gray-600 dark:text-gray-400 mb-2">
@@ -573,11 +573,11 @@ function ReportDetails() {
                                         <iframe
                                             ref={briefingIframeRef}
                                             src={briefingPdfUrl}
-                                            className="w-full h-[80vh] border-0"
+                                            className="w-full h-[calc(100vh-12rem)] border-0"
                                             title="Briefing PDF Preview"
                                         />
                                     ) : (
-                                        <div className="flex items-center justify-center h-[80vh] bg-gray-50 dark:bg-gray-900">
+                                        <div className="flex items-center justify-center h-[calc(100vh-12rem)] bg-gray-50 dark:bg-gray-900">
                                             <div className="text-center">
                                                 <ClipboardList className="w-24 h-24 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
                                                 <p className="text-lg font-medium text-gray-600 dark:text-gray-400 mb-2">
@@ -608,11 +608,11 @@ function ReportDetails() {
                                     report.generatedPptUrl ? (
                                         <iframe
                                             src={report.generatedPptUrl}
-                                            className="w-full h-[80vh] border-0"
+                                            className="w-full h-[calc(100vh-12rem)] border-0"
                                             title="PowerPoint Report Preview"
                                         />
                                     ) : (
-                                        <div className="flex items-center justify-center h-[80vh] bg-gray-50 dark:bg-gray-900">
+                                        <div className="flex items-center justify-center h-[calc(100vh-12rem)] bg-gray-50 dark:bg-gray-900">
                                             <div className="text-center">
                                                 <FileSpreadsheet className="w-24 h-24 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
                                                 <p className="text-lg font-medium text-gray-600 dark:text-gray-400">

@@ -428,6 +428,6 @@ This project is licensed under the GNU General Public License v3.0 - see the [LI
 
 <div align="center">
 
-**[⬆ Back to Top](#cosmic-axiom)**
+**[Back to Top](#cosmic-axiom)**
 
 </div>

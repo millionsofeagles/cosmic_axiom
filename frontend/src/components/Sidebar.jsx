@@ -4,6 +4,7 @@ import {
     LayoutDashboard,
     Moon,
     Settings,
+    Shield,
     Sun,
     Users
 } from "lucide-react";
@@ -56,6 +57,11 @@ const Sidebar = () => {
                 <Link to="/reports" className="flex items-center gap-4 hover:text-indigo-500">
                     <FileText size={20} />
                     {!collapsed && <span>Reports</span>}
+                </Link>
+
+                <Link to="/roe" className="flex items-center gap-4 hover:text-indigo-500">
+                    <Shield size={20} />
+                    {!collapsed && <span>Rules of Engagement</span>}
                 </Link>
 
                 <Link to="/findings" className="flex items-center gap-4 hover:text-indigo-500">

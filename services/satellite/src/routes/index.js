@@ -13,6 +13,7 @@ import newsRoutes from './news.js';
 import scopeRoutes from './scope.js';
 import imagesRoutes from './images.js';
 import aiRoutes from './ai.js';
+import roeRoutes from './roe.js';
 
 
 const router = Router();
@@ -31,6 +32,7 @@ router.use('/news', newsRoutes);
 router.use('/scope', scopeRoutes);
 router.use('/images', imagesRoutes);
 router.use('/ai', aiRoutes);
+router.use('/roe', roeRoutes);
 
 
 

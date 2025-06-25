@@ -1,4 +1,4 @@
-import { generatePdf, generateBriefingPdf } from "../services/generateReport.js";
+import { generatePdf, generateBriefingPdf, generateRoePdf } from "../services/generateReport.js";
 import fs from "fs";
 import path from "path";
 
@@ -37,6 +37,25 @@ export const generateBriefingReport = async (req, res) => {
     } catch (err) {
         console.error("Failed to generate briefing PDF:", err.message);
         res.status(500).json({ error: "Briefing PDF generation failed" });
+    }
+};
+
+export const generateRoeReport = async (req, res) => {
+    const { roe, engagement, existingFilename } = req.body;
+
+    if (!roe || !engagement) {
+        return res.status(400).json({ error: "Missing roe or engagement data" });
+    }
+
+    try {
+        // Generate the RoE PDF using provided data
+        const filePath = await generateRoePdf({ roe, engagement, existingFilename });
+
+        // Return the path to the generated file
+        res.status(200).json({ url: `/generated/${filePath}`, filename: filePath });
+    } catch (err) {
+        console.error("Failed to generate RoE PDF:", err.message);
+        res.status(500).json({ error: "RoE PDF generation failed" });
     }
 };
 

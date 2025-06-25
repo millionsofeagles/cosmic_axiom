@@ -17,6 +17,7 @@ export async function authenticateRequest(req, res, next) {
             },
         });
         req.tokenPayload = response.data;
+        req.user = response.data;
         next();
     } catch (err) {
         const status = err.response?.status || 403;

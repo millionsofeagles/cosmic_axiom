@@ -98,3 +98,99 @@ model DefaultReportTemplate {
   toolsAndTechniques String @db.Text
   conclusion         String @db.Text
 }
+
+enum RoeStatus {
+  DRAFT
+  APPROVED
+  ACTIVE
+  EXPIRED
+  ARCHIVED
+}
+
+enum RoeSectionType {
+  AUTHORIZATION
+  SCOPE
+  TESTING_WINDOW
+  METHODOLOGY
+  RESTRICTIONS
+  COMMUNICATION
+  EMERGENCY
+  LEGAL
+  CUSTOM
+}
+
+model RulesOfEngagement {
+  id           String          @id @default(uuid())
+  engagementId String
+  title        String
+  version      String          @default("1.0")
+  status       RoeStatus       @default(DRAFT)
+  
+  // Key dates
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  approvedAt   DateTime?
+  expiresAt    DateTime?
+  
+  // Authorization details
+  authorizedBy    String?
+  authorizedTitle String?
+  authorizedDate  DateTime?
+  
+  // Document metadata
+  classification  String?       @default("CONFIDENTIAL")
+  filename        String?
+  
+  // Sections
+  sections        RoeSection[]
+  
+  // Quick access fields for common content
+  testingWindow   Json?         // {start, end, blackoutPeriods: []}
+  emergencyContact Json?        // {name, phone, email, availability}
+  
+  @@index([engagementId])
+}
+
+model RoeSection {
+  id        String         @id @default(uuid())
+  roe       RulesOfEngagement @relation(fields: [roeId], references: [id], onDelete: Cascade)
+  roeId     String
+  
+  type      RoeSectionType
+  position  Int
+  title     String
+  content   String         @db.Text
+  
+  // For structured data sections
+  data      Json?          // Flexible JSON for section-specific data
+  
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  
+  @@index([roeId, position])
+}
+
+model RoeTemplate {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  isDefault   Boolean  @default(false)
+  
+  // Template content
+  sections    Json     // Array of template sections
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([isDefault])
+}
+
+model RoeSectionTemplate {
+  id          String         @id @default(uuid())
+  sectionType RoeSectionType @unique
+  title       String
+  content     String         @db.Text
+  
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+}
