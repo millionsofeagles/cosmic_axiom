@@ -24,7 +24,11 @@ router.get("/engagement/:engagementId", authenticateRequest, async (req, res) =>
 
 // POST /scope - Create a new scope entry
 router.post("/", authenticateRequest, async (req, res) => {
-    const { engagementId, address, description, inScope, notes } = req.body;
+    const { 
+        engagementId, address, description, inScope, notes,
+        environment, criticality, assetType, techStack,
+        authBoundary, dataClassification, geoRestrictions, thirdPartyDeps
+    } = req.body;
 
     if (!engagementId || !address) {
         return res.status(400).json({ error: "engagementId and address are required" });
@@ -37,7 +41,15 @@ router.post("/", authenticateRequest, async (req, res) => {
                 address,
                 description,
                 inScope: inScope !== undefined ? inScope : true,
-                notes
+                notes,
+                environment: environment || "PRODUCTION",
+                criticality: criticality || "MEDIUM",
+                assetType: assetType || "NETWORK",
+                techStack: techStack || [],
+                authBoundary,
+                dataClassification: dataClassification || "INTERNAL",
+                geoRestrictions,
+                thirdPartyDeps: thirdPartyDeps || []
             }
         });
 
@@ -50,7 +62,10 @@ router.post("/", authenticateRequest, async (req, res) => {
 
 // POST /scope/bulk - Bulk create scope entries from text input
 router.post("/bulk", authenticateRequest, async (req, res) => {
-    const { engagementId, addresses, inScope } = req.body;
+    const { 
+        engagementId, addresses, inScope,
+        environment, criticality, assetType, dataClassification
+    } = req.body;
 
     if (!engagementId || !addresses || !Array.isArray(addresses)) {
         return res.status(400).json({ error: "engagementId and addresses array are required" });
@@ -62,7 +77,13 @@ router.post("/bulk", authenticateRequest, async (req, res) => {
             .map(address => ({
                 engagementId,
                 address: address.trim(),
-                inScope: inScope !== undefined ? inScope : true
+                inScope: inScope !== undefined ? inScope : true,
+                environment: environment || "PRODUCTION",
+                criticality: criticality || "MEDIUM",
+                assetType: assetType || "NETWORK",
+                dataClassification: dataClassification || "INTERNAL",
+                techStack: [],
+                thirdPartyDeps: []
             }));
 
         if (scopeEntries.length === 0) {
@@ -87,16 +108,28 @@ router.post("/bulk", authenticateRequest, async (req, res) => {
 // PUT /scope/:id - Update a scope entry
 router.put("/:id", authenticateRequest, async (req, res) => {
     const { id } = req.params;
-    const { address, description, inScope, notes } = req.body;
+    const { 
+        address, description, inScope, notes,
+        environment, criticality, assetType, techStack,
+        authBoundary, dataClassification, geoRestrictions, thirdPartyDeps
+    } = req.body;
 
     try {
         const scope = await prisma.scope.update({
             where: { id },
             data: {
-                address,
-                description,
-                inScope,
-                notes
+                ...(address !== undefined && { address }),
+                ...(description !== undefined && { description }),
+                ...(inScope !== undefined && { inScope }),
+                ...(notes !== undefined && { notes }),
+                ...(environment !== undefined && { environment }),
+                ...(criticality !== undefined && { criticality }),
+                ...(assetType !== undefined && { assetType }),
+                ...(techStack !== undefined && { techStack }),
+                ...(authBoundary !== undefined && { authBoundary }),
+                ...(dataClassification !== undefined && { dataClassification }),
+                ...(geoRestrictions !== undefined && { geoRestrictions }),
+                ...(thirdPartyDeps !== undefined && { thirdPartyDeps })
             }
         });
 

@@ -193,8 +193,12 @@ foreach ($service in $MICROSERVICES) {
         # Generate Prisma client
         npx prisma generate 2>&1 | Out-Null
         
-        # Deploy migrations
-        npx prisma migrate deploy 2>&1 | Out-Null
+        # Try to deploy migrations first, fallback to db push if needed
+        $migrateResult = npx prisma migrate deploy 2>&1
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "    Migration deploy failed, trying db push..." -ForegroundColor Gray
+            npx prisma db push 2>&1 | Out-Null
+        }
         
         Write-Host "    ✓ Prisma setup complete" -ForegroundColor Green
     } catch {

@@ -30,12 +30,39 @@ router.get("/", authenticateRequest, async (req, res) => {
             reportMap.set(report.engagementId, report);
         });
 
-        // 4. Enrich engagements with reportId if it exists
+        // 4. Fetch testing parameters for all engagements in parallel
+        const testingParamsPromises = engagements.map(async (engagement) => {
+            try {
+                const response = await axios.get(`${FORGE_URL}/testing-parameters/${engagement.id}`, {
+                    headers: { Authorization: req.headers.authorization },
+                });
+                return { engagementId: engagement.id, params: response.data };
+            } catch (err) {
+                // If 404, testing parameters don't exist yet
+                if (err.response && err.response.status === 404) {
+                    return { engagementId: engagement.id, params: null };
+                }
+                console.error(`Failed to fetch testing params for engagement ${engagement.id}:`, err.message);
+                return { engagementId: engagement.id, params: null };
+            }
+        });
+
+        const testingParamsResults = await Promise.all(testingParamsPromises);
+        
+        // 5. Build a Map of engagementId → testingParameters
+        const testingParamsMap = new Map();
+        testingParamsResults.forEach(({ engagementId, params }) => {
+            testingParamsMap.set(engagementId, params);
+        });
+
+        // 6. Enrich engagements with reportId and testingParameters if they exist
         const enriched = engagements.map((engagement) => {
             const report = reportMap.get(engagement.id);
+            const testingParams = testingParamsMap.get(engagement.id);
             return {
                 ...engagement,
                 report: report ? { id: report.id } : null,
+                testingParameters: testingParams,
             };
         });
 

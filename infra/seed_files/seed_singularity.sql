@@ -330,3 +330,370 @@ You may use this section to document:
 - Special handling instructions
 
 Please modify the title and content of this section to meet your specific needs.', NOW(), NOW());
+
+-- Create sample RoE documents that showcase the enriched engagement data
+INSERT INTO RulesOfEngagement (
+    id, engagementId, title, version, status, classification,
+    authorizedBy, authorizedTitle, authorizedDate,
+    testingWindow, emergencyContact,
+    createdAt, updatedAt
+)
+VALUES
+-- Acme Corporation Network Pentest RoE
+(
+    'roe11111-1111-1111-1111-111111111111',
+    '11111111-1111-1111-1111-111111111111',
+    'Rules of Engagement - Acme Corporation Network Security Assessment',
+    '1.0',
+    'APPROVED',
+    'CONFIDENTIAL',
+    'Alice Johnson',
+    'IT Security Manager',
+    '2025-04-15',
+    JSON_OBJECT(
+        'start', '2025-05-01 09:00:00',
+        'end', '2025-05-31 17:00:00',
+        'blackoutPeriods', JSON_ARRAY(
+            'Memorial Day Weekend (May 24-26, 2025)',
+            'System Maintenance Window (May 15, 2025 02:00-06:00)',
+            'Board Meeting Day (May 20, 2025)'
+        )
+    ),
+    JSON_OBJECT(
+        'name', 'Alice Johnson',
+        'phone', '555-1234',
+        'email', 'alice@acme.com',
+        'availability', '24/7 during testing period'
+    ),
+    NOW(),
+    NOW()
+),
+-- Stellar Web App RoE
+(
+    'roe22222-2222-2222-2222-222222222222',
+    '22222222-2222-2222-2222-222222222222',
+    'Rules of Engagement - Stellar Cybersecurity Web Application Security Review',
+    '1.2',
+    'ACTIVE',
+    'CONFIDENTIAL',
+    'Clara Nguyen',
+    'Chief Security Officer',
+    '2025-05-10',
+    JSON_OBJECT(
+        'start', '2025-05-15 08:00:00',
+        'end', '2025-05-25 18:00:00',
+        'blackoutPeriods', JSON_ARRAY(
+            'Customer Portal Maintenance (May 18, 2025 01:00-05:00)'
+        )
+    ),
+    JSON_OBJECT(
+        'name', 'Clara Nguyen',
+        'phone', '555-8765',
+        'email', 'clara@stellar.com',
+        'availability', 'Business hours PST, emergency 24/7'
+    ),
+    NOW(),
+    NOW()
+),
+-- Orbit Cloud Assessment RoE
+(
+    'roe33333-3333-3333-3333-333333333333',
+    '33333333-3333-3333-3333-333333333333',
+    'Rules of Engagement - Orbit Industries Cloud Infrastructure Assessment',
+    '1.0',
+    'DRAFT',
+    'RESTRICTED',
+    'David Lee',
+    'Chief Technology Officer',
+    NULL,
+    JSON_OBJECT(
+        'start', '2025-06-01 10:00:00',
+        'end', '2025-06-15 16:00:00',
+        'blackoutPeriods', JSON_ARRAY(
+            'Production Deployment Window (June 5, 2025 12:00-14:00)',
+            'AWS Scheduled Maintenance (June 10, 2025 03:00-07:00)'
+        )
+    ),
+    JSON_OBJECT(
+        'name', 'David Lee',
+        'phone', '555-3456',
+        'email', 'david@orbit.com',
+        'availability', 'Business hours UTC, critical issues 24/7'
+    ),
+    NOW(),
+    NOW()
+);
+
+-- Create RoE sections for the Acme engagement showcasing different section types
+INSERT INTO RoeSection (
+    id, roeId, type, position, title, content, data,
+    createdAt, updatedAt
+)
+VALUES
+-- Authorization section
+(
+    UUID(),
+    'roe11111-1111-1111-1111-111111111111',
+    'AUTHORIZATION',
+    1,
+    'Authorization & Approval',
+    'This Network Penetration Testing engagement has been authorized by Acme Corporation and is conducted under the explicit authorization of Alice Johnson, IT Security Manager. This engagement is specifically designed for PCI DSS and SOC2 Type 2 compliance validation, focusing on the organization''s payment processing infrastructure and critical business systems.',
+    JSON_OBJECT(
+        'complianceFrameworks', JSON_ARRAY('PCI_DSS', 'SOC2_TYPE2'),
+        'riskLevel', 'MEDIUM',
+        'businessContext', 'Payment processing and customer data protection'
+    ),
+    NOW(),
+    NOW()
+),
+-- Enhanced scope section with enriched data
+(
+    UUID(),
+    'roe11111-1111-1111-1111-111111111111',
+    'SCOPE',
+    2,
+    'Scope Definition & Asset Classification',
+    'The following scope has been defined based on the network penetration testing engagement type, with assets categorized by criticality and environment. This assessment covers production infrastructure only, with development systems explicitly excluded.',
+    JSON_OBJECT(
+        'inScopeAssets', JSON_ARRAY(
+            '192.168.1.0/24 (Corporate Network - HIGH criticality)',
+            '10.0.0.0/16 (Data Center - CRITICAL criticality)',
+            'acme.com (Web Applications - MEDIUM criticality)'
+        ),
+        'outOfScopeAssets', JSON_ARRAY(
+            '172.16.0.0/12 (Development Network)',
+            'Disaster Recovery Site',
+            'Third-party SaaS applications'
+        ),
+        'criticalSystems', JSON_ARRAY(
+            'Primary Domain Controller',
+            'Payment Processing Server',
+            'Customer Database'
+        ),
+        'complianceZones', JSON_ARRAY(
+            'PCI DSS Cardholder Data Environment',
+            'SOC2 Critical Business Systems'
+        )
+    ),
+    NOW(),
+    NOW()
+),
+-- Testing window with business context
+(
+    UUID(),
+    'roe11111-1111-1111-1111-111111111111',
+    'TESTING_WINDOW',
+    3,
+    'Testing Schedule & Business Considerations',
+    'Testing is scheduled for 160 hours over a 4-week period with a maximum of 3 concurrent testers. Business critical hours (9:00 AM - 5:00 PM EST) require coordination with IT staff, and certain high-impact testing will be restricted during peak business operations.',
+    JSON_OBJECT(
+        'totalBudgetHours', 160,
+        'maxConcurrentTesters', 3,
+        'businessCriticalHours', JSON_OBJECT(
+            'start', '09:00',
+            'end', '17:00',
+            'timezone', 'EST'
+        ),
+        'testingPhases', JSON_ARRAY(
+            'Week 1-2: External reconnaissance and vulnerability discovery',
+            'Week 3: Internal network testing and privilege escalation',
+            'Week 4: Lateral movement testing and documentation'
+        )
+    ),
+    NOW(),
+    NOW()
+),
+-- Methodology section with testing parameters
+(
+    UUID(),
+    'roe11111-1111-1111-1111-111111111111',
+    'METHODOLOGY',
+    4,
+    'Approved Testing Methodology & Parameters',
+    'This black-box network penetration test will follow NIST SP 800-115 guidelines with automated scanning and manual testing techniques. Testing parameters have been configured for conservative operation to minimize business impact.',
+    JSON_OBJECT(
+        'testingApproach', 'BLACK_BOX',
+        'allowedMethods', JSON_ARRAY(
+            'Automated vulnerability scanning (max 10 req/sec)',
+            'Manual penetration testing',
+            'Password spraying (limited attempts)',
+            'Default credential testing'
+        ),
+        'restrictions', JSON_ARRAY(
+            'No brute force attacks',
+            'No DoS testing',
+            'No data exfiltration',
+            'No disruptive testing'
+        ),
+        'frameworks', JSON_ARRAY(
+            'NIST SP 800-115',
+            'OWASP Testing Guide',
+            'PCI DSS Testing Procedures'
+        )
+    ),
+    NOW(),
+    NOW()
+),
+-- Restrictions based on testing parameters
+(
+    UUID(),
+    'roe11111-1111-1111-1111-111111111111',
+    'RESTRICTIONS',
+    5,
+    'Testing Restrictions & Limitations',
+    'Strict limitations are in place to protect business operations and comply with PCI DSS requirements. All testing must coordinate with IT staff during business hours (9AM-5PM EST) and avoid any activities that could impact payment processing systems.',
+    JSON_OBJECT(
+        'technicalRestrictions', JSON_ARRAY(
+            'Maximum 10 requests per second',
+            'Maximum 50 concurrent connections',
+            'No load or stress testing',
+            'No social engineering activities'
+        ),
+        'operationalRestrictions', JSON_ARRAY(
+            'No testing during business hours without IT coordination',
+            'Immediate notification required for any payment system access',
+            'No modification of production data',
+            'Screenshots only for proof-of-concept documentation'
+        ),
+        'complianceRestrictions', JSON_ARRAY(
+            'PCI DSS data handling requirements',
+            'SOC2 audit trail maintenance',
+            'No access to live cardholder data'
+        )
+    ),
+    NOW(),
+    NOW()
+),
+-- Communication protocols
+(
+    UUID(),
+    'roe11111-1111-1111-1111-111111111111',
+    'COMMUNICATION',
+    6,
+    'Communication Protocols & Escalation',
+    'Communication procedures are established to ensure proper coordination with Acme Corporation stakeholders and immediate escalation of critical findings that could impact payment processing or customer data security.',
+    JSON_OBJECT(
+        'contacts', JSON_ARRAY(
+            JSON_OBJECT(
+                'role', 'Primary Technical Contact',
+                'name', 'Alice Johnson',
+                'phone', '555-1234',
+                'email', 'alice@acme.com',
+                'availability', '24/7 during testing period'
+            ),
+            JSON_OBJECT(
+                'role', 'Secondary Contact',
+                'name', 'Bob Smith',
+                'phone', '555-5678',
+                'email', 'bob@acme.com',
+                'availability', 'Business hours EST'
+            )
+        ),
+        'escalationMatrix', JSON_ARRAY(
+            'Level 1: Testing team → Alice Johnson (IT Security)',
+            'Level 2: Alice Johnson → CTO',
+            'Level 3: CTO → Executive team'
+        ),
+        'reportingSchedule', JSON_ARRAY(
+            'Daily status calls at 5:00 PM EST',
+            'Weekly executive summary reports',
+            'Immediate notification for CRITICAL findings',
+            '4-hour notification for HIGH findings'
+        )
+    ),
+    NOW(),
+    NOW()
+);
+
+-- Create sample RoE template for different engagement types
+INSERT INTO RoeTemplate (
+    id, name, description, isDefault,
+    sections,
+    createdAt, updatedAt
+)
+VALUES
+(
+    UUID(),
+    'Network Penetration Test Template',
+    'Standard template for network-based penetration testing engagements',
+    TRUE,
+    JSON_ARRAY(
+        JSON_OBJECT(
+            'type', 'AUTHORIZATION',
+            'title', 'Network Testing Authorization',
+            'content', 'This network penetration testing engagement has been authorized for the purpose of evaluating network security controls and identifying potential vulnerabilities in the organization''s network infrastructure.'
+        ),
+        JSON_OBJECT(
+            'type', 'SCOPE',
+            'title', 'Network Scope Definition',
+            'content', 'The scope includes all network segments, devices, and services within the defined IP ranges. Critical infrastructure and business systems have been identified and will receive special attention during testing.'
+        ),
+        JSON_OBJECT(
+            'type', 'METHODOLOGY',
+            'title', 'Network Testing Methodology',
+            'content', 'Testing will follow a structured approach including network discovery, vulnerability assessment, exploitation attempts, and post-exploitation activities where appropriate.'
+        ),
+        JSON_OBJECT(
+            'type', 'RESTRICTIONS',
+            'title', 'Network Testing Restrictions',
+            'content', 'Specific restrictions apply to network testing including rate limiting, DoS prevention, and coordination requirements during business hours.'
+        )
+    ),
+    NOW(),
+    NOW()
+),
+(
+    UUID(),
+    'Web Application Security Template',
+    'Template optimized for web application penetration testing',
+    FALSE,
+    JSON_ARRAY(
+        JSON_OBJECT(
+            'type', 'AUTHORIZATION',
+            'title', 'Web Application Testing Authorization',
+            'content', 'Authorization for comprehensive web application security testing including OWASP Top 10 validation and application-specific vulnerability assessment.'
+        ),
+        JSON_OBJECT(
+            'type', 'SCOPE',
+            'title', 'Web Application Scope',
+            'content', 'Testing scope includes all web applications, APIs, and supporting infrastructure within the defined URLs and domains.'
+        ),
+        JSON_OBJECT(
+            'type', 'METHODOLOGY',
+            'title', 'Web Application Testing Approach',
+            'content', 'Structured web application testing including automated scanning, manual verification, authentication testing, and business logic validation.'
+        )
+    ),
+    NOW(),
+    NOW()
+),
+(
+    UUID(),
+    'Cloud Security Assessment Template',
+    'Template for cloud infrastructure security assessments',
+    FALSE,
+    JSON_ARRAY(
+        JSON_OBJECT(
+            'type', 'AUTHORIZATION',
+            'title', 'Cloud Security Testing Authorization',
+            'content', 'Authorization for cloud infrastructure security assessment including IAM review, container security, and data protection analysis.'
+        ),
+        JSON_OBJECT(
+            'type', 'SCOPE',
+            'title', 'Cloud Infrastructure Scope',
+            'content', 'Assessment covers cloud services, configurations, and security controls within the specified cloud accounts and regions.'
+        ),
+        JSON_OBJECT(
+            'type', 'METHODOLOGY',
+            'title', 'Cloud Security Methodology',
+            'content', 'Cloud-specific testing approach including configuration review, IAM analysis, network security validation, and compliance verification.'
+        ),
+        JSON_OBJECT(
+            'type', 'RESTRICTIONS',
+            'title', 'Cloud Testing Restrictions',
+            'content', 'Special considerations for cloud testing including service disruption prevention, cost management, and compliance requirements.'
+        )
+    ),
+    NOW(),
+    NOW()
+);

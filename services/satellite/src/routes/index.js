@@ -14,6 +14,7 @@ import scopeRoutes from './scope.js';
 import imagesRoutes from './images.js';
 import aiRoutes from './ai.js';
 import roeRoutes from './roe.js';
+import testingParametersRoutes from './testing-parameters.js';
 
 
 const router = Router();
@@ -33,6 +34,7 @@ router.use('/scope', scopeRoutes);
 router.use('/images', imagesRoutes);
 router.use('/ai', aiRoutes);
 router.use('/roe', roeRoutes);
+router.use('/testing-parameters', testingParametersRoutes);
 
 
 
