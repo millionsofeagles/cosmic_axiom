@@ -113,6 +113,105 @@
       border-left: 4px solid #10b981;
     }
     
+    .schedule-visual {
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 1rem;
+      margin: 1rem 0;
+    }
+    
+    .week-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    
+    .day-cell {
+      text-align: center;
+      padding: 0.5rem;
+      border-radius: 6px;
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+    
+    .day-allowed {
+      background-color: #f59e0b;
+      color: white;
+    }
+    
+    .day-weekend {
+      background-color: #fca5a5;
+      color: #dc2626;
+    }
+    
+    .day-disabled {
+      background-color: #f3f4f6;
+      color: #6b7280;
+    }
+    
+    .timeline-container {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 6px;
+      padding: 1rem;
+      margin: 1rem 0;
+    }
+    
+    .timeline-bar {
+      position: relative;
+      height: 20px;
+      background: #e5e7eb;
+      border-radius: 10px;
+      margin: 0.5rem 0;
+    }
+    
+    .timeline-testing {
+      position: absolute;
+      height: 100%;
+      background: linear-gradient(90deg, #f59e0b, #d97706);
+      border-radius: 10px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .timeline-restricted {
+      position: absolute;
+      height: 100%;
+      background: linear-gradient(90deg, #ef4444, #dc2626);
+      border-radius: 10px;
+      border: 2px solid #b91c1c;
+      z-index: 10;
+    }
+    
+    .timeline-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: #6b7280;
+      margin-bottom: 0.5rem;
+    }
+    
+    .timeline-legend {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-top: 0.5rem;
+      font-size: 0.75rem;
+    }
+    
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    
+    .legend-color {
+      width: 12px;
+      height: 12px;
+      border-radius: 2px;
+    }
+    
     .restrictions-box {
       background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
       border-left: 4px solid #ef4444;
@@ -423,6 +522,105 @@
           <h4 class="font-semibold text-blue-800 mb-2">Total Authorized Testing Hours:</h4>
           <p class="text-gray-700">{{../engagement.budgetHours}} hours</p>
         </div>
+        {{/if}}
+        
+        {{#if ../engagement.testingParameters}}
+        {{#if ../engagement.testingParameters.testingWindowEnabled}}
+        <div class="schedule-visual mt-4 can-break">
+          <h4 class="font-semibold text-green-800 mb-3">Authorized Testing Schedule</h4>
+          
+          <!-- Testing Period -->
+          <div class="mb-3 p-2 bg-green-50 border-l-4 border-green-400 rounded text-sm">
+            <span class="font-semibold text-green-700">Testing Period:</span>
+            <span class="text-green-700">{{formatDate ../engagement.startDate}} - {{formatDate ../engagement.endDate}}</span>
+          </div>
+          
+          <!-- Compact Schedule Grid -->
+          <div class="grid grid-cols-2 gap-4">
+            <!-- Weekly Schedule -->
+            <div>
+              <h5 class="font-semibold text-gray-700 mb-2 text-sm">Allowed Testing Days</h5>
+              <div class="week-grid" style="grid-template-columns: repeat(7, 1fr); gap: 0.25rem;">
+                <div class="day-cell {{#if (contains ../engagement.testingParameters.allowedDays 'Sunday')}}day-allowed{{else}}day-weekend{{/if}}" style="padding: 0.25rem; font-size: 0.75rem;">
+                  <div>Sun</div>
+                  <div style="font-size: 0.625rem;">{{#if (contains ../engagement.testingParameters.allowedDays 'Sunday')}}Yes{{else}}No{{/if}}</div>
+                </div>
+                <div class="day-cell {{#if (contains ../engagement.testingParameters.allowedDays 'Monday')}}day-allowed{{else}}day-disabled{{/if}}" style="padding: 0.25rem; font-size: 0.75rem;">
+                  <div>Mon</div>
+                  <div style="font-size: 0.625rem;">{{#if (contains ../engagement.testingParameters.allowedDays 'Monday')}}Yes{{else}}No{{/if}}</div>
+                </div>
+                <div class="day-cell {{#if (contains ../engagement.testingParameters.allowedDays 'Tuesday')}}day-allowed{{else}}day-disabled{{/if}}" style="padding: 0.25rem; font-size: 0.75rem;">
+                  <div>Tue</div>
+                  <div style="font-size: 0.625rem;">{{#if (contains ../engagement.testingParameters.allowedDays 'Tuesday')}}Yes{{else}}No{{/if}}</div>
+                </div>
+                <div class="day-cell {{#if (contains ../engagement.testingParameters.allowedDays 'Wednesday')}}day-allowed{{else}}day-disabled{{/if}}" style="padding: 0.25rem; font-size: 0.75rem;">
+                  <div>Wed</div>
+                  <div style="font-size: 0.625rem;">{{#if (contains ../engagement.testingParameters.allowedDays 'Wednesday')}}Yes{{else}}No{{/if}}</div>
+                </div>
+                <div class="day-cell {{#if (contains ../engagement.testingParameters.allowedDays 'Thursday')}}day-allowed{{else}}day-disabled{{/if}}" style="padding: 0.25rem; font-size: 0.75rem;">
+                  <div>Thu</div>
+                  <div style="font-size: 0.625rem;">{{#if (contains ../engagement.testingParameters.allowedDays 'Thursday')}}Yes{{else}}No{{/if}}</div>
+                </div>
+                <div class="day-cell {{#if (contains ../engagement.testingParameters.allowedDays 'Friday')}}day-allowed{{else}}day-disabled{{/if}}" style="padding: 0.25rem; font-size: 0.75rem;">
+                  <div>Fri</div>
+                  <div style="font-size: 0.625rem;">{{#if (contains ../engagement.testingParameters.allowedDays 'Friday')}}Yes{{else}}No{{/if}}</div>
+                </div>
+                <div class="day-cell {{#if (contains ../engagement.testingParameters.allowedDays 'Saturday')}}day-allowed{{else}}day-weekend{{/if}}" style="padding: 0.25rem; font-size: 0.75rem;">
+                  <div>Sat</div>
+                  <div style="font-size: 0.625rem;">{{#if (contains ../engagement.testingParameters.allowedDays 'Saturday')}}Yes{{else}}No{{/if}}</div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Daily Testing Hours -->
+            {{#if ../engagement.testingParameters.testingStartTime}}
+            <div>
+              <h5 class="font-semibold text-gray-700 mb-2 text-sm">Daily Testing Hours</h5>
+              <div class="timeline-container" style="padding: 0.5rem; margin: 0;">
+                <div class="timeline-labels" style="font-size: 0.625rem; margin-bottom: 0.25rem;">
+                  <span>12 AM</span>
+                  <span>6 AM</span>
+                  <span>12 PM</span>
+                  <span>6 PM</span>
+                  <span>12 AM</span>
+                </div>
+                <div class="timeline-bar" style="height: 16px;">
+                  <div class="timeline-testing" style="left: {{timeToPercent ../engagement.testingParameters.testingStartTime}}%; width: {{timeDuration ../engagement.testingParameters.testingStartTime ../engagement.testingParameters.testingEndTime}}%;"></div>
+                  {{#if ../engagement.testingParameters.disruptiveTestingWindow.enabled}}
+                  <div class="timeline-restricted" style="left: {{timeToPercent ../engagement.testingParameters.disruptiveTestingWindow.startTime}}%; width: {{timeDuration ../engagement.testingParameters.disruptiveTestingWindow.startTime ../engagement.testingParameters.disruptiveTestingWindow.endTime}}%;"></div>
+                  {{/if}}
+                </div>
+                <div class="timeline-legend" style="margin-top: 0.25rem; font-size: 0.625rem;">
+                  <div class="legend-item">
+                    <div class="legend-color" style="background: linear-gradient(90deg, #f59e0b, #d97706); width: 8px; height: 8px;"></div>
+                    <span>Testing Window</span>
+                  </div>
+                  {{#if ../engagement.testingParameters.disruptiveTestingWindow.enabled}}
+                  <div class="legend-item">
+                    <div class="legend-color" style="background: linear-gradient(90deg, #ef4444, #dc2626); border: 1px solid #b91c1c; width: 8px; height: 8px;"></div>
+                    <span>No Disruptive</span>
+                  </div>
+                  {{/if}}
+                </div>
+                <div class="text-xs text-gray-600 mt-1">
+                  {{../engagement.testingParameters.testingStartTime}} - {{../engagement.testingParameters.testingEndTime}}{{#if ../engagement.testingParameters.timezone}} ({{../engagement.testingParameters.timezone}}){{/if}}
+                  {{#if ../engagement.testingParameters.disruptiveTestingWindow.enabled}}
+                  <br>Disruptive restricted: {{../engagement.testingParameters.disruptiveTestingWindow.startTime}} - {{../engagement.testingParameters.disruptiveTestingWindow.endTime}}
+                  {{/if}}
+                </div>
+              </div>
+            </div>
+            {{/if}}
+          </div>
+          
+          {{#if ../engagement.testingParameters.emergencyContactRequired}}
+          <div class="mt-2 p-2 bg-yellow-50 border-l-4 border-yellow-400 rounded text-sm">
+            <span class="text-yellow-600 font-semibold">Emergency Contact Required:</span>
+            <span class="text-yellow-700">Emergency contact availability required during off-hours testing.</span>
+          </div>
+          {{/if}}
+        </div>
+        {{/if}}
         {{/if}}
       </div>
     </div>

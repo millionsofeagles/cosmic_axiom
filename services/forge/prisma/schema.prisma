@@ -136,6 +136,16 @@ model TestingParameters {
   // Custom restrictions
   customRestrictions      Json    @default("[]")
   
+  // Testing window & schedule
+  testingWindowEnabled    Boolean @default(false)
+  allowedDays            Json    @default("[\"Monday\", \"Tuesday\", \"Wednesday\", \"Thursday\", \"Friday\"]")
+  testingStartTime       String? // e.g., "09:00"
+  testingEndTime         String? // e.g., "17:00"
+  timezone               String  @default("EST")
+  disruptiveTestingWindow Json   @default("{\"enabled\": false, \"startTime\": \"12:00\", \"endTime\": \"14:00\"}")
+  emergencyContactRequired Boolean @default(false)
+  blackoutDates          Json    @default("[]")
+  
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 }

@@ -186,6 +186,8 @@ INSERT INTO TestingParameters (
     dataExfiltrationAllowed, maxDataExfilSize, screenshotAllowed,
     dosTestingAllowed, disruptiveTestingAllowed,
     customRestrictions,
+    testingWindowEnabled, allowedDays, testingStartTime, testingEndTime, timezone,
+    disruptiveTestingWindow, emergencyContactRequired, blackoutDates,
     createdAt, updatedAt
 )
 VALUES
@@ -200,6 +202,8 @@ VALUES
     FALSE, NULL, TRUE,
     FALSE, FALSE,
     JSON_ARRAY('No testing during business hours 9AM-5PM EST', 'Coordinate with IT before any network scans'),
+    TRUE, JSON_ARRAY('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'), '09:00', '17:00', 'EST',
+    JSON_OBJECT('enabled', FALSE, 'startTime', '12:00', 'endTime', '14:00'), FALSE, JSON_ARRAY(),
     NOW(), NOW()
 ),
 -- Stellar Web App Parameters (Moderate)
@@ -213,6 +217,8 @@ VALUES
     TRUE, '1MB', TRUE,
     FALSE, FALSE,
     JSON_ARRAY('Phishing emails only to designated test accounts', 'No real customer data exfiltration'),
+    TRUE, JSON_ARRAY('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'), '08:00', '18:00', 'PST',
+    JSON_OBJECT('enabled', TRUE, 'startTime', '12:00', 'endTime', '13:00'), FALSE, JSON_ARRAY(),
     NOW(), NOW()
 ),
 -- Orbit Cloud Assessment Parameters (Comprehensive)
@@ -226,6 +232,8 @@ VALUES
     TRUE, '10MB', TRUE,
     FALSE, FALSE,
     JSON_ARRAY('AWS CloudTrail monitoring required', 'Coordinate with DevOps team for any infrastructure changes'),
+    TRUE, JSON_ARRAY('Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'), '00:00', '23:59', 'UTC',
+    JSON_OBJECT('enabled', FALSE, 'startTime', '12:00', 'endTime', '14:00'), TRUE, JSON_ARRAY('2025-12-25', '2025-01-01'),
     NOW(), NOW()
 ),
 -- Mobile App Parameters (Mobile-specific)
@@ -239,6 +247,8 @@ VALUES
     FALSE, NULL, TRUE,
     FALSE, FALSE,
     JSON_ARRAY('Testing on dedicated devices only', 'No jailbreaking/rooting of production devices'),
+    TRUE, JSON_ARRAY('Tuesday', 'Wednesday', 'Thursday', 'Monday', 'Friday'), '09:00', '17:00', 'EST',
+    JSON_OBJECT('enabled', TRUE, 'startTime', '12:00', 'endTime', '14:00'), FALSE, JSON_ARRAY(),
     NOW(), NOW()
 ),
 -- Red Team Parameters (Aggressive)
@@ -252,5 +262,7 @@ VALUES
     TRUE, '100MB', TRUE,
     FALSE, TRUE,
     JSON_ARRAY('24/7 testing allowed', 'Real-world attack simulation', 'Physical access attempts allowed'),
+    FALSE, JSON_ARRAY('Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'), NULL, NULL, 'UTC',
+    JSON_OBJECT('enabled', FALSE, 'startTime', '12:00', 'endTime', '14:00'), TRUE, JSON_ARRAY(),
     NOW(), NOW()
 );

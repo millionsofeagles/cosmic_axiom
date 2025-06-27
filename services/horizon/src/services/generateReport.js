@@ -49,6 +49,41 @@ Handlebars.registerHelper("formatEnum", function(str) {
         .join(' ');
 });
 
+// Helper for checking if array contains value
+Handlebars.registerHelper("contains", function(array, value) {
+    if (!array || !Array.isArray(array)) return false;
+    return array.includes(value);
+});
+
+// Helper for joining array values
+Handlebars.registerHelper("join", function(array, separator) {
+    if (!array || !Array.isArray(array)) return '';
+    return array.join(separator || ', ');
+});
+
+// Helper for converting time to percentage of day
+Handlebars.registerHelper("timeToPercent", function(timeString) {
+    if (!timeString) return 0;
+    const [hours, minutes] = timeString.split(':').map(Number);
+    const totalMinutes = hours * 60 + minutes;
+    return (totalMinutes / (24 * 60)) * 100;
+});
+
+// Helper for calculating time duration as percentage
+Handlebars.registerHelper("timeDuration", function(startTime, endTime) {
+    if (!startTime || !endTime) return 0;
+    const [startHours, startMinutes] = startTime.split(':').map(Number);
+    const [endHours, endMinutes] = endTime.split(':').map(Number);
+    
+    const startTotalMinutes = startHours * 60 + startMinutes;
+    const endTotalMinutes = endHours * 60 + endMinutes;
+    
+    let duration = endTotalMinutes - startTotalMinutes;
+    if (duration < 0) duration += 24 * 60; // Handle overnight periods
+    
+    return (duration / (24 * 60)) * 100;
+});
+
 const generateChartImage = async (severityCounts) => {
     const width = 600;
     const height = 400;
