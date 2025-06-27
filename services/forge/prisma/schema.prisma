@@ -40,6 +40,24 @@ model Engagement {
   startDate    DateTime
   endDate      DateTime?
   status       EngagementStatus @default(PLANNED)
+  
+  // Engagement type and methodology
+  type         EngagementType    @default(NETWORK_PENTEST)
+  methodology  TestingMethodology @default(BLACK_BOX)
+  
+  // Compliance and risk
+  complianceFrameworks Json      @default("[]") // Array of compliance requirements
+  riskTolerance        RiskTolerance @default(MEDIUM)
+  
+  // Business context
+  businessCriticalHours Json?     // e.g., {"start": "09:00", "end": "17:00", "timezone": "EST"}
+  criticalSystems      Json       @default("[]") // Array of critical system identifiers
+  previousEngagements  Json       @default("[]") // References to previous engagement IDs
+  
+  // Constraints
+  budgetHours          Int?       // Total authorized testing hours
+  maxConcurrentTesters Int?       // Resource constraints
+  
   createdAt    DateTime         @default(now())
   updatedAt    DateTime         @updatedAt
 
@@ -47,6 +65,7 @@ model Engagement {
   customerId   String
 
   scopes       Scope[]
+  testingParameters TestingParameters?
 }
 
 model Scope {
@@ -55,6 +74,21 @@ model Scope {
   description   String?
   inScope       Boolean   @default(true)
   notes         String?
+  
+  // Asset categorization
+  environment   AssetEnvironment @default(PRODUCTION)
+  criticality   AssetCriticality @default(MEDIUM)
+  assetType     AssetType        @default(NETWORK)
+  
+  // Technical details
+  techStack     Json      @default("[]") // Array of technologies
+  authBoundary  String?   // Authentication realm/domain
+  dataClassification DataClassification @default(INTERNAL)
+  
+  // Restrictions
+  geoRestrictions Json?   // Geographic/jurisdictional limits
+  thirdPartyDeps  Json    @default("[]") // External dependencies
+  
   engagement    Engagement @relation(fields: [engagementId], references: [id], onDelete: Cascade)
   engagementId  String
 
@@ -62,9 +96,118 @@ model Scope {
   updatedAt     DateTime  @updatedAt
 }
 
+// Testing Parameters Model
+model TestingParameters {
+  id            String    @id @default(uuid())
+  engagement    Engagement @relation(fields: [engagementId], references: [id], onDelete: Cascade)
+  engagementId  String    @unique
+  
+  // Automated vs Manual
+  automatedScanningAllowed Boolean @default(true)
+  manualTestingAllowed     Boolean @default(true)
+  
+  // Load and stress testing
+  maxRequestsPerSecond     Int?
+  maxConcurrentConnections Int?
+  loadTestingAllowed       Boolean @default(false)
+  stressTestingAllowed     Boolean @default(false)
+  
+  // Social engineering
+  socialEngineeringAllowed Boolean @default(false)
+  phishingAllowed         Boolean @default(false)
+  vishingAllowed          Boolean @default(false)
+  physicalTestingAllowed  Boolean @default(false)
+  
+  // Credential testing
+  bruteForceAllowed       Boolean @default(false)
+  passwordSprayingAllowed Boolean @default(false)
+  credentialStuffingAllowed Boolean @default(false)
+  defaultCredsTestingAllowed Boolean @default(true)
+  
+  // Data handling
+  dataExfiltrationAllowed Boolean @default(false)
+  maxDataExfilSize        String? // e.g., "10MB", "1GB"
+  screenshotAllowed       Boolean @default(true)
+  
+  // DoS and disruption
+  dosTestingAllowed       Boolean @default(false)
+  disruptiveTestingAllowed Boolean @default(false)
+  
+  // Custom restrictions
+  customRestrictions      Json    @default("[]")
+  
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
 enum EngagementStatus {
   PLANNED
   ACTIVE
   COMPLETED
   CANCELED
+}
+
+enum EngagementType {
+  NETWORK_PENTEST
+  WEB_APP_PENTEST
+  MOBILE_APP_PENTEST
+  API_PENTEST
+  CLOUD_SECURITY
+  IOT_PENTEST
+  PHYSICAL_SECURITY
+  SOCIAL_ENGINEERING
+  RED_TEAM
+  PURPLE_TEAM
+  VULNERABILITY_ASSESSMENT
+  COMPLIANCE_AUDIT
+}
+
+enum TestingMethodology {
+  BLACK_BOX
+  GRAY_BOX
+  WHITE_BOX
+  HYBRID
+}
+
+enum RiskTolerance {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum AssetEnvironment {
+  PRODUCTION
+  STAGING
+  DEVELOPMENT
+  QA
+  DR
+  SANDBOX
+}
+
+enum AssetCriticality {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum AssetType {
+  NETWORK
+  WEB_APPLICATION
+  API
+  DATABASE
+  CLOUD_RESOURCE
+  IOT_DEVICE
+  MOBILE_APP
+  INFRASTRUCTURE
+  ENDPOINT
+}
+
+enum DataClassification {
+  PUBLIC
+  INTERNAL
+  CONFIDENTIAL
+  RESTRICTED
+  TOP_SECRET
 }

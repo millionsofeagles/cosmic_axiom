@@ -13,6 +13,7 @@ router.get("/", authenticateRequest, async (req, res) => {
                 customer: {
                     select: { id: true, name: true },
                 },
+                testingParameters: true,
             },
             orderBy: { createdAt: "desc" },
         });
@@ -26,6 +27,10 @@ router.get("/", authenticateRequest, async (req, res) => {
                 endDate: e.endDate,
                 customerId: e.customerId,
                 customer: e.customer?.name || "Unknown",
+                type: e.type,
+                methodology: e.methodology,
+                riskTolerance: e.riskTolerance,
+                complianceFrameworks: e.complianceFrameworks,
             }))
         );
     } catch (err) {
@@ -45,6 +50,8 @@ router.get("/:id", authenticateRequest, async (req, res) => {
                 customer: {
                     select: { id: true, name: true },
                 },
+                testingParameters: true,
+                scopes: true,
             },
         });
 
@@ -55,11 +62,23 @@ router.get("/:id", authenticateRequest, async (req, res) => {
         res.json({
             id: engagement.id,
             name: engagement.name,
+            description: engagement.description,
             status: engagement.status,
             startDate: engagement.startDate,
             endDate: engagement.endDate,
             customerId: engagement.customerId,
             customer: engagement.customer?.name || "Unknown",
+            type: engagement.type,
+            methodology: engagement.methodology,
+            complianceFrameworks: engagement.complianceFrameworks,
+            riskTolerance: engagement.riskTolerance,
+            businessCriticalHours: engagement.businessCriticalHours,
+            criticalSystems: engagement.criticalSystems,
+            previousEngagements: engagement.previousEngagements,
+            budgetHours: engagement.budgetHours,
+            maxConcurrentTesters: engagement.maxConcurrentTesters,
+            testingParameters: engagement.testingParameters,
+            scopes: engagement.scopes,
         });
     } catch (err) {
         console.error("Failed to fetch engagement:", err.message);
@@ -69,7 +88,12 @@ router.get("/:id", authenticateRequest, async (req, res) => {
 
 // POST /engagement - Create a new engagement
 router.post("/", authenticateRequest, async (req, res) => {
-    const { name, description, customerId, status, startDate, endDate } = req.body;
+    const { 
+        name, description, customerId, status, startDate, endDate,
+        type, methodology, complianceFrameworks, riskTolerance,
+        businessCriticalHours, criticalSystems, previousEngagements,
+        budgetHours, maxConcurrentTesters, testingParameters
+    } = req.body;
 
     if (!name || !customerId) {
         return res.status(400).json({ error: "Missing required fields" });
@@ -84,11 +108,24 @@ router.post("/", authenticateRequest, async (req, res) => {
                 status: status || "PLANNED",
                 startDate: startDate ? new Date(startDate) : undefined,
                 endDate: endDate ? new Date(endDate) : undefined,
+                type: type || "NETWORK_PENTEST",
+                methodology: methodology || "BLACK_BOX",
+                complianceFrameworks: complianceFrameworks || [],
+                riskTolerance: riskTolerance || "MEDIUM",
+                businessCriticalHours: businessCriticalHours || null,
+                criticalSystems: criticalSystems || [],
+                previousEngagements: previousEngagements || [],
+                budgetHours: budgetHours || null,
+                maxConcurrentTesters: maxConcurrentTesters || null,
+                testingParameters: testingParameters ? {
+                    create: testingParameters
+                } : undefined,
             },
             include: {
                 customer: {
                     select: { id: true, name: true },
                 },
+                testingParameters: true,
             },
         });
 
@@ -96,11 +133,22 @@ router.post("/", authenticateRequest, async (req, res) => {
         res.status(201).json({
             id: newEngagement.id,
             name: newEngagement.name,
+            description: newEngagement.description,
             status: newEngagement.status,
             startDate: newEngagement.startDate,
             endDate: newEngagement.endDate,
             customerId: newEngagement.customerId,
             customer: newEngagement.customer?.name || "Unknown",
+            type: newEngagement.type,
+            methodology: newEngagement.methodology,
+            complianceFrameworks: newEngagement.complianceFrameworks,
+            riskTolerance: newEngagement.riskTolerance,
+            businessCriticalHours: newEngagement.businessCriticalHours,
+            criticalSystems: newEngagement.criticalSystems,
+            previousEngagements: newEngagement.previousEngagements,
+            budgetHours: newEngagement.budgetHours,
+            maxConcurrentTesters: newEngagement.maxConcurrentTesters,
+            testingParameters: newEngagement.testingParameters,
         });
     } catch (err) {
         console.error("Failed to create engagement:", err.message);
@@ -111,9 +159,35 @@ router.post("/", authenticateRequest, async (req, res) => {
 // PUT /engagement/:id - Update an engagement
 router.put("/:id", authenticateRequest, async (req, res) => {
     const { id } = req.params;
-    const { name, description, customerId, status, startDate, endDate } = req.body;
+    const { 
+        name, description, customerId, status, startDate, endDate,
+        type, methodology, complianceFrameworks, riskTolerance,
+        businessCriticalHours, criticalSystems, previousEngagements,
+        budgetHours, maxConcurrentTesters, testingParameters
+    } = req.body;
 
     try {
+        // Handle testing parameters update separately if provided
+        if (testingParameters) {
+            const existingParams = await prisma.testingParameters.findUnique({
+                where: { engagementId: id },
+            });
+
+            if (existingParams) {
+                await prisma.testingParameters.update({
+                    where: { engagementId: id },
+                    data: testingParameters,
+                });
+            } else {
+                await prisma.testingParameters.create({
+                    data: {
+                        ...testingParameters,
+                        engagementId: id,
+                    },
+                });
+            }
+        }
+
         const updatedEngagement = await prisma.engagement.update({
             where: { id },
             data: {
@@ -123,11 +197,21 @@ router.put("/:id", authenticateRequest, async (req, res) => {
                 ...(status !== undefined && { status }),
                 ...(startDate !== undefined && { startDate: new Date(startDate) }),
                 ...(endDate !== undefined && { endDate: new Date(endDate) }),
+                ...(type !== undefined && { type }),
+                ...(methodology !== undefined && { methodology }),
+                ...(complianceFrameworks !== undefined && { complianceFrameworks }),
+                ...(riskTolerance !== undefined && { riskTolerance }),
+                ...(businessCriticalHours !== undefined && { businessCriticalHours }),
+                ...(criticalSystems !== undefined && { criticalSystems }),
+                ...(previousEngagements !== undefined && { previousEngagements }),
+                ...(budgetHours !== undefined && { budgetHours }),
+                ...(maxConcurrentTesters !== undefined && { maxConcurrentTesters }),
             },
             include: {
                 customer: {
                     select: { id: true, name: true },
                 },
+                testingParameters: true,
             },
         });
 
@@ -135,11 +219,22 @@ router.put("/:id", authenticateRequest, async (req, res) => {
         res.json({
             id: updatedEngagement.id,
             name: updatedEngagement.name,
+            description: updatedEngagement.description,
             status: updatedEngagement.status,
             startDate: updatedEngagement.startDate,
             endDate: updatedEngagement.endDate,
             customerId: updatedEngagement.customerId,
             customer: updatedEngagement.customer?.name || "Unknown",
+            type: updatedEngagement.type,
+            methodology: updatedEngagement.methodology,
+            complianceFrameworks: updatedEngagement.complianceFrameworks,
+            riskTolerance: updatedEngagement.riskTolerance,
+            businessCriticalHours: updatedEngagement.businessCriticalHours,
+            criticalSystems: updatedEngagement.criticalSystems,
+            previousEngagements: updatedEngagement.previousEngagements,
+            budgetHours: updatedEngagement.budgetHours,
+            maxConcurrentTesters: updatedEngagement.maxConcurrentTesters,
+            testingParameters: updatedEngagement.testingParameters,
         });
     } catch (err) {
         console.error("Failed to update engagement:", err.message);

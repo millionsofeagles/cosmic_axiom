@@ -41,6 +41,14 @@ Handlebars.registerHelper("add", function(a, b) {
     return a + b;
 });
 
+Handlebars.registerHelper("formatEnum", function(str) {
+    if (!str) return '';
+    // Convert SNAKE_CASE to Title Case
+    return str.split('_')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ');
+});
+
 const generateChartImage = async (severityCounts) => {
     const width = 600;
     const height = 400;

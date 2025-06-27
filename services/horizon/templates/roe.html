@@ -196,6 +196,14 @@
           <td class="text-gray-900">{{#if engagement.customerName}}{{engagement.customerName}}{{else if engagement.customer}}{{engagement.customer}}{{else}}Not Specified{{/if}}</td>
         </tr>
         <tr>
+          <td class="font-semibold text-gray-700 py-2">Engagement Type:</td>
+          <td class="text-gray-900">{{#if engagement.type}}{{formatEnum engagement.type}}{{else}}Not Specified{{/if}}</td>
+        </tr>
+        <tr>
+          <td class="font-semibold text-gray-700 py-2">Testing Methodology:</td>
+          <td class="text-gray-900">{{#if engagement.methodology}}{{formatEnum engagement.methodology}}{{else}}Not Specified{{/if}}</td>
+        </tr>
+        <tr>
           <td class="font-semibold text-gray-700 py-2">Document Version:</td>
           <td class="text-gray-900">{{roe.version}}</td>
         </tr>
@@ -221,6 +229,12 @@
         <tr>
           <td class="font-semibold text-gray-700 py-2">Expires:</td>
           <td class="text-gray-900">{{roe.expiresAt}}</td>
+        </tr>
+        {{/if}}
+        {{#if engagement.riskTolerance}}
+        <tr>
+          <td class="font-semibold text-gray-700 py-2">Risk Tolerance:</td>
+          <td class="text-gray-900">{{engagement.riskTolerance}}</td>
         </tr>
         {{/if}}
       </table>
@@ -333,6 +347,30 @@
           </ul>
         </div>
         {{/if}}
+        {{#if ../engagement.criticalSystems}}
+        {{#if ../engagement.criticalSystems.length}}
+        <div class="mt-4">
+          <h4 class="font-semibold text-orange-800 mb-2">Critical Systems:</h4>
+          <ul class="list-disc list-inside text-gray-700">
+            {{#each ../engagement.criticalSystems}}
+            <li>{{this}}</li>
+            {{/each}}
+          </ul>
+        </div>
+        {{/if}}
+        {{/if}}
+        {{#if ../engagement.complianceFrameworks}}
+        {{#if ../engagement.complianceFrameworks.length}}
+        <div class="mt-4">
+          <h4 class="font-semibold text-purple-800 mb-2">Compliance Requirements:</h4>
+          <ul class="list-disc list-inside text-gray-700">
+            {{#each ../engagement.complianceFrameworks}}
+            <li>{{this}}</li>
+            {{/each}}
+          </ul>
+        </div>
+        {{/if}}
+        {{/if}}
       </div>
     </div>
     {{/ifCond}}
@@ -370,6 +408,22 @@
         </div>
         {{/if}}
         {{/if}}
+        {{#if ../engagement.businessCriticalHours}}
+        <div class="mt-4">
+          <h4 class="font-semibold text-yellow-800 mb-2">Business Critical Hours:</h4>
+          <p class="text-gray-700">
+            {{#if ../engagement.businessCriticalHours.start}}Start: {{../engagement.businessCriticalHours.start}}{{/if}}
+            {{#if ../engagement.businessCriticalHours.end}} - End: {{../engagement.businessCriticalHours.end}}{{/if}}
+            {{#if ../engagement.businessCriticalHours.timezone}} ({{../engagement.businessCriticalHours.timezone}}){{/if}}
+          </p>
+        </div>
+        {{/if}}
+        {{#if ../engagement.budgetHours}}
+        <div class="mt-4">
+          <h4 class="font-semibold text-blue-800 mb-2">Total Authorized Testing Hours:</h4>
+          <p class="text-gray-700">{{../engagement.budgetHours}} hours</p>
+        </div>
+        {{/if}}
       </div>
     </div>
     {{/ifCond}}
@@ -391,6 +445,38 @@
           </ul>
         </div>
         {{/if}}
+        {{#if ../engagement.testingParameters}}
+        <div class="mt-4">
+          <h4 class="font-semibold text-gray-800 mb-2">Testing Parameters:</h4>
+          <table class="w-full mt-2">
+            <tr>
+              <td class="py-1 pr-4">Automated Scanning:</td>
+              <td class="py-1">{{#if ../engagement.testingParameters.automatedScanningAllowed}}<span class="text-green-600">✓ Allowed</span>{{else}}<span class="text-red-600">✗ Not Allowed</span>{{/if}}</td>
+            </tr>
+            <tr>
+              <td class="py-1 pr-4">Manual Testing:</td>
+              <td class="py-1">{{#if ../engagement.testingParameters.manualTestingAllowed}}<span class="text-green-600">✓ Allowed</span>{{else}}<span class="text-red-600">✗ Not Allowed</span>{{/if}}</td>
+            </tr>
+            <tr>
+              <td class="py-1 pr-4">Load Testing:</td>
+              <td class="py-1">{{#if ../engagement.testingParameters.loadTestingAllowed}}<span class="text-green-600">✓ Allowed</span>{{else}}<span class="text-red-600">✗ Not Allowed</span>{{/if}}</td>
+            </tr>
+            <tr>
+              <td class="py-1 pr-4">Social Engineering:</td>
+              <td class="py-1">{{#if ../engagement.testingParameters.socialEngineeringAllowed}}<span class="text-green-600">✓ Allowed</span>{{else}}<span class="text-red-600">✗ Not Allowed</span>{{/if}}</td>
+            </tr>
+            <tr>
+              <td class="py-1 pr-4">Physical Testing:</td>
+              <td class="py-1">{{#if ../engagement.testingParameters.physicalTestingAllowed}}<span class="text-green-600">✓ Allowed</span>{{else}}<span class="text-red-600">✗ Not Allowed</span>{{/if}}</td>
+            </tr>
+          </table>
+        </div>
+        {{#if ../engagement.testingParameters.maxRequestsPerSecond}}
+        <div class="mt-2">
+          <p class="text-sm text-gray-600"><strong>Max Requests/Second:</strong> {{../engagement.testingParameters.maxRequestsPerSecond}}</p>
+        </div>
+        {{/if}}
+        {{/if}}
       </div>
     </div>
     {{/ifCond}}
@@ -410,6 +496,31 @@
             <li>{{this}}</li>
             {{/each}}
           </ul>
+        </div>
+        {{/if}}
+        {{#if ../engagement.testingParameters}}
+        <div class="mt-4">
+          <h4 class="font-semibold text-red-800 mb-2">Testing Restrictions:</h4>
+          <table class="w-full mt-2">
+            {{#unless ../engagement.testingParameters.bruteForceAllowed}}
+            <tr><td class="py-1">✗ Brute Force Attacks</td></tr>
+            {{/unless}}
+            {{#unless ../engagement.testingParameters.passwordSprayingAllowed}}
+            <tr><td class="py-1">✗ Password Spraying</td></tr>
+            {{/unless}}
+            {{#unless ../engagement.testingParameters.dosTestingAllowed}}
+            <tr><td class="py-1">✗ Denial of Service Testing</td></tr>
+            {{/unless}}
+            {{#unless ../engagement.testingParameters.dataExfiltrationAllowed}}
+            <tr><td class="py-1">✗ Data Exfiltration</td></tr>
+            {{/unless}}
+            {{#unless ../engagement.testingParameters.disruptiveTestingAllowed}}
+            <tr><td class="py-1">✗ Disruptive Testing</td></tr>
+            {{/unless}}
+          </table>
+          {{#if ../engagement.testingParameters.maxDataExfilSize}}
+          <p class="mt-2 text-sm text-gray-600"><strong>Max Data Exfiltration Size:</strong> {{../engagement.testingParameters.maxDataExfilSize}}</p>
+          {{/if}}
         </div>
         {{/if}}
       </div>
