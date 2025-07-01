@@ -49,5 +49,5 @@ Thumbs.db
 **/*.pdf
 **/test_data/*
 
-# Claude artifacts
+# Claude artifacts - Claude AI Front end development assistance
 CLAUDE.md
