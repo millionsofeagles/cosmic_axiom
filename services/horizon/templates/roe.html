@@ -7,68 +7,68 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     @media print {
+      body { 
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      .no-print { display: none !important; }
       .page-break { page-break-before: always; }
-      .no-break { page-break-inside: avoid; }
-      .keep-together { page-break-inside: avoid; }
-      
-      /* Prevent awkward breaks in tables */
-      table { page-break-inside: auto; }
-      tr { page-break-inside: avoid; page-break-after: auto; }
-      thead { display: table-header-group; }
-      tfoot { display: table-footer-group; }
-      
-      /* Prevent breaks right after headers */
-      h1, h2, h3, h4, h5, h6 {
-        page-break-after: avoid;
+      .content-section {
         page-break-inside: avoid;
+        break-inside: avoid;
       }
-      
-      /* Keep headers with at least 2 lines of content */
-      h1 + *, h2 + *, h3 + *, h4 + * {
-        page-break-before: avoid;
+      .compact-section {
+        margin-bottom: 10px;
+        padding-bottom: 10px;
       }
-      
-      /* Avoid breaking inside paragraphs */
-      p {
-        orphans: 3;
-        widows: 3;
+      h2 {
+        margin-top: 0;
+        margin-bottom: 15px;
       }
-      
-      /* Keep section boxes together when possible */
-      .section-box {
-        page-break-inside: avoid;
-      }
-      
-      /* Allow breaking inside very long sections */
-      .section-box.can-break {
-        page-break-inside: auto;
-      }
-      
-      /* Special handling for subsections */
-      .roe-section {
-        page-break-before: auto;
-        page-break-inside: auto;
-      }
-      
-      /* Keep section headers with content */
-      .roe-section h4 {
-        page-break-after: avoid;
-        margin-bottom: 0.5rem;
-      }
-      
-      /* Allow paragraphs to break naturally */
-      .roe-section p {
-        page-break-inside: auto;
-        orphans: 3;
-        widows: 3;
+      .section-content {
+        margin-top: 0;
       }
     }
     
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-      line-height: 1.5;
-      color: #1a202c;
-      font-size: 13px;
+    .page-break {
+      page-break-before: always;
+    }
+    
+    .content-section {
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+    
+    .compact-section {
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+    }
+    
+    .section-header {
+      color: #1f2937;
+      border-bottom: 2px solid #e5e7eb;
+      padding-bottom: 8px;
+      margin-bottom: 16px;
+    }
+    
+    .section-box {
+      background-color: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    
+    .warning-banner {
+      background-color: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 8px;
+      padding: 16px;
+    }
+    
+    .emergency-box {
+      background-color: #fef2f2;
+      border: 2px solid #ef4444;
     }
     
     .gradient-text {
@@ -78,190 +78,106 @@
       background-clip: text;
     }
     
-    .status-draft { background-color: #f59e0b; color: white; }
+    .status-draft { background-color: #fbbf24; color: white; }
     .status-approved { background-color: #10b981; color: white; }
     .status-active { background-color: #3b82f6; color: white; }
     .status-expired { background-color: #ef4444; color: white; }
-    .status-archived { background-color: #6b7280; color: white; }
     
-    .section-header {
-      border-bottom: 3px solid #e5e7eb;
-      padding-bottom: 0.5rem;
-      margin-bottom: 1.5rem;
-    }
-    
-    .section-box {
-      border: 1px solid #e5e7eb;
-      border-radius: 0.5rem;
-      padding: 1.5rem;
-      margin-bottom: 1.5rem;
-      background-color: #f9fafb;
-    }
-    
-    .authorization-box {
-      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-      border-left: 4px solid #f59e0b;
-    }
-    
-    .scope-box {
-      background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-      border-left: 4px solid #3b82f6;
-    }
-    
-    .testing-window-box {
-      background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
-      border-left: 4px solid #10b981;
-    }
-    
-    .schedule-visual {
-      background: #ffffff;
-      border: 1px solid #e5e7eb;
-      border-radius: 8px;
-      padding: 1rem;
-      margin: 1rem 0;
-    }
-    
-    .week-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 0.5rem;
-      margin-bottom: 1rem;
-    }
-    
-    .day-cell {
-      text-align: center;
-      padding: 0.5rem;
-      border-radius: 6px;
-      font-size: 0.875rem;
-      font-weight: 600;
-    }
-    
-    .day-allowed {
-      background-color: #f59e0b;
-      color: white;
-    }
-    
-    .day-weekend {
-      background-color: #fca5a5;
-      color: #dc2626;
-    }
-    
-    .day-disabled {
-      background-color: #f3f4f6;
-      color: #6b7280;
-    }
-    
-    .timeline-container {
-      background: #f9fafb;
-      border: 1px solid #e5e7eb;
-      border-radius: 6px;
-      padding: 1rem;
-      margin: 1rem 0;
-    }
-    
-    .timeline-bar {
-      position: relative;
-      height: 20px;
-      background: #e5e7eb;
-      border-radius: 10px;
-      margin: 0.5rem 0;
-    }
-    
-    .timeline-testing {
-      position: absolute;
-      height: 100%;
-      background: linear-gradient(90deg, #f59e0b, #d97706);
-      border-radius: 10px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    
-    .timeline-restricted {
-      position: absolute;
-      height: 100%;
-      background: linear-gradient(90deg, #ef4444, #dc2626);
-      border-radius: 10px;
-      border: 2px solid #b91c1c;
-      z-index: 10;
-    }
-    
-    .timeline-labels {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.75rem;
-      color: #6b7280;
+    /* Optimize scope section for single page */
+    .compact-section h3 {
       margin-bottom: 0.5rem;
     }
     
-    .timeline-legend {
-      display: flex;
-      justify-content: center;
-      gap: 1rem;
-      margin-top: 0.5rem;
-      font-size: 0.75rem;
+    .compact-section h4 {
+      margin-bottom: 0.5rem;
+      margin-top: 0.75rem;
     }
     
-    .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 0.25rem;
+    .compact-section .grid {
+      gap: 0.75rem;
     }
     
-    .legend-color {
-      width: 12px;
-      height: 12px;
-      border-radius: 2px;
+    .compact-section ul {
+      margin: 0;
+      padding-left: 1rem;
     }
     
-    .restrictions-box {
-      background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-      border-left: 4px solid #ef4444;
+    .compact-section li {
+      margin-bottom: 0.25rem;
     }
     
-    .emergency-box {
-      background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
-      border-left: 4px solid #dc2626;
-      border: 2px solid #dc2626;
+    /* Ensure sections stay together when possible */
+    .keep-together {
+      page-break-inside: avoid;
+      break-inside: avoid;
     }
     
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 1rem 0;
+    /* Prevent headers from splitting from their content */
+    h4 {
+      page-break-after: avoid;
+      break-after: avoid;
     }
     
-    th, td {
-      border: 1px solid #e5e7eb;
-      padding: 0.75rem;
-      text-align: left;
+    /* Keep subsection headers with their immediate content */
+    h5 {
+      page-break-after: avoid;
+      break-after: avoid;
     }
     
-    th {
-      background-color: #f3f4f6;
-      font-weight: 600;
+    /* Prevent splitting of small content blocks */
+    .compact-section h4 + div {
+      page-break-before: avoid;
+      break-before: avoid;
     }
     
-    .contact-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 1rem;
-      margin: 1rem 0;
+    /* Keep header and first paragraph/list together */
+    .compact-section h4 + * {
+      page-break-before: avoid;
+      break-before: avoid;
     }
     
-    .contact-card {
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 0.5rem;
-      padding: 1rem;
+    /* Ensure grid containers try to stay together */
+    .grid {
+      page-break-inside: avoid;
+      break-inside: avoid;
     }
     
-    .warning-banner {
-      background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
-      border: 2px solid #dc2626;
-      border-radius: 0.5rem;
-      padding: 1rem;
-      margin: 1rem 0;
-      text-align: center;
+    /* For really stubborn cases, force headers to keep next element */
+    .compact-section .mb-4 {
+      page-break-inside: avoid;
+      break-inside: avoid;
     }
+    
+    /* Handle section borders across page breaks */
+    @media print {
+      .content-section {
+        box-decoration-break: clone;
+        -webkit-box-decoration-break: clone;
+      }
+      
+      /* Reset borders and backgrounds for page breaks */
+      .bg-white {
+        box-decoration-break: clone;
+        -webkit-box-decoration-break: clone;
+      }
+      
+      .border {
+        box-decoration-break: clone;
+        -webkit-box-decoration-break: clone;
+      }
+      
+      .rounded-lg {
+        box-decoration-break: clone;
+        -webkit-box-decoration-break: clone;
+      }
+      
+      /* Ensure proper border behavior across pages */
+      .shadow-sm {
+        box-decoration-break: clone;
+        -webkit-box-decoration-break: clone;
+      }
+    }
+    
   </style>
 </head>
 <body class="text-gray-900">
@@ -292,7 +208,7 @@
       <table class="w-full text-left">
         <tr>
           <td class="font-semibold text-gray-700 py-2 w-1/3">Client Organization:</td>
-          <td class="text-gray-900">{{#if engagement.customerName}}{{engagement.customerName}}{{else if engagement.customer}}{{engagement.customer}}{{else}}Not Specified{{/if}}</td>
+          <td class="text-gray-900">{{#if engagement.customer.customerName}}{{engagement.customerName}}{{else}}{{#if engagement.customer}}{{engagement.customer}}{{else}}Not Specified{{/if}}{{/if}}</td>
         </tr>
         <tr>
           <td class="font-semibold text-gray-700 py-2">Engagement Type:</td>
@@ -345,506 +261,357 @@
     </div>
   </div>
 
-  <!-- Document Control & Authorization -->
+  <!-- Table of Contents -->
   <div class="px-10 py-8 page-break">
-    <h2 class="text-2xl font-bold mb-6 section-header">Document Control & Authorization</h2>
+    <h2 class="text-2xl font-bold mb-6 section-header">Table of Contents</h2>
     
-    {{#if roe.authorizedBy}}
-    <div class="authorization-box section-box keep-together">
-      <h3 class="text-xl font-semibold mb-4 text-yellow-800">Authorization</h3>
-      <div class="grid grid-cols-2 gap-4">
-        <div>
-          <p class="text-sm font-semibold text-gray-700">Authorized By:</p>
-          <p class="text-gray-900">{{roe.authorizedBy}}</p>
-        </div>
-        {{#if roe.authorizedTitle}}
-        <div>
-          <p class="text-sm font-semibold text-gray-700">Title:</p>
-          <p class="text-gray-900">{{roe.authorizedTitle}}</p>
-        </div>
-        {{/if}}
-        {{#if roe.authorizedDate}}
-        <div>
-          <p class="text-sm font-semibold text-gray-700">Date Authorized:</p>
-          <p class="text-gray-900">{{roe.authorizedDate}}</p>
-        </div>
-        {{/if}}
+    <div class="space-y-2">
+      <div class="flex justify-between border-b border-dotted border-gray-300 pb-1">
+        <span class="font-medium">Document Control & Authorization</span>
+        <span class="text-gray-600">3</span>
       </div>
-    </div>
-    {{/if}}
-    
-    <div class="mb-8 keep-together">
-      <h3 class="text-xl font-semibold mb-4 text-gray-800">Distribution</h3>
-      <table class="w-full">
-        <thead>
-          <tr>
-            <th class="text-left">Name</th>
-            <th class="text-left">Title</th>
-            <th class="text-left">Organization</th>
-            <th class="text-left">Date</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>{{engagement.contactName}}</td>
-            <td>{{engagement.contactTitle}}</td>
-            <td>{{#if engagement.customerName}}{{engagement.customerName}}{{else if engagement.customer}}{{engagement.customer}}{{else}}Not Specified{{/if}}</td>
-            <td>{{roe.createdAt}}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    
-    <div class="warning-banner">
-      <h3 class="text-xl font-semibold mb-3 text-red-800">IMPORTANT NOTICE</h3>
-      <p class="text-gray-700">
-        This document contains confidential information regarding authorized penetration testing activities. 
-        All testing activities must be conducted strictly within the parameters defined herein. 
-        Any deviation from these rules may result in immediate termination of testing and potential legal consequences.
-      </p>
+      
+      {{#each roe.processedSections}}
+      <div class="flex justify-between border-b border-dotted border-gray-300 pb-1">
+        <span class="font-medium">{{#if title}}{{title}}{{else}}{{type}} Section{{/if}}</span>
+        <span class="text-gray-600">{{add @index 4}}</span>
+      </div>
+      {{/each}}
+      
+      <div class="flex justify-between border-b border-dotted border-gray-300 pb-1">
+        <span class="font-medium">Document Approval & Signatures</span>
+        <span class="text-gray-600">{{add roe.processedSections.length 4}}</span>
+      </div>
+      
+      <div class="flex justify-between border-b border-dotted border-gray-300 pb-1">
+        <span class="font-medium">Appendix A - Detailed Scope Inventory</span>
+        <span class="text-gray-600">{{add roe.processedSections.length 5}}</span>
+      </div>
     </div>
   </div>
 
-  <!-- Dynamic Sections -->
-  {{#each roe.sections}}
-  <div class="px-10 py-8 {{#unless @first}}page-break{{/unless}}">
-    {{#ifCond type "===" "AUTHORIZATION"}}
-    <h2 class="text-2xl font-bold mb-6 section-header">{{#if title}}{{title}}{{else}}Authorization Details{{/if}}</h2>
-    <div class="authorization-box section-box">
-      <div class="roe-section">
-        <div class="prose max-w-none">
-          <p class="text-gray-800 leading-relaxed">{{content}}</p>
-        </div>
-      </div>
-    </div>
-    {{/ifCond}}
+  <!-- Document Control & Authorization -->
+  <div class="px-10 py-6 page-break compact-section">
+    <h2 class="text-2xl font-bold mb-4 section-header">Document Control & Authorization</h2>
     
-    {{#ifCond type "===" "SCOPE"}}
-    <h2 class="text-2xl font-bold mb-6 section-header">{{#if title}}{{title}}{{else}}Scope Definition{{/if}}</h2>
-    <div class="scope-box section-box">
-      <div class="roe-section">
-        <div class="prose max-w-none">
-          <p class="text-gray-800 leading-relaxed">{{content}}</p>
+    <!-- Document Information and Engagement Details in Two Columns -->
+    <div class="grid grid-cols-2 gap-6 mb-6">
+      
+      <!-- Left Column - Document Information -->
+      <div class="bg-white border border-gray-300 rounded-lg shadow-sm">
+        <div class="border-b border-gray-300 px-4 py-3">
+          <h3 class="text-lg font-semibold text-gray-900">Document Information</h3>
         </div>
-        {{#if data.inScopeAssets}}
-        <div class="mt-4">
-          <h4 class="font-semibold text-blue-800 mb-2">In-Scope Assets:</h4>
-          <ul class="list-disc list-inside text-gray-700">
-            {{#each data.inScopeAssets}}
-            <li>{{this}}</li>
-            {{/each}}
-          </ul>
-        </div>
-        {{/if}}
-        {{#if data.outOfScopeAssets}}
-        <div class="mt-4">
-          <h4 class="font-semibold text-red-800 mb-2">Out-of-Scope Assets:</h4>
-          <ul class="list-disc list-inside text-gray-700">
-            {{#each data.outOfScopeAssets}}
-            <li>{{this}}</li>
-            {{/each}}
-          </ul>
-        </div>
-        {{/if}}
-        {{#if ../engagement.criticalSystems}}
-        {{#if ../engagement.criticalSystems.length}}
-        <div class="mt-4">
-          <h4 class="font-semibold text-orange-800 mb-2">Critical Systems:</h4>
-          <ul class="list-disc list-inside text-gray-700">
-            {{#each ../engagement.criticalSystems}}
-            <li>{{this}}</li>
-            {{/each}}
-          </ul>
-        </div>
-        {{/if}}
-        {{/if}}
-        {{#if ../engagement.complianceFrameworks}}
-        {{#if ../engagement.complianceFrameworks.length}}
-        <div class="mt-4">
-          <h4 class="font-semibold text-purple-800 mb-2">Compliance Requirements:</h4>
-          <ul class="list-disc list-inside text-gray-700">
-            {{#each ../engagement.complianceFrameworks}}
-            <li>{{this}}</li>
-            {{/each}}
-          </ul>
-        </div>
-        {{/if}}
-        {{/if}}
-      </div>
-    </div>
-    {{/ifCond}}
-    
-    {{#ifCond type "===" "TESTING_WINDOW"}}
-    <h2 class="text-2xl font-bold mb-6 section-header">{{#if title}}{{title}}{{else}}Testing Window{{/if}}</h2>
-    <div class="testing-window-box section-box">
-      <div class="roe-section">
-        <div class="prose max-w-none">
-          <p class="text-gray-800 leading-relaxed">{{content}}</p>
-        </div>
-        {{#if ../roe.testingWindow}}
-        <div class="mt-4 grid grid-cols-2 gap-4">
-          {{#if ../roe.testingWindow.start}}
-          <div>
-            <h4 class="font-semibold text-green-800 mb-1">Start Date:</h4>
-            <p class="text-gray-700">{{../roe.testingWindow.start}}</p>
-          </div>
-          {{/if}}
-          {{#if ../roe.testingWindow.end}}
-          <div>
-            <h4 class="font-semibold text-green-800 mb-1">End Date:</h4>
-            <p class="text-gray-700">{{../roe.testingWindow.end}}</p>
-          </div>
-          {{/if}}
-        </div>
-        {{#if ../roe.testingWindow.blackoutPeriods}}
-        <div class="mt-4">
-          <h4 class="font-semibold text-red-800 mb-2">Blackout Periods:</h4>
-          <ul class="list-disc list-inside text-gray-700">
-            {{#each ../roe.testingWindow.blackoutPeriods}}
-            <li>{{this}}</li>
-            {{/each}}
-          </ul>
-        </div>
-        {{/if}}
-        {{/if}}
-        {{#if ../engagement.businessCriticalHours}}
-        <div class="mt-4">
-          <h4 class="font-semibold text-yellow-800 mb-2">Business Critical Hours:</h4>
-          <p class="text-gray-700">
-            {{#if ../engagement.businessCriticalHours.start}}Start: {{../engagement.businessCriticalHours.start}}{{/if}}
-            {{#if ../engagement.businessCriticalHours.end}} - End: {{../engagement.businessCriticalHours.end}}{{/if}}
-            {{#if ../engagement.businessCriticalHours.timezone}} ({{../engagement.businessCriticalHours.timezone}}){{/if}}
-          </p>
-        </div>
-        {{/if}}
-        {{#if ../engagement.budgetHours}}
-        <div class="mt-4">
-          <h4 class="font-semibold text-blue-800 mb-2">Total Authorized Testing Hours:</h4>
-          <p class="text-gray-700">{{../engagement.budgetHours}} hours</p>
-        </div>
-        {{/if}}
-        
-        {{#if ../engagement.testingParameters}}
-        {{#if ../engagement.testingParameters.testingWindowEnabled}}
-        <div class="schedule-visual mt-4 can-break">
-          <h4 class="font-semibold text-green-800 mb-3">Authorized Testing Schedule</h4>
-          
-          <!-- Testing Period -->
-          <div class="mb-3 p-2 bg-green-50 border-l-4 border-green-400 rounded text-sm">
-            <span class="font-semibold text-green-700">Testing Period:</span>
-            <span class="text-green-700">{{formatDate ../engagement.startDate}} - {{formatDate ../engagement.endDate}}</span>
-          </div>
-          
-          <!-- Compact Schedule Grid -->
-          <div class="grid grid-cols-2 gap-4">
-            <!-- Weekly Schedule -->
+        <div class="p-4">
+          <div class="space-y-3 text-sm">
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <div class="text-gray-500 text-xs uppercase tracking-wide mb-1">Document Title</div>
+                <div class="font-medium text-gray-900">{{roe.title}}</div>
+              </div>
+              <div>
+                <div class="text-gray-500 text-xs uppercase tracking-wide mb-1">Status</div>
+                <div><span class="px-2 py-1 rounded text-xs font-semibold status-{{toLowerCase roe.status}}">{{roe.status}}</span></div>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <div class="text-gray-500 text-xs uppercase tracking-wide mb-1">Version</div>
+                <div class="font-medium">{{roe.version}}</div>
+              </div>
+              <div>
+                <div class="text-gray-500 text-xs uppercase tracking-wide mb-1">Created Date</div>
+                <div>{{formatDate roe.createdAt}}</div>
+              </div>
+            </div>
             <div>
-              <h5 class="font-semibold text-gray-700 mb-2 text-sm">Allowed Testing Days</h5>
-              <div class="week-grid" style="grid-template-columns: repeat(7, 1fr); gap: 0.25rem;">
-                <div class="day-cell {{#if (contains ../engagement.testingParameters.allowedDays 'Sunday')}}day-allowed{{else}}day-weekend{{/if}}" style="padding: 0.25rem; font-size: 0.75rem;">
-                  <div>Sun</div>
-                  <div style="font-size: 0.625rem;">{{#if (contains ../engagement.testingParameters.allowedDays 'Sunday')}}Yes{{else}}No{{/if}}</div>
+              <div class="text-gray-500 text-xs uppercase tracking-wide mb-1">Document Identifier</div>
+              <div class="font-mono text-xs text-gray-700">{{roe.id}}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column - Engagement Details -->
+      <div class="bg-white border border-gray-300 rounded-lg shadow-sm">
+        <div class="border-b border-gray-300 px-4 py-3">
+          <h3 class="text-lg font-semibold text-gray-900">Engagement Details</h3>
+        </div>
+        <div class="p-4">
+          <div class="space-y-3 text-sm">
+            <div>
+              <div class="text-gray-500 text-xs uppercase tracking-wide mb-1">Client Organization</div>
+              <div class="font-medium text-gray-900">{{#if engagement.customerName}}{{engagement.customerName}}{{else}}{{engagement.customer}}{{/if}}</div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <div class="text-gray-500 text-xs uppercase tracking-wide mb-1">Engagement Type</div>
+                <div class="text-gray-700">{{formatEnum engagement.type}}</div>
+              </div>
+              <div>
+                <div class="text-gray-500 text-xs uppercase tracking-wide mb-1">Methodology</div>
+                <div class="text-gray-700">{{formatEnum engagement.methodology}}</div>
+              </div>
+            </div>
+            {{#if engagement.riskTolerance}}
+            <div>
+              <div class="text-gray-500 text-xs uppercase tracking-wide mb-1">Risk Tolerance</div>
+              <div class="text-gray-700">{{engagement.riskTolerance}}</div>
+            </div>
+            {{/if}}
+            <div>
+              <div class="text-gray-500 text-xs uppercase tracking-wide mb-1">Testing Period</div>
+              <div class="text-gray-700">{{formatDate engagement.startDate}} to {{formatDate engagement.endDate}}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Primary Contact - Full Width Below -->
+    <div class="mb-6">
+      <div class="bg-white border border-gray-300 rounded-lg shadow-sm">
+        <div class="border-b border-gray-300 px-4 py-3">
+          <h3 class="text-lg font-semibold text-gray-900">Primary Contact</h3>
+        </div>
+        <div class="p-4">
+          <div class="grid grid-cols-4 gap-4 text-sm">
+            <div>
+              <div class="text-gray-500 text-xs uppercase tracking-wide mb-1">Name</div>
+              <div class="font-medium text-gray-900">{{#if engagement.customer.contactName}}{{engagement.customer.contactName}}{{else}}[Contact Name Not Set]{{/if}}</div>
+            </div>
+            <div>
+              <div class="text-gray-500 text-xs uppercase tracking-wide mb-1">Title</div>
+              <div class="text-gray-700">{{#if engagement.customer.contactTitle}}{{engagement.customer.contactTitle}}{{else}}[Contact Title Not Set]{{/if}}</div>
+            </div>
+            <div>
+              <div class="text-gray-500 text-xs uppercase tracking-wide mb-1">Email Address</div>
+              <div class="text-gray-700">{{#if engagement.customer.contactEmail}}{{engagement.customer.contactEmail}}{{else}}[Contact Email Not Set]{{/if}}</div>
+            </div>
+            {{#if engagement.customer.contactPhone}}
+            <div>
+              <div class="text-gray-500 text-xs uppercase tracking-wide mb-1">Phone Number</div>
+              <div class="text-gray-700">{{engagement.customer.contactPhone}}</div>
+            </div>
+            {{else}}
+            <div>
+              <div class="text-gray-500 text-xs uppercase tracking-wide mb-1">Client Organization</div>
+              <div class="text-gray-700">{{#if engagement.customer.customerName}}{{engagement.customer.customerName}}{{else}}{{engagement.customer.name}}{{/if}}</div>
+            </div>
+            {{/if}}
+          </div>
+          {{#if engagement.customer.contactPhone}}
+          <div class="mt-3 pt-3 border-t border-gray-200">
+            <div class="text-gray-500 text-xs uppercase tracking-wide mb-1">Client Organization</div>
+            <div class="text-gray-700">{{#if engagement.customer.customerName}}{{engagement.customer.customerName}}{{else}}{{engagement.customer.name}}{{/if}}</div>
+          </div>
+          {{/if}}
+        </div>
+      </div>
+    </div>
+    
+    <!-- Legal Notice -->
+    <div class="bg-white border border-gray-400 rounded-lg shadow-sm">
+      <div class="bg-gray-100 border-b border-gray-400 px-4 py-3 rounded-t-lg">
+        <h3 class="text-base font-semibold text-gray-900 uppercase tracking-wide">Legal Notice</h3>
+      </div>
+      <div class="p-4">
+        <p class="text-sm text-gray-700 leading-relaxed">
+          This document contains confidential and proprietary information. It serves as the official authorization for the specified penetration testing activities. 
+          All testing activities must be conducted strictly within the parameters defined in this document. Any deviation from the authorized scope, 
+          methodology, or testing windows may result in immediate termination of the engagement and may subject the testing party to legal action, 
+          including but not limited to criminal prosecution and civil liability.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dynamic Sections with Pre-rendered Content -->
+  {{#each roe.processedSections}}
+  <div class="px-10 py-6 content-section compact-section">
+    <h2 class="text-2xl font-bold mb-4 section-header">{{#if title}}{{title}}{{else}}{{type}} Section{{/if}}</h2>
+    <div class="section-content">
+      {{{renderedContent}}}
+    </div>
+  </div>
+  {{/each}}
+
+  <!-- Signature Page -->
+  <div class="px-10 py-4 page-break">
+    <h2 class="text-2xl font-bold mb-4 section-header">Document Approval & Signatures</h2>
+    
+    <!-- Legal Statement -->
+    <div class="mb-4 bg-gray-50 border border-gray-200 rounded-lg p-3">
+      <h3 class="text-md font-semibold text-gray-800 mb-2">Authorization Statement</h3>
+      <p class="text-sm text-gray-700 leading-relaxed">
+        By signing below, all parties acknowledge they have reviewed, understood, and agree to be bound by the terms 
+        outlined in this Rules of Engagement document. This authorization explicitly permits the described penetration 
+        testing activities within the specified scope and timeframe.
+      </p>
+    </div>
+
+    <!-- Signature Blocks -->
+    <div class="space-y-4">
+      <!-- Primary Signatures -->
+      <div class="grid grid-cols-2 gap-8">
+        <!-- Client Authorization -->
+        <div class="bg-white border border-gray-300 rounded-lg p-3">
+          <h3 class="text-md font-semibold mb-4 text-gray-800 border-b border-gray-200 pb-2">Client Authorization</h3>
+          
+          <div class="space-y-4">
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-medium text-gray-600 mb-1">Name</label>
+                <div class="border-b border-gray-400 pb-1 min-h-[1.25rem] text-sm">
+                  {{#if engagement.contactName}}{{engagement.contactName}}{{/if}}
                 </div>
-                <div class="day-cell {{#if (contains ../engagement.testingParameters.allowedDays 'Monday')}}day-allowed{{else}}day-disabled{{/if}}" style="padding: 0.25rem; font-size: 0.75rem;">
-                  <div>Mon</div>
-                  <div style="font-size: 0.625rem;">{{#if (contains ../engagement.testingParameters.allowedDays 'Monday')}}Yes{{else}}No{{/if}}</div>
-                </div>
-                <div class="day-cell {{#if (contains ../engagement.testingParameters.allowedDays 'Tuesday')}}day-allowed{{else}}day-disabled{{/if}}" style="padding: 0.25rem; font-size: 0.75rem;">
-                  <div>Tue</div>
-                  <div style="font-size: 0.625rem;">{{#if (contains ../engagement.testingParameters.allowedDays 'Tuesday')}}Yes{{else}}No{{/if}}</div>
-                </div>
-                <div class="day-cell {{#if (contains ../engagement.testingParameters.allowedDays 'Wednesday')}}day-allowed{{else}}day-disabled{{/if}}" style="padding: 0.25rem; font-size: 0.75rem;">
-                  <div>Wed</div>
-                  <div style="font-size: 0.625rem;">{{#if (contains ../engagement.testingParameters.allowedDays 'Wednesday')}}Yes{{else}}No{{/if}}</div>
-                </div>
-                <div class="day-cell {{#if (contains ../engagement.testingParameters.allowedDays 'Thursday')}}day-allowed{{else}}day-disabled{{/if}}" style="padding: 0.25rem; font-size: 0.75rem;">
-                  <div>Thu</div>
-                  <div style="font-size: 0.625rem;">{{#if (contains ../engagement.testingParameters.allowedDays 'Thursday')}}Yes{{else}}No{{/if}}</div>
-                </div>
-                <div class="day-cell {{#if (contains ../engagement.testingParameters.allowedDays 'Friday')}}day-allowed{{else}}day-disabled{{/if}}" style="padding: 0.25rem; font-size: 0.75rem;">
-                  <div>Fri</div>
-                  <div style="font-size: 0.625rem;">{{#if (contains ../engagement.testingParameters.allowedDays 'Friday')}}Yes{{else}}No{{/if}}</div>
-                </div>
-                <div class="day-cell {{#if (contains ../engagement.testingParameters.allowedDays 'Saturday')}}day-allowed{{else}}day-weekend{{/if}}" style="padding: 0.25rem; font-size: 0.75rem;">
-                  <div>Sat</div>
-                  <div style="font-size: 0.625rem;">{{#if (contains ../engagement.testingParameters.allowedDays 'Saturday')}}Yes{{else}}No{{/if}}</div>
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-600 mb-1">Title</label>
+                <div class="border-b border-gray-400 pb-1 min-h-[1.25rem] text-sm">
+                  {{#if engagement.contactTitle}}{{engagement.contactTitle}}{{/if}}
                 </div>
               </div>
             </div>
             
-            <!-- Daily Testing Hours -->
-            {{#if ../engagement.testingParameters.testingStartTime}}
             <div>
-              <h5 class="font-semibold text-gray-700 mb-2 text-sm">Daily Testing Hours</h5>
-              <div class="timeline-container" style="padding: 0.5rem; margin: 0;">
-                <div class="timeline-labels" style="font-size: 0.625rem; margin-bottom: 0.25rem;">
-                  <span>12 AM</span>
-                  <span>6 AM</span>
-                  <span>12 PM</span>
-                  <span>6 PM</span>
-                  <span>12 AM</span>
-                </div>
-                <div class="timeline-bar" style="height: 16px;">
-                  <div class="timeline-testing" style="left: {{timeToPercent ../engagement.testingParameters.testingStartTime}}%; width: {{timeDuration ../engagement.testingParameters.testingStartTime ../engagement.testingParameters.testingEndTime}}%;"></div>
-                  {{#if ../engagement.testingParameters.disruptiveTestingWindow.enabled}}
-                  <div class="timeline-restricted" style="left: {{timeToPercent ../engagement.testingParameters.disruptiveTestingWindow.startTime}}%; width: {{timeDuration ../engagement.testingParameters.disruptiveTestingWindow.startTime ../engagement.testingParameters.disruptiveTestingWindow.endTime}}%;"></div>
-                  {{/if}}
-                </div>
-                <div class="timeline-legend" style="margin-top: 0.25rem; font-size: 0.625rem;">
-                  <div class="legend-item">
-                    <div class="legend-color" style="background: linear-gradient(90deg, #f59e0b, #d97706); width: 8px; height: 8px;"></div>
-                    <span>Testing Window</span>
-                  </div>
-                  {{#if ../engagement.testingParameters.disruptiveTestingWindow.enabled}}
-                  <div class="legend-item">
-                    <div class="legend-color" style="background: linear-gradient(90deg, #ef4444, #dc2626); border: 1px solid #b91c1c; width: 8px; height: 8px;"></div>
-                    <span>No Disruptive</span>
-                  </div>
-                  {{/if}}
-                </div>
-                <div class="text-xs text-gray-600 mt-1">
-                  {{../engagement.testingParameters.testingStartTime}} - {{../engagement.testingParameters.testingEndTime}}{{#if ../engagement.testingParameters.timezone}} ({{../engagement.testingParameters.timezone}}){{/if}}
-                  {{#if ../engagement.testingParameters.disruptiveTestingWindow.enabled}}
-                  <br>Disruptive restricted: {{../engagement.testingParameters.disruptiveTestingWindow.startTime}} - {{../engagement.testingParameters.disruptiveTestingWindow.endTime}}
-                  {{/if}}
-                </div>
+              <label class="block text-xs font-medium text-gray-600 mb-1">Organization</label>
+              <div class="border-b border-gray-400 pb-1 min-h-[1.25rem] text-sm">
+                {{#if engagement.customerName}}{{engagement.customerName}}{{else}}{{engagement.customer}}{{/if}}
               </div>
             </div>
-            {{/if}}
+            
+            <div class="grid grid-cols-2 gap-3 mt-4">
+              <div>
+                <label class="block text-xs font-medium text-gray-600 mb-1">Signature</label>
+                <div class="border-b border-gray-400 pb-1 min-h-[2rem]"></div>
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-600 mb-1">Date</label>
+                <div class="border-b border-gray-400 pb-1 min-h-[1.25rem]"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Testing Organization Authorization -->
+        <div class="bg-white border border-gray-300 rounded-lg p-3">
+          <h3 class="text-md font-semibold mb-4 text-gray-800 border-b border-gray-200 pb-2">Testing Organization</h3>
+          
+          <div class="space-y-4">
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-medium text-gray-600 mb-1">Lead Tester</label>
+                <div class="border-b border-gray-400 pb-1 min-h-[1.25rem]"></div>
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-600 mb-1">Certifications</label>
+                <div class="border-b border-gray-400 pb-1 min-h-[1.25rem]"></div>
+              </div>
+            </div>
+            
+            <div>
+              <label class="block text-xs font-medium text-gray-600 mb-1">Organization</label>
+              <div class="border-b border-gray-400 pb-1 min-h-[1.25rem] text-sm">
+                {{#if engagement.organization}}{{engagement.organization}}{{/if}}
+              </div>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-3 mt-4">
+              <div>
+                <label class="block text-xs font-medium text-gray-600 mb-1">Signature</label>
+                <div class="border-b border-gray-400 pb-1 min-h-[2rem]"></div>
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-600 mb-1">Date</label>
+                <div class="border-b border-gray-400 pb-1 min-h-[1.25rem]"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Additional Approvals (Optional) -->
+      <div class="bg-gray-50 border border-gray-200 rounded-lg p-3 mt-4">
+        <h3 class="text-md font-semibold mb-3 text-gray-800">Additional Approvals <span class="text-sm font-normal text-gray-500">(If Required)</span></h3>
+        
+        <div class="grid grid-cols-2 gap-6">
+          <div>
+            <label class="block text-xs font-medium text-gray-600 mb-1">Legal/Compliance Officer</label>
+            <div class="border-b border-gray-400 pb-1 min-h-[1.25rem] mb-3"></div>
+            
+            <label class="block text-xs font-medium text-gray-600 mb-1">Title</label>
+            <div class="border-b border-gray-400 pb-1 min-h-[1.25rem]"></div>
           </div>
           
-          {{#if ../engagement.testingParameters.emergencyContactRequired}}
-          <div class="mt-2 p-2 bg-yellow-50 border-l-4 border-yellow-400 rounded text-sm">
-            <span class="text-yellow-600 font-semibold">Emergency Contact Required:</span>
-            <span class="text-yellow-700">Emergency contact availability required during off-hours testing.</span>
-          </div>
-          {{/if}}
-        </div>
-        {{/if}}
-        {{/if}}
-      </div>
-    </div>
-    {{/ifCond}}
-    
-    {{#ifCond type "===" "METHODOLOGY"}}
-    <h2 class="text-2xl font-bold mb-6 section-header">{{#if title}}{{title}}{{else}}Approved Testing Methodology{{/if}}</h2>
-    <div class="section-box">
-      <div class="roe-section">
-        <div class="prose max-w-none">
-          <p class="text-gray-800 leading-relaxed">{{content}}</p>
-        </div>
-        {{#if data.allowedMethods}}
-        <div class="mt-4">
-          <h4 class="font-semibold text-gray-800 mb-2">Allowed Testing Methods:</h4>
-          <ul class="list-disc list-inside text-gray-700">
-            {{#each data.allowedMethods}}
-            <li>{{this}}</li>
-            {{/each}}
-          </ul>
-        </div>
-        {{/if}}
-        {{#if ../engagement.testingParameters}}
-        <div class="mt-4">
-          <h4 class="font-semibold text-gray-800 mb-2">Testing Parameters:</h4>
-          <table class="w-full mt-2">
-            <tr>
-              <td class="py-1 pr-4">Automated Scanning:</td>
-              <td class="py-1">{{#if ../engagement.testingParameters.automatedScanningAllowed}}<span class="text-green-600">✓ Allowed</span>{{else}}<span class="text-red-600">✗ Not Allowed</span>{{/if}}</td>
-            </tr>
-            <tr>
-              <td class="py-1 pr-4">Manual Testing:</td>
-              <td class="py-1">{{#if ../engagement.testingParameters.manualTestingAllowed}}<span class="text-green-600">✓ Allowed</span>{{else}}<span class="text-red-600">✗ Not Allowed</span>{{/if}}</td>
-            </tr>
-            <tr>
-              <td class="py-1 pr-4">Load Testing:</td>
-              <td class="py-1">{{#if ../engagement.testingParameters.loadTestingAllowed}}<span class="text-green-600">✓ Allowed</span>{{else}}<span class="text-red-600">✗ Not Allowed</span>{{/if}}</td>
-            </tr>
-            <tr>
-              <td class="py-1 pr-4">Social Engineering:</td>
-              <td class="py-1">{{#if ../engagement.testingParameters.socialEngineeringAllowed}}<span class="text-green-600">✓ Allowed</span>{{else}}<span class="text-red-600">✗ Not Allowed</span>{{/if}}</td>
-            </tr>
-            <tr>
-              <td class="py-1 pr-4">Physical Testing:</td>
-              <td class="py-1">{{#if ../engagement.testingParameters.physicalTestingAllowed}}<span class="text-green-600">✓ Allowed</span>{{else}}<span class="text-red-600">✗ Not Allowed</span>{{/if}}</td>
-            </tr>
-          </table>
-        </div>
-        {{#if ../engagement.testingParameters.maxRequestsPerSecond}}
-        <div class="mt-2">
-          <p class="text-sm text-gray-600"><strong>Max Requests/Second:</strong> {{../engagement.testingParameters.maxRequestsPerSecond}}</p>
-        </div>
-        {{/if}}
-        {{/if}}
-      </div>
-    </div>
-    {{/ifCond}}
-    
-    {{#ifCond type "===" "RESTRICTIONS"}}
-    <h2 class="text-2xl font-bold mb-6 section-header">{{#if title}}{{title}}{{else}}Restrictions & Limitations{{/if}}</h2>
-    <div class="restrictions-box section-box">
-      <div class="roe-section">
-        <div class="prose max-w-none">
-          <p class="text-gray-800 leading-relaxed">{{content}}</p>
-        </div>
-        {{#if data.forbiddenActivities}}
-        <div class="mt-4">
-          <h4 class="font-semibold text-red-800 mb-2">Explicitly Forbidden Activities:</h4>
-          <ul class="list-disc list-inside text-gray-700">
-            {{#each data.forbiddenActivities}}
-            <li>{{this}}</li>
-            {{/each}}
-          </ul>
-        </div>
-        {{/if}}
-        {{#if ../engagement.testingParameters}}
-        <div class="mt-4">
-          <h4 class="font-semibold text-red-800 mb-2">Testing Restrictions:</h4>
-          <table class="w-full mt-2">
-            {{#unless ../engagement.testingParameters.bruteForceAllowed}}
-            <tr><td class="py-1">✗ Brute Force Attacks</td></tr>
-            {{/unless}}
-            {{#unless ../engagement.testingParameters.passwordSprayingAllowed}}
-            <tr><td class="py-1">✗ Password Spraying</td></tr>
-            {{/unless}}
-            {{#unless ../engagement.testingParameters.dosTestingAllowed}}
-            <tr><td class="py-1">✗ Denial of Service Testing</td></tr>
-            {{/unless}}
-            {{#unless ../engagement.testingParameters.dataExfiltrationAllowed}}
-            <tr><td class="py-1">✗ Data Exfiltration</td></tr>
-            {{/unless}}
-            {{#unless ../engagement.testingParameters.disruptiveTestingAllowed}}
-            <tr><td class="py-1">✗ Disruptive Testing</td></tr>
-            {{/unless}}
-          </table>
-          {{#if ../engagement.testingParameters.maxDataExfilSize}}
-          <p class="mt-2 text-sm text-gray-600"><strong>Max Data Exfiltration Size:</strong> {{../engagement.testingParameters.maxDataExfilSize}}</p>
-          {{/if}}
-        </div>
-        {{/if}}
-      </div>
-    </div>
-    {{/ifCond}}
-    
-    {{#ifCond type "===" "COMMUNICATION"}}
-    <h2 class="text-2xl font-bold mb-6 section-header">{{#if title}}{{title}}{{else}}Communication Protocols{{/if}}</h2>
-    <div class="section-box">
-      <div class="roe-section">
-        <div class="prose max-w-none">
-          <p class="text-gray-800 leading-relaxed">{{content}}</p>
-        </div>
-        {{#if data.contacts}}
-        <div class="contact-grid mt-4">
-          {{#each data.contacts}}
-          <div class="contact-card">
-            <h4 class="font-semibold text-gray-800">{{this.role}}</h4>
-            <p class="text-gray-700">{{this.name}}</p>
-            {{#if this.phone}}<p class="text-sm text-gray-600">📞 {{this.phone}}</p>{{/if}}
-            {{#if this.email}}<p class="text-sm text-gray-600">✉️ {{this.email}}</p>{{/if}}
-            {{#if this.availability}}<p class="text-xs text-gray-500">{{this.availability}}</p>{{/if}}
-          </div>
-          {{/each}}
-        </div>
-        {{/if}}
-      </div>
-    </div>
-    {{/ifCond}}
-    
-    {{#ifCond type "===" "EMERGENCY"}}
-    <h2 class="text-2xl font-bold mb-6 section-header">{{#if title}}{{title}}{{else}}Emergency Procedures{{/if}}</h2>
-    <div class="emergency-box section-box">
-      <div class="roe-section">
-        <div class="prose max-w-none">
-          <p class="text-gray-800 leading-relaxed">{{content}}</p>
-        </div>
-        {{#if ../roe.emergencyContact}}
-        <div class="mt-4 bg-white bg-opacity-50 rounded p-4">
-          <h4 class="font-semibold text-red-800 mb-2">Emergency Contact:</h4>
-          <div class="grid grid-cols-2 gap-2">
-            {{#if ../roe.emergencyContact.name}}
-            <p><strong>Name:</strong> {{../roe.emergencyContact.name}}</p>
-            {{/if}}
-            {{#if ../roe.emergencyContact.phone}}
-            <p><strong>Phone:</strong> {{../roe.emergencyContact.phone}}</p>
-            {{/if}}
-            {{#if ../roe.emergencyContact.email}}
-            <p><strong>Email:</strong> {{../roe.emergencyContact.email}}</p>
-            {{/if}}
-            {{#if ../roe.emergencyContact.availability}}
-            <p><strong>Availability:</strong> {{../roe.emergencyContact.availability}}</p>
-            {{/if}}
+          <div>
+            <label class="block text-xs font-medium text-gray-600 mb-1">Signature</label>
+            <div class="border-b border-gray-400 pb-1 min-h-[1.5rem] mb-3"></div>
+            
+            <label class="block text-xs font-medium text-gray-600 mb-1">Date</label>
+            <div class="border-b border-gray-400 pb-1 min-h-[1.25rem]"></div>
           </div>
         </div>
-        {{/if}}
       </div>
     </div>
-    {{/ifCond}}
-    
-    {{#ifCond type "===" "LEGAL"}}
-    <h2 class="text-2xl font-bold mb-6 section-header">{{#if title}}{{title}}{{else}}Legal & Compliance{{/if}}</h2>
-    <div class="section-box">
-      <div class="roe-section">
-        <div class="prose max-w-none">
-          <p class="text-gray-800 leading-relaxed">{{content}}</p>
-        </div>
-      </div>
-    </div>
-    {{/ifCond}}
-    
-    {{#ifCond type "===" "CUSTOM"}}
-    <h2 class="text-2xl font-bold mb-6 section-header">{{title}}</h2>
-    <div class="section-box">
-      <div class="roe-section">
-        <div class="prose max-w-none">
-          <p class="text-gray-800 leading-relaxed">{{content}}</p>
-        </div>
-      </div>
-    </div>
-    {{/ifCond}}
-  </div>
-  {{/each}}
 
-  <!-- Acknowledgment & Signatures -->
-  <div class="px-10 py-8 page-break">
-    <h2 class="text-2xl font-bold mb-6 section-header">Acknowledgment & Signatures</h2>
-    
-    <div class="mb-8">
-      <p class="text-gray-800 leading-relaxed mb-6">
-        By signing below, all parties acknowledge that they have read, understood, and agree to abide by 
-        the terms and conditions outlined in this Rules of Engagement document.
-      </p>
-      
-      <div class="grid grid-cols-2 gap-8 mt-8">
-        <div class="border-t-2 border-gray-300 pt-4">
-          <div class="text-center">
-            <p class="font-semibold">Client Representative</p>
-            <p class="text-sm text-gray-600 mt-2">{{engagement.contactName}}</p>
-            <p class="text-sm text-gray-600">{{engagement.contactTitle}}</p>
-            <p class="text-sm text-gray-600">{{#if engagement.customerName}}{{engagement.customerName}}{{else if engagement.customer}}{{engagement.customer}}{{else}}Client Organization{{/if}}</p>
-            <div class="mt-8 border-b border-gray-300 w-48 mx-auto"></div>
-            <p class="text-xs text-gray-500 mt-2">Signature / Date</p>
+    <!-- Document Control & Legal Notice -->
+    <div class="mt-4">
+      <div class="grid grid-cols-3 gap-6 mb-4">
+        <!-- Document Control -->
+        <div class="bg-white border border-gray-200 rounded p-3">
+          <h4 class="font-semibold text-xs text-gray-800 mb-2 border-b border-gray-200 pb-1">Document Control</h4>
+          <div class="text-xs text-gray-600 space-y-1">
+            <div>Version: {{roe.version}}</div>
+            <div>Created: {{formatDate roe.createdAt}}</div>
+            {{#if roe.approvedAt}}<div>Approved: {{formatDate roe.approvedAt}}</div>{{/if}}
           </div>
         </div>
-        
-        <div class="border-t-2 border-gray-300 pt-4">
-          <div class="text-center">
-            <p class="font-semibold">Testing Organization</p>
-            {{#if roe.authorizedBy}}
-            <p class="text-sm text-gray-600 mt-2">{{roe.authorizedBy}}</p>
-            <p class="text-sm text-gray-600">{{roe.authorizedTitle}}</p>
-            {{/if}}
-            <p class="text-sm text-gray-600">{{engagement.organization}}</p>
-            <div class="mt-8 border-b border-gray-300 w-48 mx-auto"></div>
-            <p class="text-xs text-gray-500 mt-2">Signature / Date</p>
+
+        <!-- Validity Period -->
+        <div class="bg-white border border-gray-200 rounded p-3">
+          <h4 class="font-semibold text-xs text-gray-800 mb-2 border-b border-gray-200 pb-1">Validity Period</h4>
+          <div class="text-xs text-gray-600 space-y-1">
+            <div>Effective: {{formatDate engagement.startDate}}</div>
+            {{#if engagement.endDate}}<div>Expires: {{formatDate engagement.endDate}}</div>{{/if}}
+            {{#if roe.expiresAt}}<div>RoE Expires: {{formatDate roe.expiresAt}}</div>{{/if}}
+          </div>
+        </div>
+
+        <!-- Document IDs -->
+        <div class="bg-white border border-gray-200 rounded p-3">
+          <h4 class="font-semibold text-xs text-gray-800 mb-2 border-b border-gray-200 pb-1">Reference IDs</h4>
+          <div class="text-xs text-gray-600 space-y-1">
+            <div class="font-mono">RoE: {{roe.id}}</div>
+            <div class="font-mono">Engagement: {{engagement.id}}</div>
           </div>
         </div>
       </div>
+
+      <!-- Legal Notice -->
+      <div class="bg-gray-50 border border-gray-200 rounded-lg p-3">
+        <h4 class="font-semibold text-xs text-gray-800 mb-2">Legal Notice</h4>
+        <p class="text-xs text-gray-600 leading-relaxed">
+          This document constitutes a legally binding agreement between the parties. Modifications require written 
+          consent from authorized representatives of both parties. Electronic signatures are acceptable where permitted 
+          by applicable law. This agreement is governed by the laws specified in the engagement contract.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Appendix A - Detailed Scope Inventory -->
+  <div class="px-10 py-6 page-break compact-section">
+    <h2 class="text-2xl font-bold mb-4 section-header">Appendix A - Detailed Scope Inventory</h2>
+    <div class="section-content">
+      {{{roe.scopeAppendix}}}
     </div>
   </div>
 
   <!-- Footer -->
-  <div class="px-10 py-8">
-    <div class="text-center text-sm text-gray-500 border-t border-gray-200 pt-4">
-      <p>Document generated on {{roe.generatedDate}} using Cosmic Axiom Security Platform</p>
+  <div class="px-10 py-4">
+    <div class="text-center text-xs text-gray-500 border-t pt-3">
+      <p>This document was generated on {{roe.generatedDate}} by the Cosmic Axiom Security Platform</p>
       <p class="mt-1">© {{roe.year}} {{engagement.organization}}. All rights reserved.</p>
     </div>
   </div>

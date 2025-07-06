@@ -377,6 +377,129 @@ router.get('/templates/list', authenticateRequest, async (req, res) => {
     }
 });
 
+// Get specific RoE template
+router.get('/templates/:id', authenticateRequest, async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        const template = await prisma.roeTemplate.findUnique({
+            where: { id }
+        });
+        
+        if (!template) {
+            return res.status(404).json({ error: 'Template not found' });
+        }
+        
+        res.json(template);
+    } catch (error) {
+        console.error('Error fetching template:', error);
+        res.status(500).json({ error: 'Failed to fetch template' });
+    }
+});
+
+// Create new RoE template
+router.post('/templates', authenticateRequest, async (req, res) => {
+    try {
+        const { name, description, isDefault, sections } = req.body;
+        
+        // If this is being set as default, unset other defaults
+        if (isDefault) {
+            await prisma.roeTemplate.updateMany({
+                where: { isDefault: true },
+                data: { isDefault: false }
+            });
+        }
+        
+        const template = await prisma.roeTemplate.create({
+            data: {
+                name,
+                description,
+                isDefault: isDefault || false,
+                sections: sections || []
+            }
+        });
+        
+        res.status(201).json(template);
+    } catch (error) {
+        console.error('Error creating template:', error);
+        res.status(500).json({ error: 'Failed to create template' });
+    }
+});
+
+// Update RoE template
+router.put('/templates/:id', authenticateRequest, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { name, description, isDefault, sections } = req.body;
+        
+        // If this is being set as default, unset other defaults
+        if (isDefault) {
+            await prisma.roeTemplate.updateMany({
+                where: { 
+                    isDefault: true,
+                    id: { not: id }
+                },
+                data: { isDefault: false }
+            });
+        }
+        
+        const template = await prisma.roeTemplate.update({
+            where: { id },
+            data: {
+                name,
+                description,
+                isDefault,
+                sections
+            }
+        });
+        
+        res.json(template);
+    } catch (error) {
+        console.error('Error updating template:', error);
+        res.status(500).json({ error: 'Failed to update template' });
+    }
+});
+
+// Delete RoE template
+router.delete('/templates/:id', authenticateRequest, async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        const template = await prisma.roeTemplate.findUnique({
+            where: { id }
+        });
+        
+        if (!template) {
+            return res.status(404).json({ error: 'Template not found' });
+        }
+        
+        // Don't allow deleting the default template if it's the only one
+        if (template.isDefault) {
+            const totalTemplates = await prisma.roeTemplate.count();
+            if (totalTemplates === 1) {
+                return res.status(400).json({ error: 'Cannot delete the only template' });
+            }
+            
+            // If there are other templates, make the first non-default one the new default
+            await prisma.roeTemplate.updateMany({
+                where: { 
+                    id: { not: id }
+                },
+                data: { isDefault: true }
+            });
+        }
+        
+        await prisma.roeTemplate.delete({
+            where: { id }
+        });
+        
+        res.status(204).send();
+    } catch (error) {
+        console.error('Error deleting template:', error);
+        res.status(500).json({ error: 'Failed to delete template' });
+    }
+});
+
 // Create RoE from template
 router.post('/from-template', authenticateRequest, async (req, res) => {
     try {
@@ -390,19 +513,22 @@ router.post('/from-template', authenticateRequest, async (req, res) => {
             return res.status(404).json({ error: 'Template not found' });
         }
         
-        const sections = JSON.parse(template.sections);
+        const sections = template.sections;
         
         const roe = await prisma.rulesOfEngagement.create({
             data: {
                 engagementId,
                 title,
+                version: '1.0',
+                status: 'DRAFT',
+                classification: 'CONFIDENTIAL',
                 sections: {
                     create: sections.map((section, index) => ({
                         type: section.type,
                         position: index,
                         title: section.title,
                         content: section.content,
-                        data: section.data
+                        data: section.data || {}
                     }))
                 }
             },

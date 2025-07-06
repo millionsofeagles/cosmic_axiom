@@ -48,7 +48,14 @@ router.get("/:id", authenticateRequest, async (req, res) => {
             where: { id },
             include: {
                 customer: {
-                    select: { id: true, name: true },
+                    select: { 
+                        id: true, 
+                        name: true,
+                        contacts: {
+                            where: { isPrimary: true },
+                            take: 1
+                        }
+                    },
                 },
                 testingParameters: true,
                 scopes: true,
@@ -59,6 +66,8 @@ router.get("/:id", authenticateRequest, async (req, res) => {
             return res.status(404).json({ error: "Engagement not found" });
         }
 
+        const primaryContact = engagement.customer?.contacts?.[0];
+        
         res.json({
             id: engagement.id,
             name: engagement.name,
@@ -67,7 +76,21 @@ router.get("/:id", authenticateRequest, async (req, res) => {
             startDate: engagement.startDate,
             endDate: engagement.endDate,
             customerId: engagement.customerId,
-            customer: engagement.customer?.name || "Unknown",
+            customer: {
+                id: engagement.customer?.id,
+                name: engagement.customer?.name || "Unknown",
+                customerName: engagement.customer?.name || "Unknown",
+                contactName: primaryContact?.name || null,
+                contactEmail: primaryContact?.email || null,
+                contactPhone: primaryContact?.phone || null,
+                contactTitle: "Primary Contact", // Default title since it's not in the Contact model
+            },
+            customerName: engagement.customer?.name || "Unknown", // Keep for backward compatibility
+            contactName: primaryContact?.name || null, // Keep for backward compatibility
+            contactEmail: primaryContact?.email || null, // Keep for backward compatibility
+            contactPhone: primaryContact?.phone || null, // Keep for backward compatibility
+            contactTitle: "Primary Contact", // Keep for backward compatibility
+            organization: "Cosmic Axiom Security", // Testing organization
             type: engagement.type,
             methodology: engagement.methodology,
             complianceFrameworks: engagement.complianceFrameworks,

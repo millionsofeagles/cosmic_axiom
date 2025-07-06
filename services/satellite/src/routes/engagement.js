@@ -90,10 +90,29 @@ router.post("/", authenticateRequest, async (req, res) => {
 // GET /engagement/:id
 router.get("/:id", authenticateRequest, async (req, res) => {
     try {
-        const response = await axios.get(`${FORGE_URL}/engagement/${req.params.id}`, {
+        // Fetch engagement data from Forge
+        const engagementResponse = await axios.get(`${FORGE_URL}/engagement/${req.params.id}`, {
             headers: { Authorization: req.headers.authorization },
         });
-        res.json(response.data);
+        const engagement = engagementResponse.data;
+
+        // Fetch scopes for this engagement
+        let scopes = [];
+        try {
+            const scopesResponse = await axios.get(`${FORGE_URL}/scope/engagement/${req.params.id}`, {
+                headers: { Authorization: req.headers.authorization },
+            });
+            scopes = scopesResponse.data;
+        } catch (scopeErr) {
+            // If scopes don't exist or error, continue without them
+            console.warn(`Could not fetch scopes for engagement ${req.params.id}:`, scopeErr.message);
+        }
+
+        // Return enriched engagement data
+        res.json({
+            ...engagement,
+            scopes
+        });
     } catch (err) {
         console.error(`GET /engagement/${req.params.id} failed:`, err.message);
         res.status(404).json({ error: "Engagement not found" });

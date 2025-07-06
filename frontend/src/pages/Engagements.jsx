@@ -1,11 +1,10 @@
-import { Plus, Edit2, Trash2, Search, Filter, Calendar, Users, FileText, ChevronDown, ChevronUp, Target, Shield, Settings, MoreHorizontal } from "lucide-react";
+import { Plus, Edit2, Trash2, Search, Filter, Calendar, Users, FileText, ChevronDown, ChevronUp, Target, Shield, MoreHorizontal } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import NewEngagementModal from "../components/NewEngagementModal";
 import NewReportModal from "../components/NewReportModal";
 import NewRoEModal from "../components/NewRoEModal";
 import ScopeModal from "../components/ScopeModal";
-import TestingParametersModal from "../components/TestingParametersModal";
 import DashboardLayout from "../layouts/DashboardLayout";
 
 function Engagements() {
@@ -14,7 +13,6 @@ function Engagements() {
     const [isReportModalOpen, setIsReportModalOpen] = useState(false);
     const [isRoEModalOpen, setIsRoEModalOpen] = useState(false);
     const [isScopeModalOpen, setIsScopeModalOpen] = useState(false);
-    const [isTestingParamsModalOpen, setIsTestingParamsModalOpen] = useState(false);
     const [selectedEngagement, setSelectedEngagement] = useState(null);
     const [editingEngagement, setEditingEngagement] = useState(null);
     const [customers, setCustomers] = useState([]);
@@ -28,7 +26,6 @@ function Engagements() {
     const [isCreatingRoE, setIsCreatingRoE] = useState(false);
     const [openDropdown, setOpenDropdown] = useState(null);
     const token = localStorage.getItem("token");
-    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchCustomers = async () => {
@@ -176,24 +173,47 @@ function Engagements() {
         }
     };
 
-    const submitNewRoE = async (title) => {
+    const submitNewRoE = async (roeData) => {
         setIsCreatingRoE(true);
         try {
-            const res = await fetch(`${import.meta.env.VITE_SATELLITE_URL}/roe`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({ engagementId: selectedEngagement.id, title }),
-            });
+            let res;
+            let created;
+            
+            if (roeData.templateId) {
+                // Create from template
+                res = await fetch(`${import.meta.env.VITE_SATELLITE_URL}/roe/from-template`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({ 
+                        engagementId: selectedEngagement.id, 
+                        title: roeData.title,
+                        templateId: roeData.templateId 
+                    }),
+                });
+            } else {
+                // Create blank RoE (fallback)
+                res = await fetch(`${import.meta.env.VITE_SATELLITE_URL}/roe`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({ 
+                        engagementId: selectedEngagement.id, 
+                        title: roeData.title 
+                    }),
+                });
+            }
 
             if (!res.ok) {
                 const error = await res.text();
                 throw new Error(`Failed to create RoE: ${error}`);
             }
 
-            const created = await res.json();
+            created = await res.json();
             
             // Navigate to RoE builder
             window.location.href = `/engagements/${selectedEngagement.id}/roe/${created.id}`;
@@ -207,38 +227,6 @@ function Engagements() {
         }
     };
 
-    const handleTestingParameters = (engagement) => {
-        setSelectedEngagement(engagement);
-        setIsTestingParamsModalOpen(true);
-    };
-
-    const saveTestingParameters = async (testingParams) => {
-        try {
-            const url = selectedEngagement.testingParameters 
-                ? `${import.meta.env.VITE_SATELLITE_URL}/testing-parameters/${selectedEngagement.id}`
-                : `${import.meta.env.VITE_SATELLITE_URL}/testing-parameters`;
-            
-            const res = await fetch(url, {
-                method: selectedEngagement.testingParameters ? "PUT" : "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify(selectedEngagement.testingParameters ? testingParams : { engagementId: selectedEngagement.id, ...testingParams }),
-            });
-
-            if (!res.ok) {
-                throw new Error("Failed to save testing parameters");
-            }
-
-            await fetchEngagements(); // Refresh the list
-            setIsTestingParamsModalOpen(false);
-            setSelectedEngagement(null);
-        } catch (err) {
-            console.error("Error saving testing parameters:", err);
-            alert("Failed to save testing parameters");
-        }
-    };
 
     // Filter and sort engagements
     const filteredEngagements = engagements
@@ -501,16 +489,6 @@ function Engagements() {
                                                         Manage Scope
                                                     </button>
                                                     
-                                                    <button
-                                                        onClick={() => {
-                                                            handleTestingParameters(engagement);
-                                                            setOpenDropdown(null);
-                                                        }}
-                                                        className="w-full px-4 py-2 text-left text-sm text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/20 flex items-center gap-2"
-                                                    >
-                                                        <Settings size={14} />
-                                                        Testing Parameters
-                                                    </button>
 
                                                     <div className="border-t border-gray-200 dark:border-gray-700 my-1"></div>
                                                     
@@ -661,16 +639,6 @@ function Engagements() {
                 }}
             />
 
-            <TestingParametersModal
-                isOpen={isTestingParamsModalOpen}
-                onClose={() => {
-                    setIsTestingParamsModalOpen(false);
-                    setSelectedEngagement(null);
-                }}
-                onSave={saveTestingParameters}
-                engagement={selectedEngagement}
-                initialData={selectedEngagement?.testingParameters}
-            />
         </DashboardLayout>
     );
 }

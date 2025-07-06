@@ -237,4 +237,99 @@ router.put('/section-templates/:sectionType', authenticateRequest, async (req, r
     }
 });
 
+// GET /roe/templates/list - Get all RoE templates
+router.get('/templates/list', authenticateRequest, async (req, res) => {
+    try {
+        const response = await axios.get(`${SINGULARITY_URL}/roe/templates/list`, {
+            headers: { Authorization: req.headers.authorization },
+        });
+        res.json(response.data);
+    } catch (error) {
+        console.error('Error fetching RoE templates:', error.message);
+        res.status(500).json({ error: 'Failed to fetch RoE templates' });
+    }
+});
+
+// POST /roe/from-template - Create RoE from template
+router.post('/from-template', authenticateRequest, async (req, res) => {
+    try {
+        const response = await axios.post(`${SINGULARITY_URL}/roe/from-template`, req.body, {
+            headers: { 
+                'Content-Type': 'application/json',
+                Authorization: req.headers.authorization 
+            },
+        });
+        res.status(201).json(response.data);
+    } catch (error) {
+        console.error('Error creating RoE from template:', error.message);
+        res.status(500).json({ error: 'Failed to create RoE from template' });
+    }
+});
+
+// GET /roe/templates/:id - Get specific RoE template
+router.get('/templates/:id', authenticateRequest, async (req, res) => {
+    try {
+        const response = await axios.get(`${SINGULARITY_URL}/roe/templates/${req.params.id}`, {
+            headers: { Authorization: req.headers.authorization },
+        });
+        res.json(response.data);
+    } catch (error) {
+        console.error('Error fetching RoE template:', error.message);
+        if (error.response?.status === 404) {
+            res.status(404).json({ error: 'Template not found' });
+        } else {
+            res.status(500).json({ error: 'Failed to fetch RoE template' });
+        }
+    }
+});
+
+// POST /roe/templates - Create new RoE template
+router.post('/templates', authenticateRequest, async (req, res) => {
+    try {
+        const response = await axios.post(`${SINGULARITY_URL}/roe/templates`, req.body, {
+            headers: { 
+                'Content-Type': 'application/json',
+                Authorization: req.headers.authorization 
+            },
+        });
+        res.status(201).json(response.data);
+    } catch (error) {
+        console.error('Error creating RoE template:', error.message);
+        res.status(500).json({ error: 'Failed to create RoE template' });
+    }
+});
+
+// PUT /roe/templates/:id - Update RoE template
+router.put('/templates/:id', authenticateRequest, async (req, res) => {
+    try {
+        const response = await axios.put(`${SINGULARITY_URL}/roe/templates/${req.params.id}`, req.body, {
+            headers: { 
+                'Content-Type': 'application/json',
+                Authorization: req.headers.authorization 
+            },
+        });
+        res.json(response.data);
+    } catch (error) {
+        console.error('Error updating RoE template:', error.message);
+        res.status(500).json({ error: 'Failed to update RoE template' });
+    }
+});
+
+// DELETE /roe/templates/:id - Delete RoE template
+router.delete('/templates/:id', authenticateRequest, async (req, res) => {
+    try {
+        const response = await axios.delete(`${SINGULARITY_URL}/roe/templates/${req.params.id}`, {
+            headers: { Authorization: req.headers.authorization },
+        });
+        res.status(204).send();
+    } catch (error) {
+        console.error('Error deleting RoE template:', error.message);
+        if (error.response?.status === 400) {
+            res.status(400).json({ error: error.response.data?.error || 'Bad request' });
+        } else {
+            res.status(500).json({ error: 'Failed to delete RoE template' });
+        }
+    }
+});
+
 export default router;

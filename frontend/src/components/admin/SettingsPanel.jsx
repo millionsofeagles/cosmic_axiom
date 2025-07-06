@@ -1,5 +1,6 @@
 import { ChevronDown, ChevronRight, Shield, FileText, Clock, Settings, AlertTriangle, Phone, Scale, Edit2, Archive, BookOpen } from "lucide-react";
 import { useEffect, useState } from "react";
+import RoETemplateManager from "./RoETemplateManager";
 
 const REPORT_SECTIONS = [
     { key: "executiveSummary", label: "Executive Summary", icon: BookOpen, description: "High-level summary and key findings overview" },
@@ -399,12 +400,24 @@ const SettingsPanel = () => {
                     >
                         RoE Sections
                     </button>
+                    <button
+                        onClick={() => setActiveTab('roe-templates')}
+                        className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+                            activeTab === 'roe-templates'
+                                ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
+                                : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
+                        }`}
+                    >
+                        RoE Templates
+                    </button>
                 </nav>
             </div>
 
             {/* Tab Content */}
             <div>
-                {activeTab === 'reports' ? renderReportTemplates() : renderRoeTemplates()}
+                {activeTab === 'reports' && renderReportTemplates()}
+                {activeTab === 'roe' && renderRoeTemplates()}
+                {activeTab === 'roe-templates' && <RoETemplateManager />}
             </div>
         </div>
     );
