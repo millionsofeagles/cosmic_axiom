@@ -23,6 +23,12 @@ model User {
   id           String   @id @default(uuid())
   username     String   @unique
   name         String
+  // One of 'ADMIN', 'PENTESTER', 'PENTEST LEAD'. Enforced by a CHECK constraint
+  // in the database (migration 20260926120000_user_role_check), not by a Prisma
+  // enum: an enum member cannot contain a space, so 'PENTEST LEAD' would become
+  // PENTEST_LEAD in everything the client reads and have to be translated back
+  // at every place a role is read or written. The constraint keeps the column,
+  // the API and the frontend exactly as they are, and still refuses a typo.
   role         String
   passwordHash String
   createdAt    DateTime @default(now())
